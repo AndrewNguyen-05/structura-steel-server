@@ -1,0 +1,55 @@
+version: '3.8'
+
+name: 'structura'
+
+services:
+  consul:
+    image: hashicorp/consul:1.14
+    container_name: consul
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    volumes:
+      - consul:/consul/data
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+    networks:
+      - structura-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    container_name: keycloak
+    restart: unless-stopped
+    ports:
+      - "8008:8080"
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8008
+      KC_HOSTNAME_STRICT_BACKCHANNEL: false
+      KC_HEALTH_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    networks:
+      - structura-network
+
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: structura
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    networks:
+      - structura-network
+
+volumes:
+  consul:
+    driver: local
+
+networks:
+  structura-network:
+    external: true
