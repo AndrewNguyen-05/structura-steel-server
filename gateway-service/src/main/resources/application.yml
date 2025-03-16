@@ -32,12 +32,29 @@ spring:
           filters:
             - RewritePath=/api/demo, /core-service/demo
             - RewritePath=/api/demo/(?<segment>.*), /core-service/demo/$\{segment}
-#        - id: keycloak
-#          uri: ${KEYCLOAK_URL}
-#          predicates:
-#            - Path=/api/auth/sign-in, /api/auth/token
-#          filters:
-#            - SetPath=/realms/hometopia/protocol/openid-connect/token
+
+        - id: keycloak
+          uri: ${KEYCLOAK_URL:http://localhost:8008}
+          predicates:
+            - Path=/api/auth/sign-in, /api/auth/token
+          filters:
+            - SetPath=/realms/structura/protocol/openid-connect/token
+
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/product-demo/**
+          filters:
+            - RewritePath=/api/product-demo, /product-service/product-demo
+            - RewritePath=/api/product-demo/(?<segment>.*), /product-service/product-demo/$\{segment}
+
+        - id: partner-service
+          uri: lb://partner-service
+          predicates:
+            - Path=/api/partner-demo/**
+          filters:
+            - RewritePath=/api/partner-demo, /partner-service/partner-demo
+            - RewritePath=/api/partner-demo/(?<segment>.*), /partner-service/partner-demo/$\{segment}
 
 management:
   endpoints:

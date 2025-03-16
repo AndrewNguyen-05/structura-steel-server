@@ -1,4 +1,4 @@
-package com.structura.steel.coreservice;
+package com.structura.steel.productservice.config.property;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -11,12 +11,12 @@ public record KeycloakProperty(
 ) {
     public record Realm(
             String master,
-            String hometopia
+            String structura
     ) {}
 
     public record Client(
             String adminCli,
-            String hometopia
+            String structura
     ) {}
 
     public record Admin(

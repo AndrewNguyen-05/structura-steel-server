@@ -1,11 +1,11 @@
 server:
-  port: 8010
+  port: 8030
   servlet:
-    context-path: /core-service
+    context-path: /partner-service
 
 spring:
   application:
-    name: core-service
+    name: partner-service
   profiles:
     active: dev
   cloud:
@@ -50,14 +50,3 @@ management:
     sampling:
       probability: 1.0
 
-keycloak:
-  url: ${KC_URI:localhost:8008}
-  realm:
-    master: master
-    structura: structura
-  client:
-    admin-cli: admin-cli
-    structura-client: structura-client
-  admin:
-    username: admin
-    password: admin
