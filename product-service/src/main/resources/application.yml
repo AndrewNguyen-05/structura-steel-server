@@ -20,7 +20,7 @@ spring:
         prefer-ip-address: true
         query-passing: true
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/core_service
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/product_service
     username: ${DB_USERNAME:admin}
     password: ${DB_PASSWORD:admin}
   jpa:

@@ -36,16 +36,16 @@ spring:
         - id: keycloak
           uri: ${KEYCLOAK_URL:http://localhost:8008}
           predicates:
-            - Path=/api/auth/sign-in, /api/auth/token
+            - Path=/api/auth/signin, /api/auth/token
           filters:
             - SetPath=/realms/structura/protocol/openid-connect/token
 
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/api/product-demo/**
+            - Path=/api/v1/products/**
           filters:
-            - RewritePath=/api/product-demo, /product-service/product-demo
+            - RewritePath=/api/v1/products, /product-service/products
             - RewritePath=/api/product-demo/(?<segment>.*), /product-service/product-demo/$\{segment}
 
         - id: partner-service
