@@ -14,7 +14,6 @@ import java.time.Instant;
 @AllArgsConstructor
 public class DeliveryDebt extends BaseEntity {
 
-    // Quan hệ với DeliveryOrder (Core Service)
     @ManyToOne
     @JoinColumn(name = "delivery_order_id")
     private DeliveryOrder deliveryOrder;

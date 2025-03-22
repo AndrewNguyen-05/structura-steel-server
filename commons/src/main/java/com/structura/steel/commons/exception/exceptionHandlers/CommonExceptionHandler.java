@@ -1,5 +1,8 @@
-package com.structura.steel.commons.exception;
+package com.structura.steel.commons.exception.exceptionHandlers;
 
+import com.structura.steel.commons.exception.ProblemDetailsBuilder;
+import com.structura.steel.commons.exception.ResourceNotFoundException;
+import com.structura.steel.commons.exception.ViolationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

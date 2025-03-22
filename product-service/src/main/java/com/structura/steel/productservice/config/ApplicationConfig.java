@@ -1,5 +1,6 @@
 package com.structura.steel.productservice.config;
 
+import com.structura.steel.commons.exception.exceptionHandlers.GlobalExceptionHandler;
 import com.structura.steel.commons.mapper.MapperConfig;
 import com.structura.steel.commons.persistence.AuditingConfig;
 import com.structura.steel.commons.security.SecurityConfig;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
-@Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class})
+@Import({GlobalExceptionHandler.class, SecurityConfig.class, AuditingConfig.class, MapperConfig.class})
 @Configuration
 @EnableScheduling
 //@EnableFeignClients(basePackages = "com.hometopia.coreservice.client")

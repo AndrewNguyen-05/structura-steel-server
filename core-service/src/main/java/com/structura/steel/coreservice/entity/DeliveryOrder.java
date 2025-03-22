@@ -14,12 +14,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DeliveryOrder extends BaseEntity {
 
-    // Quan hệ với PurchaseOrder (Core Service)
     @ManyToOne
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
-    // Quan hệ với SaleOrder (Core Service)
     @ManyToOne
     @JoinColumn(name = "sale_order_id")
     private SaleOrder saleOrder;
@@ -27,14 +25,14 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "delivery_date")
     private Instant deliveryDate;
 
-    // Khóa ngoại đến vehicles (Part Service)
+    // Khóa ngoại đến vehicles (Partner Service)
     @Column(name = "vehicle_id")
     private Long vehicleId;
 
     @Column(name = "driver_name")
     private String driverName;
 
-    // Khóa ngoại đến warehouses (Part Service)
+    // Khóa ngoại đến warehouses (Partner Service)
     @Column(name = "warehouse_id")
     private Long warehouseId;
 

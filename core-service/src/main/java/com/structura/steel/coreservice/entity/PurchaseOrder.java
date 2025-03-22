@@ -15,18 +15,17 @@ import java.util.Set;
 @AllArgsConstructor
 public class PurchaseOrder extends BaseEntity {
 
-    // Khóa ngoại đến partners (Part Service)
+    // Khóa ngoại đến partners (Partner Service)
     @Column(name = "supplier_id", nullable = false)
     private Long supplierId;
 
-    // Khóa ngoại đến partner_projects (Part Service)
+    // Khóa ngoại đến partner_projects (Partner Service)
     @Column(name = "project_id")
     private Long projectId;
 
     @Column(name = "order_date")
     private Instant orderDate;
 
-    // Quan hệ với User (Core Service)
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -40,11 +39,10 @@ public class PurchaseOrder extends BaseEntity {
     @Column(name = "purchase_orders_note")
     private String purchaseOrdersNote;
 
-    // Khóa ngoại đến warehouses (Part Service)
+    // Khóa ngoại đến warehouses (Partner Service)
     @Column(name = "warehouse_id")
     private Long warehouseId;
 
-    // Quan hệ 1-n với PurchaseOrderDetail
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private Set<PurchaseOrderDetail> purchaseOrderDetails;
 }

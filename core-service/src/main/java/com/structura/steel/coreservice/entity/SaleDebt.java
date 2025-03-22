@@ -14,12 +14,10 @@ import java.time.Instant;
 @AllArgsConstructor
 public class SaleDebt extends BaseEntity {
 
-    // Quan hệ với SaleOrder (Core Service)
     @ManyToOne
     @JoinColumn(name = "sale_order_id")
     private SaleOrder saleOrder;
 
-    // Khóa ngoại đến partner_projects (Part Service)
     @Column(name = "project_id")
     private Long projectId;
 

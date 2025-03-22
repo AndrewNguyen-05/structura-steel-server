@@ -15,18 +15,17 @@ import java.util.Set;
 @AllArgsConstructor
 public class SaleOrder extends BaseEntity {
 
-    // Khóa ngoại đến partners (Part Service) → lưu plain field
+    // Khóa ngoại đến partners (Partner Service) → lưu plain field
     @Column(name = "partner_id", nullable = false)
     private Long partnerId;
 
-    // Khóa ngoại đến partner_projects (Part Service)
+    // Khóa ngoại đến partner_projects (Partner Service)
     @Column(name = "project_id")
     private Long projectId;
 
     @Column(name = "order_date")
     private Instant orderDate;
 
-    // Quan hệ với User trong cùng Core Service
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

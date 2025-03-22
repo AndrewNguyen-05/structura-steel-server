@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PurchaseOrderDetail extends BaseEntity {
 
-    // Quan hệ với PurchaseOrder (Core Service)
     @ManyToOne
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;

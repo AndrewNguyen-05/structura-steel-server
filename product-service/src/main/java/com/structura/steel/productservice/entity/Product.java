@@ -12,17 +12,23 @@ import lombok.*;
 @AllArgsConstructor
 public class Product extends BaseEntity {
 
-    @Column(name = "product_code", unique = true, nullable = false)
-    private String productCode;
+    @Column(name = "code", unique = true, nullable = false)
+    private String code;
 
-    @Column(name = "product_name", nullable = false)
-    private String productName;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    // Quan hệ với ProductType trong cùng Product Service
-    @ManyToOne
-    @JoinColumn(name = "product_type_id")
-    private ProductType productType;
+    @Column(name = "unit_weight")
+    private Double unitWeight;
 
-    @Column(name = "unit")
-    private String unit;
+    @Column(name = "length", nullable = false)
+    private Double length;
+
+    private Double width;
+
+    private Double thickness;
+
+    private Double diameter; // đường kính
+
+    private String standard;
 }

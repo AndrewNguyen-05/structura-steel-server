@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/wards/**").permitAll()
                         .pathMatchers("/api/files/**").permitAll()
                         .pathMatchers("/api/users/check-email").permitAll()
-                        .anyExchange().permitAll()
+                        .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint(authenticationExceptionHandler())
