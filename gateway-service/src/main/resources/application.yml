@@ -28,10 +28,10 @@ spring:
         - id: core-service
           uri: lb://core-service
           predicates:
-            - Path=/api/demo/**
+            - Path=/api/v1/core/**
           filters:
-            - RewritePath=/api/demo, /core-service/demo
-            - RewritePath=/api/demo/(?<segment>.*), /core-service/demo/$\{segment}
+            - RewritePath=/api/v1/core, /core-service
+            - RewritePath=/api/v1/core//(?<segment>.*), /core-service/$\{segment}
 
         - id: keycloak
           uri: ${KEYCLOAK_URL:http://localhost:8008}
@@ -51,10 +51,10 @@ spring:
         - id: partner-service
           uri: lb://partner-service
           predicates:
-            - Path=/api/partner-demo/**
+            - Path=/api/v1/partners/**
           filters:
-            - RewritePath=/api/partner-demo, /partner-service/partner-demo
-            - RewritePath=/api/partner-demo/(?<segment>.*), /partner-service/partner-demo/$\{segment}
+            - RewritePath=/api/v1/partners, /partner-service
+            - RewritePath=/api/v1/partners/(?<segment>.*), /partner-service/$\{segment}
 
 management:
   endpoints:

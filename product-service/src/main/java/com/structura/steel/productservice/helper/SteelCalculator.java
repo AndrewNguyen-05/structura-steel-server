@@ -4,12 +4,12 @@ import com.structura.steel.productservice.dto.request.ProductRequestDto;
 
 public class SteelCalculator {
 
-    // Steel density in kg/m^3
+    // hằng số khối lượng riêng của thép kg/m^3
     private static final double STEEL_DENSITY = 7850.0;
 
     /**
-     * Calculate steel weight (in kg) based on the given ProductRequestDto.
-     * @param dto Information about the product (name, diameter, thickness, etc.)
+     * Tính khối lượng thép (kg) dựa vào ProductRequestDto.
+     * @param dto thông tin về thép cần tính (name, diameter, thickness, etc.)
      * @return weight (kg)
      */
     public static double calculateSteelWeight(ProductRequestDto dto) {
@@ -19,7 +19,7 @@ public class SteelCalculator {
 
         String lowerName = dto.getName().toLowerCase();
 
-        // 1) Deformed bar / rebar (thép thanh vằn / sắt thép cây)
+        // 1) thép thanh vằn / sắt thép cây
         if (lowerName.contains("vằn") || lowerName.contains("cây")) {
             if (dto.getDiameter() == null) {
                 throw new IllegalArgumentException("Diameter is required for rebar products.");
@@ -29,7 +29,7 @@ public class SteelCalculator {
             double unitWeight = crossSectionArea * STEEL_DENSITY;                 // kg/m
             return unitWeight * dto.getLength();                                  // kg
 
-            // 2) Coil / Plate (thép cuộn / thép tấm)
+            // 2) thép cuộn / thép tấm
         } else if (lowerName.contains("cuộn") || lowerName.contains("tấm")) {
             if (dto.getThickness() == null || dto.getWidth() == null) {
                 throw new IllegalArgumentException("Thickness and width are required for coil/plate products.");
@@ -39,10 +39,10 @@ public class SteelCalculator {
             double volume = thicknessMeter * widthMeter * dto.getLength(); // m^3
             return volume * STEEL_DENSITY;                                 // kg
 
-            // 3) Pipe / Box (thép ống / thép hộp)
+            // 3) thép ống / thép hộp
         } else if (lowerName.contains("ống") || lowerName.contains("hộp")) {
 
-            // 3a) Round pipe (ống tròn)
+            // 3a) ống tròn
             if (lowerName.contains("ống")) {
                 if (dto.getDiameter() == null || dto.getThickness() == null) {
                     throw new IllegalArgumentException("Diameter and thickness are required for round pipe products.");
@@ -62,7 +62,7 @@ public class SteelCalculator {
                 double unitWeight = crossSectionArea * STEEL_DENSITY; // kg/m
                 return unitWeight * dto.getLength(); // kg
 
-                // 3b) Square/rectangular box (hộp vuông/chữ nhật)
+                // 3b) hộp vuông/chữ nhật
             } else {
                 if (dto.getWidth() == null || dto.getThickness() == null) {
                     throw new IllegalArgumentException("Width and thickness are required for box (square/rectangular) products.");
@@ -80,9 +80,9 @@ public class SteelCalculator {
                 return unitWeight * dto.getLength(); // kg
             }
 
-            // 4) Structural steel (I, H, U, L, etc.)
+            // 4) Thép hình (I, H, U, L, v.v...)
         } else if (lowerName.contains("hình")) {
-            // Usually, we have a reference table for kg/m. So let's rely on unitWeight field.
+            // Với thép này thì thường là có bảng tra unit weight
             if (dto.getUnitWeight() == null) {
                 throw new IllegalArgumentException("unitWeight (kg/m) is required for structural steel products.");
             }
