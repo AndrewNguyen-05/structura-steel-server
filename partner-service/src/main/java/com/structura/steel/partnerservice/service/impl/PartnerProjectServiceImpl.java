@@ -4,8 +4,8 @@ import com.structura.steel.partnerservice.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.partnerservice.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
 import com.structura.steel.partnerservice.entity.PartnerProject;
-import com.structura.steel.partnerservice.feign.ProductFeignClient;
-import com.structura.steel.partnerservice.mapper.PartnerMapper;
+import com.structura.steel.partnerservice.client.ProductFeignClient;
+import com.structura.steel.partnerservice.mapper.PartnerProjectMapper;
 import com.structura.steel.partnerservice.repository.PartnerProjectRepository;
 import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.service.PartnerProjectService;
@@ -23,24 +23,22 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
     private final PartnerProjectRepository partnerProjectRepository;
     private final PartnerRepository partnerRepository;
-    private final PartnerMapper partnerMapper;
+    private final PartnerProjectMapper partnerProjectMapper;
     private final ProductFeignClient productFeignClient; // Để call sang product service
 
     @Override
     public PartnerProjectResponseDto createPartnerProject(PartnerProjectRequestDto dto) {
-        // Kiểm tra Partner tồn tại
-        Partner partner = partnerRepository.findById(dto.getPartnerId())
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + dto.getPartnerId()));
+        Partner partner = partnerRepository.findById(dto.partnerId())
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + dto.partnerId()));
 
-        // Map sang entity
-        PartnerProject project = partnerMapper.toPartnerProject(dto);
+        PartnerProject project = partnerProjectMapper.toPartnerProject(dto);
         project.setPartner(partner);
 
         // Ở DB ta không thể lưu List<Product> vì Product ở service khác,
         // ta có thể lưu chuỗi productIds. Ví dụ:
-        if (dto.getProductIds() != null && !dto.getProductIds().isEmpty()) {
+        if (dto.productIds() != null && !dto.productIds().isEmpty()) {
             // Convert List<Long> -> "1,2,3" (đơn giản)
-            String productIdsStr = dto.getProductIds().stream()
+            String productIdsStr = dto.productIds().stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));
             // Ta dùng tạm cột 'extraInfo' hoặc cột 'productIds' (tự thêm) để lưu trữ
@@ -50,7 +48,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
         PartnerProject saved = partnerProjectRepository.save(project);
 
-        return partnerMapper.toPartnerProjectResponseDto(saved);
+        return partnerProjectMapper.toPartnerProjectResponseDto(saved);
     }
 
     @Override
@@ -58,32 +56,33 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         PartnerProject existing = partnerProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PartnerProject not found with id: " + id));
 
-        partnerMapper.updatePartnerProjectFromDto(dto, existing);
+        partnerProjectMapper.updatePartnerProjectFromDto(dto, existing);
         // Lưu ý nếu dto.getPartnerId() thay đổi, cần set lại partner:
-        if (dto.getPartnerId() != null) {
-            Partner partner = partnerRepository.findById(dto.getPartnerId())
-                    .orElseThrow(() -> new RuntimeException("Partner not found with id: " + dto.getPartnerId()));
+        if (dto.partnerId() != null) {
+            Partner partner = partnerRepository.findById(dto.partnerId())
+                    .orElseThrow(() -> new RuntimeException("Partner not found with id: " + dto.partnerId()));
             existing.setPartner(partner);
         }
 
         // Tương tự, xử lý productIds
-        if (dto.getProductIds() != null) {
-            // Convert sang chuỗi
-            String productIdsStr = dto.getProductIds().stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
-            // existing.setProductIds(productIdsStr);
-        }
+//        if (dto.productIds() != null) {
+//            // Convert sang chuỗi
+//            String productIdsStr = dto.productIds().stream()
+//                    .map(String::valueOf)
+//                    .collect(Collectors.joining(","));
+//            existing.setProductIds(productIdsStr);
+//        }
 
         PartnerProject updated = partnerProjectRepository.save(existing);
-        return partnerMapper.toPartnerProjectResponseDto(updated);
+
+        return partnerProjectMapper.toPartnerProjectResponseDto(updated);
     }
 
     @Override
     public PartnerProjectResponseDto getPartnerProject(Long id) {
         PartnerProject project = partnerProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PartnerProject not found with id: " + id));
-        return partnerMapper.toPartnerProjectResponseDto(project);
+        return partnerProjectMapper.toPartnerProjectResponseDto(project);
     }
 
     @Override
@@ -96,6 +95,6 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     @Override
     public List<PartnerProjectResponseDto> getAllPartnerProjects() {
         List<PartnerProject> projects = partnerProjectRepository.findAll();
-        return partnerMapper.toPartnerProjectResponseDtoList(projects);
+        return partnerProjectMapper.toPartnerProjectResponseDtoList(projects);
     }
 }

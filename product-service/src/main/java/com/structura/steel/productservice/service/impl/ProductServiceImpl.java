@@ -13,6 +13,8 @@ import com.structura.steel.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
@@ -72,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
         validateProductRequest(productRequestDto);
 
-        handleProductCodeAlreadyExist(productRequestDto.getCode());
+        handleProductCodeAlreadyExist(productRequestDto.code());
 
         Product product = productMapper.toProduct(productRequestDto);
         Product savedProduct = productRepository.save(product);
@@ -84,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
-        handleProductCodeAlreadyExist(productRequestDto.getCode());
+        handleProductCodeAlreadyExist(productRequestDto.code());
 
         productMapper.updateProductFromDto(productRequestDto, existingProduct);
         Product updatedProduct = productRepository.save(existingProduct);
@@ -113,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public double calculateWeight(Long productId) {
+    public BigDecimal calculateWeight(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
@@ -122,26 +124,26 @@ public class ProductServiceImpl implements ProductService {
 
 
     private void validateProductRequest(ProductRequestDto productRequestDto) {
-        String name = productRequestDto.getName().toLowerCase();
+        String name = productRequestDto.name().toLowerCase();
 
         if (name.contains("vằn") || name.contains("cây")) {
-            if (productRequestDto.getDiameter() == null || productRequestDto.getLength() == null) {
+            if (productRequestDto.diameter() == null || productRequestDto.length() == null) {
                 throw new IllegalArgumentException("Diameter and length must not be null for ribbed bar products.");
             }
         } else if (name.contains("cuộn") || name.contains("tấm")) {
-            if (productRequestDto.getThickness() == null || productRequestDto.getWidth() == null || productRequestDto.getLength() == null) {
+            if (productRequestDto.thickness() == null || productRequestDto.width() == null || productRequestDto.length() == null) {
                 throw new IllegalArgumentException("Thickness, width, and length must not be null for coil/plate products.");
             }
         } else if (name.contains("ống") || name.contains("hộp")) {
-            if (productRequestDto.getThickness() == null || productRequestDto.getDiameter() == null || productRequestDto.getLength() == null) {
+            if (productRequestDto.thickness() == null || productRequestDto.diameter() == null || productRequestDto.length() == null) {
                 throw new IllegalArgumentException("Thickness, diameter, and length must not be null for pipe/box products.");
             }
         } else if (name.contains("hình")) {
-            if (productRequestDto.getUnitWeight() == null || productRequestDto.getLength() == null) {
+            if (productRequestDto.unitWeight() == null || productRequestDto.length() == null) {
                 throw new IllegalArgumentException("Unit weight and length must not be null for shaped steel products.");
             }
         }
-        if (productRequestDto.getLength() == null) {
+        if (productRequestDto.length() == null) {
             throw new IllegalArgumentException("Length must not be null.");
         }
     }

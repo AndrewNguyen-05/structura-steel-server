@@ -1,18 +1,14 @@
 package com.structura.steel.partnerservice.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class PartnerRequestDto {
-    private String partnerType; // Đối tác, Nhà cung cấp thép, đơn vị vận chuyển, ...
-    private String partnerName;
-    private String taxCode;
-    private String legalRepresentative;
-    private String legalRepresentativePhone;
-    private String contactPerson;
-    private String contactPersonPhone;
-    private String bankName;
-    private String bankAccountNumber;
-}
+public record PartnerRequestDto (
+    String partnerType, // Đối tác, Nhà cung cấp thép, đơn vị vận chuyển, ...
+    String partnerName,
+    String taxCode,
+    String legalRepresentative,
+    String legalRepresentativePhone,
+    String contactPerson,
+    String contactPersonPhone,
+    String bankName,
+    String bankAccountNumber
+) {}

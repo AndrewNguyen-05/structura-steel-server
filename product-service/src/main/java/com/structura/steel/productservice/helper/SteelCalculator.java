@@ -1,95 +1,140 @@
 package com.structura.steel.productservice.helper;
 
 import com.structura.steel.productservice.dto.request.ProductRequestDto;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class SteelCalculator {
 
-    // hằng số khối lượng riêng của thép kg/m^3
-    private static final double STEEL_DENSITY = 7850.0;
+    private static final BigDecimal thousand = BigDecimal.valueOf(1000);
+    private static final BigDecimal density = BigDecimal.valueOf(7850.0);
+    private static final BigDecimal pi = BigDecimal.valueOf(Math.PI);
 
     /**
-     * Tính khối lượng thép (kg) dựa vào ProductRequestDto.
-     * @param dto thông tin về thép cần tính (name, diameter, thickness, etc.)
+     * Tinh khoi luong thep (kg) dua vao ProductRequestDto.
+     * @param dto thong tin ve thep can tinh (name, diameter, thickness, etc.)
      * @return weight (kg)
      */
-    public static double calculateSteelWeight(ProductRequestDto dto) {
-        if (dto == null || dto.getName() == null) {
+    public static BigDecimal calculateSteelWeight(ProductRequestDto dto) {
+        if (dto == null || dto.name() == null) {
             throw new IllegalArgumentException("Invalid product data. Name cannot be null.");
+        } else if(dto.length() == null) {
+            throw new IllegalArgumentException("Invalid product data. Length cannot be null.");
         }
 
-        String lowerName = dto.getName().toLowerCase();
+        String lowerName = dto.name().toLowerCase();
 
-        // 1) thép thanh vằn / sắt thép cây
-        if (lowerName.contains("vằn") || lowerName.contains("cây")) {
-            if (dto.getDiameter() == null) {
-                throw new IllegalArgumentException("Diameter is required for rebar products.");
+        // Xác định các loại thép theo tên
+        boolean isHinh = lowerName.contains("hinh");    // thép hình (I, H, U, ...)
+        boolean isHop = lowerName.contains("hop");        // thép hộp (box)
+        boolean isVan = lowerName.contains("van");        // thép vằn (rebar)
+        boolean isCay = lowerName.contains("cay");        // thép cây (rebar)
+        boolean isOng = lowerName.contains("ong");        // có thể là ống tròn hoặc ống hộp
+        boolean isCuon = lowerName.contains("cuon");      // thép cuộn
+        boolean isTam = lowerName.contains("tam");        // thép tấm
+
+        if(isHop) {
+            if(dto.width() == null || dto.height() == null) {
+                throw new IllegalArgumentException("Invalid product data. Width and height cannot be null.");
             }
-            double diameterMeter = dto.getDiameter() / 1000.0; // mm -> m
-            double crossSectionArea = Math.PI * Math.pow(diameterMeter, 2) / 4.0; // m^2
-            double unitWeight = crossSectionArea * STEEL_DENSITY;                 // kg/m
-            return unitWeight * dto.getLength();                                  // kg
-
-            // 2) thép cuộn / thép tấm
-        } else if (lowerName.contains("cuộn") || lowerName.contains("tấm")) {
-            if (dto.getThickness() == null || dto.getWidth() == null) {
-                throw new IllegalArgumentException("Thickness and width are required for coil/plate products.");
+            if(dto.thickness() == null) {
+                throw new IllegalArgumentException("thickness is required for structural steel products.");
             }
-            double thicknessMeter = dto.getThickness() / 1000.0;
-            double widthMeter = dto.getWidth() / 1000.0;
-            double volume = thicknessMeter * widthMeter * dto.getLength(); // m^3
-            return volume * STEEL_DENSITY;                                 // kg
-
-            // 3) thép ống / thép hộp
-        } else if (lowerName.contains("ống") || lowerName.contains("hộp")) {
-
-            // 3a) ống tròn
-            if (lowerName.contains("ống")) {
-                if (dto.getDiameter() == null || dto.getThickness() == null) {
-                    throw new IllegalArgumentException("Diameter and thickness are required for round pipe products.");
-                }
-                double d = dto.getDiameter();  // mm
-                double t = dto.getThickness(); // mm
-                // Outer
-                double outerRadius = (d / 2.0) / 1000.0; // m
-                double outerArea = Math.PI * outerRadius * outerRadius; // m^2
-                // Inner
-                double innerDiameter = d - 2.0 * t; // mm
-                double innerRadius = (innerDiameter / 2.0) / 1000.0; // m
-                double innerArea = (innerDiameter > 0)
-                        ? Math.PI * innerRadius * innerRadius
-                        : 0.0;
-                double crossSectionArea = outerArea - innerArea; // m^2
-                double unitWeight = crossSectionArea * STEEL_DENSITY; // kg/m
-                return unitWeight * dto.getLength(); // kg
-
-                // 3b) hộp vuông/chữ nhật
-            } else {
-                if (dto.getWidth() == null || dto.getThickness() == null) {
-                    throw new IllegalArgumentException("Width and thickness are required for box (square/rectangular) products.");
-                }
-                double w = dto.getWidth();     // mm
-                double t = dto.getThickness(); // mm
-                // Outer side
-                double outerSide = w / 1000.0; // m
-                double outerArea = outerSide * outerSide; // m^2
-                // Inner side
-                double innerSide = (w - 2.0 * t) / 1000.0; // m
-                double innerArea = (innerSide > 0) ? (innerSide * innerSide) : 0.0;
-                double crossSectionArea = outerArea - innerArea; // m^2
-                double unitWeight = crossSectionArea * STEEL_DENSITY; // kg/m
-                return unitWeight * dto.getLength(); // kg
-            }
-
-            // 4) Thép hình (I, H, U, L, v.v...)
-        } else if (lowerName.contains("hình")) {
-            // Với thép này thì thường là có bảng tra unit weight
-            if (dto.getUnitWeight() == null) {
+        } else if(isHinh) {
+            if (dto.unitWeight() == null) {
                 throw new IllegalArgumentException("unitWeight (kg/m) is required for structural steel products.");
             }
-            return dto.getUnitWeight() * dto.getLength();
+        } else if(isVan || isCay || isOng) {
+            if(dto.diameter() == null) {
+                throw new IllegalArgumentException("diameter is required for structural steel products.");
+            }
+            if(dto.thickness() == null) {
+                throw new IllegalArgumentException("thickness is required for structural steel products.");
+            }
+        } else if(isCuon || isTam) {
+            if(dto.thickness() == null) {
+                throw new IllegalArgumentException("thickness is required for structural steel products.");
+            }
         }
 
-        // Unknown type
-        throw new UnsupportedOperationException("Cannot determine steel type from product name: " + dto.getName());
+        BigDecimal length = dto.length();    // m
+        BigDecimal unitWeight = dto.unitWeight();   // kg
+
+
+        // 1) Thep hinh (I, H, U, L, vv...)
+        if (lowerName.contains("hinh")) {
+            return dto.unitWeight().multiply(length);
+        }
+
+        // Neu co unit weight thi tra ve khoi luong luon
+        if(unitWeight != null) {
+            return unitWeight.multiply(length);
+        }
+
+        // 2) Thep thanh van / sat thep cay
+        if (lowerName.contains("van") || lowerName.contains("cay")) {
+            BigDecimal diameterMeter = dto.diameter().divide(thousand, 10, RoundingMode.HALF_UP);
+            BigDecimal volume = getCircleVolume(diameterMeter, length);
+            return volume.multiply(density);
+        }
+
+        // 3) Thep cuon / thep tam
+        else if (lowerName.contains("cuon") || lowerName.contains("tam")) {
+            BigDecimal thicknessMeter = dto.thickness().divide(thousand, 10, RoundingMode.HALF_UP);
+            BigDecimal width = dto.width().divide(thousand, 10, RoundingMode.HALF_UP);
+            BigDecimal volume = getRectangleVolume(thicknessMeter, width, length);
+            return volume.multiply(density);
+        }
+
+        // 4) Thep ong / thep hop
+        else if (lowerName.contains("ong") || lowerName.contains("hop")) {
+
+            BigDecimal thickness = dto.thickness().divide(thousand, 10, RoundingMode.HALF_UP);
+
+            if (lowerName.contains("ong")) {
+                BigDecimal diameter = dto.diameter().divide(thousand, 10, RoundingMode.HALF_UP);
+                BigDecimal totalVolume = getCircleVolume(diameter, length);
+
+                // Tinh canh trong: innerSide = (w - 2*t)
+                BigDecimal innerDiameter = diameter.subtract(BigDecimal.valueOf(2).multiply(thickness));
+                BigDecimal innerVolume = getCircleVolume(innerDiameter, length);
+
+                return totalVolume.subtract(innerVolume).multiply(density);
+
+            } else {
+                BigDecimal width = dto.width().divide(thousand, 10, RoundingMode.HALF_UP);
+                BigDecimal height = dto.height().divide(thousand, 10, RoundingMode.HALF_UP);
+                BigDecimal totalVolume = getRectangleVolume(width, height, length);
+
+                // Tinh canh trong: innerSide = (w - 2*t)
+                BigDecimal innerSide = width.subtract(BigDecimal.valueOf(2).multiply(thickness));
+                BigDecimal innerVolume = getRectangleVolume(innerSide, innerSide, length);
+
+                return totalVolume.subtract(innerVolume).multiply(density);
+            }
+        }
+
+        throw new UnsupportedOperationException("Cannot determine steel type from product name: " + dto.name());
+    }
+
+    private static BigDecimal getRectangleVolume(BigDecimal thickness, BigDecimal width, BigDecimal length) {
+        if (thickness == null || width == null) {
+            throw new IllegalArgumentException("Thickness and width are required for coil/plate products.");
+        }
+
+        return thickness.multiply(width).multiply(length);
+    }
+
+    private static BigDecimal getCircleVolume(BigDecimal diameter, BigDecimal length) {
+        if (diameter == null) {
+            throw new IllegalArgumentException("Diameter is required for rebar products.");
+        }
+
+        // Tinh dien tich: (PI * diameter^2) / 4
+        BigDecimal diameterSquared = diameter.multiply(diameter);
+        BigDecimal crossSectionArea = pi.multiply(diameterSquared)
+                .divide(BigDecimal.valueOf(4), 10, RoundingMode.HALF_UP);
+
+        return crossSectionArea.multiply(length);
     }
 }

@@ -7,6 +7,7 @@ import com.structura.steel.commons.security.SecurityConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -15,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Import({GlobalExceptionHandler.class, SecurityConfig.class, AuditingConfig.class, MapperConfig.class})
 @Configuration
 @EnableScheduling
-//@EnableFeignClients(basePackages = "com.hometopia.coreservice.client")
+@EnableFeignClients(basePackages = "com.structura.steel.partnerservice.client")
 @ConfigurationPropertiesScan
 @RequiredArgsConstructor
 public class ApplicationConfig {

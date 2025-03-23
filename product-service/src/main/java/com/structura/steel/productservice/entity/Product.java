@@ -1,8 +1,15 @@
 package com.structura.steel.productservice.entity;
 
 import com.structura.steel.commons.persistence.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "products")
@@ -19,16 +26,18 @@ public class Product extends BaseEntity {
     private String name;
 
     @Column(name = "unit_weight")
-    private Double unitWeight;
+    private BigDecimal unitWeight;
 
     @Column(name = "length", nullable = false)
-    private Double length;
+    private BigDecimal length;
 
-    private Double width;
+    private BigDecimal width;
 
-    private Double thickness;
+    private BigDecimal height;
 
-    private Double diameter; // đường kính
+    private BigDecimal thickness;
+
+    private BigDecimal diameter; // đường kính
 
     private String standard;
 }

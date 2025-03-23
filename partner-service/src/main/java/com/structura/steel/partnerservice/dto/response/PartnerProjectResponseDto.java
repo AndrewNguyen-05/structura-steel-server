@@ -1,22 +1,17 @@
 package com.structura.steel.partnerservice.dto.response;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
-@Getter
-@Setter
-public class PartnerProjectResponseDto {
-    private Long id;
-    private Long partnerId;
-    private String projectName;
-    private String projectAddress;
-    private String projectRepresentative;
-    private String projectRepresentativePhone;
-    private String contactPerson;
-    private String contactPersonPhone;
-    private String address;
+public record PartnerProjectResponseDto (
+    Long id,
+    Long partnerId,
+    String projectName,
+    String projectAddress,
+    String projectRepresentative,
+    String projectRepresentativePhone,
+    String contactPerson,
+    String contactPersonPhone,
+    String address,
 
-    private List<Long> productIds;
-}
+    List<Long> productIds
+) {}

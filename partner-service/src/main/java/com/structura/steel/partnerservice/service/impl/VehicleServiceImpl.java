@@ -4,7 +4,7 @@ import com.structura.steel.partnerservice.dto.request.VehicleRequestDto;
 import com.structura.steel.partnerservice.dto.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
 import com.structura.steel.partnerservice.entity.Vehicle;
-import com.structura.steel.partnerservice.mapper.PartnerMapper;
+import com.structura.steel.partnerservice.mapper.VehicleMapper;
 import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.repository.VehicleRepository;
 import com.structura.steel.partnerservice.service.VehicleService;
@@ -21,18 +21,18 @@ public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final PartnerRepository partnerRepository;
-    private final PartnerMapper partnerMapper;
+    private final VehicleMapper vehicleMapper;
 
     @Override
     public VehicleResponseDto createVehicle(VehicleRequestDto dto) {
-        Partner partner = partnerRepository.findById(dto.getPartnerId())
-                .orElseThrow(() -> new RuntimeException("Partner not found: " + dto.getPartnerId()));
+        Partner partner = partnerRepository.findById(dto.partnerId())
+                .orElseThrow(() -> new RuntimeException("Partner not found: " + dto.partnerId()));
 
-        Vehicle vehicle = partnerMapper.toVehicle(dto);
+        Vehicle vehicle = vehicleMapper.toVehicle(dto);
         vehicle.setPartner(partner);
 
         Vehicle saved = vehicleRepository.save(vehicle);
-        return partnerMapper.toVehicleResponseDto(saved);
+        return vehicleMapper.toVehicleResponseDto(saved);
     }
 
     @Override
@@ -40,21 +40,21 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle existing = vehicleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));
 
-        partnerMapper.updateVehicleFromDto(dto, existing);
-        if (dto.getPartnerId() != null) {
-            Partner partner = partnerRepository.findById(dto.getPartnerId())
-                    .orElseThrow(() -> new RuntimeException("Partner not found: " + dto.getPartnerId()));
+        vehicleMapper.updateVehicleFromDto(dto, existing);
+        if (dto.partnerId() != null) {
+            Partner partner = partnerRepository.findById(dto.partnerId())
+                    .orElseThrow(() -> new RuntimeException("Partner not found: " + dto.partnerId()));
             existing.setPartner(partner);
         }
         Vehicle updated = vehicleRepository.save(existing);
-        return partnerMapper.toVehicleResponseDto(updated);
+        return vehicleMapper.toVehicleResponseDto(updated);
     }
 
     @Override
     public VehicleResponseDto getVehicle(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));
-        return partnerMapper.toVehicleResponseDto(vehicle);
+        return vehicleMapper.toVehicleResponseDto(vehicle);
     }
 
     @Override
@@ -67,6 +67,6 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public List<VehicleResponseDto> getAllVehicles() {
         List<Vehicle> vehicles = vehicleRepository.findAll();
-        return partnerMapper.toVehicleResponseDtoList(vehicles);
+        return vehicleMapper.toVehicleResponseDtoList(vehicles);
     }
 }

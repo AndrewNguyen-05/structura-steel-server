@@ -1,8 +1,8 @@
-package com.structura.steel.productservice.dto.response;
+package com.structura.steel.partnerservice.client.dto.response;
 
 import java.math.BigDecimal;
 
-public record ProductResponseDto (
+public record ProductResponseDto(
     Long id,
     String code,
     String name,

@@ -3,6 +3,8 @@ package com.structura.steel.productservice.service;
 import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.productservice.dto.request.ProductRequestDto;
 import com.structura.steel.productservice.dto.response.ProductResponseDto;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
@@ -13,5 +15,5 @@ public interface ProductService {
     void deleteProduct(Long id);
     ProductResponseDto findByCode(String code);
     List<ProductResponseDto> findByName(String name);
-    double calculateWeight(Long productId);
+    BigDecimal calculateWeight(Long productId);
 }

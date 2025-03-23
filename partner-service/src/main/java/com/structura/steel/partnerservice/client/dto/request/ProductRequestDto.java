@@ -1,9 +1,8 @@
-package com.structura.steel.productservice.dto.response;
+package com.structura.steel.partnerservice.client.dto.request;
 
 import java.math.BigDecimal;
 
-public record ProductResponseDto (
-    Long id,
+public record ProductRequestDto(
     String code,
     String name,
     BigDecimal unitWeight,
@@ -13,4 +12,4 @@ public record ProductResponseDto (
     BigDecimal thickness,
     BigDecimal diameter,
     String standard
-) {}
+) { }

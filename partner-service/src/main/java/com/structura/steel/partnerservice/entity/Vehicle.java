@@ -1,9 +1,16 @@
 package com.structura.steel.partnerservice.entity;
 
 import com.structura.steel.commons.persistence.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.math.BigDecimal;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 
 @Entity
 @Table(name = "vehicles")
@@ -20,7 +27,7 @@ public class Vehicle extends BaseEntity {
     private String licensePlate;
 
     @Column(name = "capacity")
-    private BigDecimal capacity;
+    private Double capacity;
 
     @Column(name = "description")
     private String description;
@@ -28,7 +35,6 @@ public class Vehicle extends BaseEntity {
     @Column(name = "driver_name")
     private String driverName;
 
-    // Quan hệ với Partner trong cùng Part Service
     @ManyToOne
     @JoinColumn(name = "partner_id")
     private Partner partner;

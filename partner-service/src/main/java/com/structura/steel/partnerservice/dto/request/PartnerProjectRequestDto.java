@@ -1,22 +1,16 @@
 package com.structura.steel.partnerservice.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
-@Getter
-@Setter
-public class PartnerProjectRequestDto {
-    private Long partnerId;
-    private String projectName;
-    private String projectAddress;
-    private String projectRepresentative;
-    private String projectRepresentativePhone;
-    private String contactPerson;
-    private String contactPersonPhone;
-    private String address;
+public record PartnerProjectRequestDto (
+    Long partnerId,
+    String projectName,
+    String projectAddress,
+    String projectRepresentative,
+    String projectRepresentativePhone,
+    String contactPerson,
+    String contactPersonPhone,
+    String address,
 
-    // Danh sách productId mà client chọn
-    private List<Long> productIds;
-}
+    List<Long> productIds
+) {}
