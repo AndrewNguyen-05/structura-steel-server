@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/partners")
+@RequestMapping("/partners")
 @RequiredArgsConstructor
 public class PartnerController {
 
@@ -23,25 +23,25 @@ public class PartnerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PartnerResponseDto> getPartnerById(@PathVariable Long id) {
-        return ResponseEntity.ok(partnerService.getPartner(id));
+        return ResponseEntity.ok(partnerService.getPartnerById(id));
     }
 
     @PostMapping
-    public ResponseEntity<PartnerResponseDto> createPartner(@RequestBody PartnerRequestDto dto) {
-        PartnerResponseDto created = partnerService.createPartner(dto);
+    public ResponseEntity<PartnerResponseDto> createPartner(@RequestBody PartnerRequestDto partnerRequestDto) {
+        PartnerResponseDto created = partnerService.createPartner(partnerRequestDto);
         return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PartnerResponseDto> updatePartner(@PathVariable Long id,
-                                                            @RequestBody PartnerRequestDto dto) {
-        PartnerResponseDto updated = partnerService.updatePartner(id, dto);
+                                                            @RequestBody PartnerRequestDto partnerRequestDto) {
+        PartnerResponseDto updated = partnerService.updatePartner(id, partnerRequestDto);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePartner(@PathVariable Long id) {
-        partnerService.deletePartner(id);
+        partnerService.deletePartnerById(id);
         return ResponseEntity.noContent().build();
     }
 }
