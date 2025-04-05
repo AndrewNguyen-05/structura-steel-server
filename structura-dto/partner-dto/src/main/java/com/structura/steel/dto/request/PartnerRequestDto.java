@@ -1,4 +1,4 @@
-package com.structura.steel.partnerservice.dto.request;
+package com.structura.steel.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

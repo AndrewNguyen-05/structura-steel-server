@@ -1,12 +1,12 @@
 package com.structura.steel.partnerservice.client;
 
 import com.structura.steel.commons.response.ObjectResponse;
-import com.structura.steel.partnerservice.client.dto.request.ProductRequestDto;
-import com.structura.steel.partnerservice.client.dto.response.ProductResponseDto;
+import com.structura.steel.dto.request.ProductRequestDto;
+import com.structura.steel.dto.response.ProductResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "product-service", path = "/api/products")
+@FeignClient(name = "product-service", url = "http://localhost:8020/product-service")
 public interface ProductFeignClient {
 
     @GetMapping("/{id}")

@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.controller;
 
-import com.structura.steel.partnerservice.dto.request.VehicleRequestDto;
-import com.structura.steel.partnerservice.dto.response.VehicleResponseDto;
+import com.structura.steel.dto.request.VehicleRequestDto;
+import com.structura.steel.dto.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,38 +10,49 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/vehicles")
+@RequestMapping("/partners/{partnerId}/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
 
     private final VehicleService vehicleService;
 
-    @GetMapping
-    public ResponseEntity<List<VehicleResponseDto>> getAllVehicles() {
-        return ResponseEntity.ok(vehicleService.getAllVehicles());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<VehicleResponseDto> getVehicleById(@PathVariable Long id) {
-        return ResponseEntity.ok(vehicleService.getVehicle(id));
-    }
-
     @PostMapping
-    public ResponseEntity<VehicleResponseDto> createVehicle(@RequestBody VehicleRequestDto dto) {
-        VehicleResponseDto created = vehicleService.createVehicle(dto);
+    public ResponseEntity<VehicleResponseDto> createVehicle(
+            @PathVariable Long partnerId,
+            @RequestBody VehicleRequestDto dto) {
+        VehicleResponseDto created = vehicleService.createVehicle(partnerId, dto);
         return ResponseEntity.ok(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VehicleResponseDto> updateVehicle(@PathVariable Long id,
-                                                            @RequestBody VehicleRequestDto dto) {
-        VehicleResponseDto updated = vehicleService.updateVehicle(id, dto);
+    @PutMapping("/{vehicleId}")
+    public ResponseEntity<VehicleResponseDto> updateVehicle(
+            @PathVariable Long partnerId,
+            @PathVariable Long vehicleId,
+            @RequestBody VehicleRequestDto dto) {
+        VehicleResponseDto updated = vehicleService.updateVehicle(partnerId, vehicleId, dto);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
-        vehicleService.deleteVehicle(id);
+    @GetMapping("/{vehicleId}")
+    public ResponseEntity<VehicleResponseDto> getVehicle(
+            @PathVariable Long partnerId,
+            @PathVariable Long vehicleId) {
+        VehicleResponseDto dto = vehicleService.getVehicle(partnerId, vehicleId);
+        return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/{vehicleId}")
+    public ResponseEntity<Void> deleteVehicle(
+            @PathVariable Long partnerId,
+            @PathVariable Long vehicleId) {
+        vehicleService.deleteVehicle(partnerId, vehicleId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<VehicleResponseDto>> getAllVehicles(
+            @PathVariable Long partnerId) {
+        List<VehicleResponseDto> dtos = vehicleService.getAllVehiclesByPartnerId(partnerId);
+        return ResponseEntity.ok(dtos);
     }
 }

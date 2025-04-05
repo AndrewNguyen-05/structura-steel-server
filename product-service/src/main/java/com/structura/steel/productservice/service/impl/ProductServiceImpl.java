@@ -2,8 +2,8 @@ package com.structura.steel.productservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.response.ObjectResponse;
-import com.structura.steel.productservice.dto.request.ProductRequestDto;
-import com.structura.steel.productservice.dto.response.ProductResponseDto;
+import com.structura.steel.dto.request.ProductRequestDto;
+import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.productservice.entity.Product;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.productservice.helper.SteelCalculator;

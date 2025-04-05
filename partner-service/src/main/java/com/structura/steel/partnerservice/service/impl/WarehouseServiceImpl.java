@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.service.impl;
 
-import com.structura.steel.partnerservice.dto.request.WarehouseRequestDto;
-import com.structura.steel.partnerservice.dto.response.WarehouseResponseDto;
+import com.structura.steel.dto.request.WarehouseRequestDto;
+import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
 import com.structura.steel.partnerservice.entity.Warehouse;
 import com.structura.steel.partnerservice.mapper.WarehouseMapper;
@@ -24,49 +24,58 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseMapper warehouseMapper;
 
     @Override
-    public WarehouseResponseDto createWarehouse(WarehouseRequestDto dto) {
-        Partner partner = partnerRepository.findById(dto.partnerId())
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + dto.partnerId()));
-
+    public WarehouseResponseDto createWarehouse(Long partnerId, WarehouseRequestDto dto) {
+        Partner partner = partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
         Warehouse warehouse = warehouseMapper.toWarehouse(dto);
         warehouse.setPartner(partner);
-
         Warehouse saved = warehouseRepository.save(warehouse);
         return warehouseMapper.toWarehouseResponseDto(saved);
     }
 
     @Override
-    public WarehouseResponseDto updateWarehouse(Long id, WarehouseRequestDto dto) {
-        Warehouse existing = warehouseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + id));
-
-        warehouseMapper.updateWarehouseFromDto(dto, existing);
-        if (dto.partnerId() != null) {
-            Partner partner = partnerRepository.findById(dto.partnerId())
-                    .orElseThrow(() -> new RuntimeException("Partner not found with id: " + dto.partnerId()));
-            existing.setPartner(partner);
+    public WarehouseResponseDto updateWarehouse(Long partnerId, Long warehouseId, WarehouseRequestDto dto) {
+        partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+        Warehouse existing = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + warehouseId));
+        if (!existing.getPartner().getId().equals(partnerId)) {
+            throw new RuntimeException("Warehouse id " + warehouseId + " not belong to Partner id " + partnerId);
         }
+        warehouseMapper.updateWarehouseFromDto(dto, existing);
         Warehouse updated = warehouseRepository.save(existing);
         return warehouseMapper.toWarehouseResponseDto(updated);
     }
 
     @Override
-    public WarehouseResponseDto getWarehouse(Long id) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + id));
+    public WarehouseResponseDto getWarehouse(Long partnerId, Long warehouseId) {
+        partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + warehouseId));
+        if (!warehouse.getPartner().getId().equals(partnerId)) {
+            throw new RuntimeException("Warehouse id " + warehouseId + " not belong to Partner id " + partnerId);
+        }
         return warehouseMapper.toWarehouseResponseDto(warehouse);
     }
 
     @Override
-    public void deleteWarehouse(Long id) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + id));
+    public void deleteWarehouse(Long partnerId, Long warehouseId) {
+        partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + warehouseId));
+        if (!warehouse.getPartner().getId().equals(partnerId)) {
+            throw new RuntimeException("Warehouse id " + warehouseId + " không thuộc Partner id " + partnerId);
+        }
         warehouseRepository.delete(warehouse);
     }
 
     @Override
-    public List<WarehouseResponseDto> getAllWarehouses() {
-        List<Warehouse> warehouses = warehouseRepository.findAll();
+    public List<WarehouseResponseDto> getAllWarehousesByPartnerId(Long partnerId) {
+        Partner partner = partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+        List<Warehouse> warehouses = partner.getWarehouses();
         return warehouseMapper.toWarehouseResponseDtoList(warehouses);
     }
 }

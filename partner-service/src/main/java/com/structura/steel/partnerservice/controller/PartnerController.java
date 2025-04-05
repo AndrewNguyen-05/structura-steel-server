@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.controller;
 
-import com.structura.steel.partnerservice.dto.request.PartnerRequestDto;
-import com.structura.steel.partnerservice.dto.response.PartnerResponseDto;
+import com.structura.steel.dto.request.PartnerRequestDto;
+import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.partnerservice.service.PartnerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +35,7 @@ public class PartnerController {
     @PutMapping("/{id}")
     public ResponseEntity<PartnerResponseDto> updatePartner(@PathVariable Long id,
                                                             @RequestBody PartnerRequestDto partnerRequestDto) {
+        // Chỉ cập nhật các trường của Partner, không xử lý các thực thể con.
         PartnerResponseDto updated = partnerService.updatePartner(id, partnerRequestDto);
         return ResponseEntity.ok(updated);
     }

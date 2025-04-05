@@ -1,6 +1,6 @@
 package com.structura.steel.productservice.helper;
 
-import com.structura.steel.productservice.dto.request.ProductRequestDto;
+import com.structura.steel.dto.request.ProductRequestDto;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

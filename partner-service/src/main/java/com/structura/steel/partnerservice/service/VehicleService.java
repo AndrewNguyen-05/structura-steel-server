@@ -1,14 +1,19 @@
 package com.structura.steel.partnerservice.service;
 
-import com.structura.steel.partnerservice.dto.request.VehicleRequestDto;
-import com.structura.steel.partnerservice.dto.response.VehicleResponseDto;
+import com.structura.steel.dto.request.VehicleRequestDto;
+import com.structura.steel.dto.response.VehicleResponseDto;
 
 import java.util.List;
 
 public interface VehicleService {
-    VehicleResponseDto createVehicle(VehicleRequestDto dto);
-    VehicleResponseDto updateVehicle(Long id, VehicleRequestDto dto);
-    VehicleResponseDto getVehicle(Long id);
-    void deleteVehicle(Long id);
-    List<VehicleResponseDto> getAllVehicles();
+
+    VehicleResponseDto createVehicle(Long partnerId, VehicleRequestDto dto);
+
+    VehicleResponseDto updateVehicle(Long partnerId, Long vehicleId, VehicleRequestDto dto);
+
+    VehicleResponseDto getVehicle(Long partnerId, Long vehicleId);
+
+    void deleteVehicle(Long partnerId, Long vehicleId);
+
+    List<VehicleResponseDto> getAllVehiclesByPartnerId(Long partnerId);
 }

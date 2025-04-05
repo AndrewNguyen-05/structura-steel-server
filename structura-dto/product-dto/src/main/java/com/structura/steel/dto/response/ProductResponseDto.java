@@ -1,4 +1,4 @@
-package com.structura.steel.productservice.dto.response;
+package com.structura.steel.dto.response;
 
 import java.math.BigDecimal;
 

@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.service;
 
-import com.structura.steel.partnerservice.dto.request.PartnerRequestDto;
-import com.structura.steel.partnerservice.dto.response.PartnerResponseDto;
+import com.structura.steel.dto.request.PartnerRequestDto;
+import com.structura.steel.dto.response.PartnerResponseDto;
 import java.util.List;
 
 public interface PartnerService {

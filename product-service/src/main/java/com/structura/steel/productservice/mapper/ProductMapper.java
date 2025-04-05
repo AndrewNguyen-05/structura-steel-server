@@ -1,7 +1,7 @@
 package com.structura.steel.productservice.mapper;
 
-import com.structura.steel.productservice.dto.request.ProductRequestDto;
-import com.structura.steel.productservice.dto.response.ProductResponseDto;
+import com.structura.steel.dto.request.ProductRequestDto;
+import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.productservice.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

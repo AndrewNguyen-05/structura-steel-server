@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.structura.steel</groupId>
-	<artifactId>commons</artifactId>
+	<artifactId>structura-commons</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>commons</name>
+	<name>structura-commons</name>
 	<properties>
 		<java.version>17</java.version>
 		<lombok.version>1.18.34</lombok.version>

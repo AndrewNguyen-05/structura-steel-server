@@ -24,9 +24,14 @@
         <keycloak.version>25.0.2</keycloak.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.structura.steel</groupId>
+            <artifactId>core-dto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 		<dependency>
 			<groupId>com.structura.steel</groupId>
-			<artifactId>commons</artifactId>
+			<artifactId>structura-commons</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
         <dependency>

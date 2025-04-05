@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.mapper;
 
-import com.structura.steel.partnerservice.dto.request.VehicleRequestDto;
-import com.structura.steel.partnerservice.dto.response.VehicleResponseDto;
+import com.structura.steel.dto.request.VehicleRequestDto;
+import com.structura.steel.dto.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.entity.Vehicle;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

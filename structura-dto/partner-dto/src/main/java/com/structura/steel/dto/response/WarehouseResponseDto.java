@@ -1,4 +1,4 @@
-package com.structura.steel.partnerservice.dto.response;
+package com.structura.steel.dto.response;
 
 public record WarehouseResponseDto (
     Long id,

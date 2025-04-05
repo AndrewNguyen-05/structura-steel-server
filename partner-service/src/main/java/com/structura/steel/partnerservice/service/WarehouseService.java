@@ -1,14 +1,19 @@
 package com.structura.steel.partnerservice.service;
 
-import com.structura.steel.partnerservice.dto.request.WarehouseRequestDto;
-import com.structura.steel.partnerservice.dto.response.WarehouseResponseDto;
+import com.structura.steel.dto.request.WarehouseRequestDto;
+import com.structura.steel.dto.response.WarehouseResponseDto;
 
 import java.util.List;
 
 public interface WarehouseService {
-    WarehouseResponseDto createWarehouse(WarehouseRequestDto dto);
-    WarehouseResponseDto updateWarehouse(Long id, WarehouseRequestDto dto);
-    WarehouseResponseDto getWarehouse(Long id);
-    void deleteWarehouse(Long id);
-    List<WarehouseResponseDto> getAllWarehouses();
+
+    WarehouseResponseDto createWarehouse(Long partnerId, WarehouseRequestDto dto);
+
+    WarehouseResponseDto updateWarehouse(Long partnerId, Long warehouseId, WarehouseRequestDto dto);
+
+    WarehouseResponseDto getWarehouse(Long partnerId, Long warehouseId);
+
+    void deleteWarehouse(Long partnerId, Long warehouseId);
+
+    List<WarehouseResponseDto> getAllWarehousesByPartnerId(Long partnerId);
 }

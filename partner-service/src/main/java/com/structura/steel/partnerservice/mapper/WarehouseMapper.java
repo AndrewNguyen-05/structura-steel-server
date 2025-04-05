@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.mapper;
 
-import com.structura.steel.partnerservice.dto.request.WarehouseRequestDto;
-import com.structura.steel.partnerservice.dto.response.WarehouseResponseDto;
+import com.structura.steel.dto.request.WarehouseRequestDto;
+import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.entity.Warehouse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
