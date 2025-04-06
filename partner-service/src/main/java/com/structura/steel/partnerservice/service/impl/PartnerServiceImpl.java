@@ -72,8 +72,7 @@ public class PartnerServiceImpl implements PartnerService {
     public void deletePartnerById(Long id) {
         Partner partner = partnerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
-        // Nếu Cascade chưa được cấu hình, bạn có thể xoá các entity con trước.
-        // Nhưng theo Phương án 3, các thao tác trên các entity con được thực hiện riêng qua endpoint khác.
+
         partnerRepository.delete(partner);
     }
 

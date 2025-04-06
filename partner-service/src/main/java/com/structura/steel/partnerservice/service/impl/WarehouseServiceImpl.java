@@ -1,5 +1,7 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.exception.ResourceNotBelongToException;
+import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -26,7 +28,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseResponseDto createWarehouse(Long partnerId, WarehouseRequestDto dto) {
         Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         Warehouse warehouse = warehouseMapper.toWarehouse(dto);
         warehouse.setPartner(partner);
         Warehouse saved = warehouseRepository.save(warehouse);
@@ -36,11 +38,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseResponseDto updateWarehouse(Long partnerId, Long warehouseId, WarehouseRequestDto dto) {
         partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         Warehouse existing = warehouseRepository.findById(warehouseId)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + warehouseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "id", warehouseId));
         if (!existing.getPartner().getId().equals(partnerId)) {
-            throw new RuntimeException("Warehouse id " + warehouseId + " not belong to Partner id " + partnerId);
+            throw new ResourceNotBelongToException("Warehouse", "id", warehouseId, "partner", "id", partnerId);
         }
         warehouseMapper.updateWarehouseFromDto(dto, existing);
         Warehouse updated = warehouseRepository.save(existing);
@@ -50,11 +52,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseResponseDto getWarehouse(Long partnerId, Long warehouseId) {
         partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + warehouseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "id", warehouseId));
         if (!warehouse.getPartner().getId().equals(partnerId)) {
-            throw new RuntimeException("Warehouse id " + warehouseId + " not belong to Partner id " + partnerId);
+            throw new ResourceNotBelongToException("Warehouse", "id", warehouseId, "partner", "id", partnerId);
         }
         return warehouseMapper.toWarehouseResponseDto(warehouse);
     }
@@ -62,11 +64,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void deleteWarehouse(Long partnerId, Long warehouseId) {
         partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + warehouseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "id", warehouseId));
         if (!warehouse.getPartner().getId().equals(partnerId)) {
-            throw new RuntimeException("Warehouse id " + warehouseId + " không thuộc Partner id " + partnerId);
+            throw new ResourceNotBelongToException("Warehouse", "id", warehouseId, "partner", "id", partnerId);
         }
         warehouseRepository.delete(warehouse);
     }
@@ -74,7 +76,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public List<WarehouseResponseDto> getAllWarehousesByPartnerId(Long partnerId) {
         Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         List<Warehouse> warehouses = partner.getWarehouses();
         return warehouseMapper.toWarehouseResponseDtoList(warehouses);
     }

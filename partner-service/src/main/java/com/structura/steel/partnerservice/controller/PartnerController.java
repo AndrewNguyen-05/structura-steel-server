@@ -28,16 +28,13 @@ public class PartnerController {
 
     @PostMapping
     public ResponseEntity<PartnerResponseDto> createPartner(@RequestBody PartnerRequestDto partnerRequestDto) {
-        PartnerResponseDto created = partnerService.createPartner(partnerRequestDto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(partnerService.createPartner(partnerRequestDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PartnerResponseDto> updatePartner(@PathVariable Long id,
                                                             @RequestBody PartnerRequestDto partnerRequestDto) {
-        // Chỉ cập nhật các trường của Partner, không xử lý các thực thể con.
-        PartnerResponseDto updated = partnerService.updatePartner(id, partnerRequestDto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(partnerService.updatePartner(id, partnerRequestDto));
     }
 
     @DeleteMapping("/{id}")

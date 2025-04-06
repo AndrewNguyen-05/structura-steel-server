@@ -12,7 +12,7 @@ public class MissingRequiredFieldException extends RuntimeException {
 
     // Nếu cần truyền thêm thông tin, bạn có thể thêm constructor thứ hai:
     public MissingRequiredFieldException(String fieldName, String message) {
-        super(String.format("Field '%s' error: %s", fieldName, message));
+        super(String.format("Field %s error: %s", fieldName, message));
     }
 }
 

@@ -20,8 +20,7 @@ public class PartnerProjectController {
     public ResponseEntity<PartnerProjectResponseDto> createPartnerProject(
             @PathVariable Long partnerId,
             @RequestBody PartnerProjectRequestDto dto) {
-        PartnerProjectResponseDto created = partnerProjectService.createPartnerProject(partnerId, dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(partnerProjectService.createPartnerProject(partnerId, dto));
     }
 
     @PutMapping("/{projectId}")
@@ -29,8 +28,7 @@ public class PartnerProjectController {
             @PathVariable Long partnerId,
             @PathVariable Long projectId,
             @RequestBody PartnerProjectRequestDto dto) {
-        PartnerProjectResponseDto updated = partnerProjectService.updatePartnerProject(partnerId, projectId, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(partnerProjectService.updatePartnerProject(partnerId, projectId, dto));
     }
 
     @GetMapping("/{projectId}")

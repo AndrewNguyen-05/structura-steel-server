@@ -65,7 +65,6 @@ public class ProductController {
 
     @GetMapping("/{id}/weight")
     public ResponseEntity<BigDecimal> getProductWeight(@PathVariable Long id) {
-        BigDecimal weight = productService.calculateWeight(id);
-        return ResponseEntity.ok(weight);
+        return ResponseEntity.ok(productService.calculateWeight(id));
     }
 }

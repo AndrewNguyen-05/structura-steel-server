@@ -38,7 +38,8 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         PartnerProject project = partnerProjectMapper.toPartnerProject(dto);
         project.setPartner(partner);
         PartnerProject saved = partnerProjectRepository.save(project);
-        return partnerProjectMapper.toPartnerProjectResponseDto(saved);
+
+        return entityToResponseWithProduct(saved);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
         partnerProjectMapper.updatePartnerProjectFromDto(dto, existing);
         PartnerProject updated = partnerProjectRepository.save(existing);
-        return partnerProjectMapper.toPartnerProjectResponseDto(updated);
+        return entityToResponseWithProduct(updated);
     }
 
     @Override
@@ -69,19 +70,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         if (!project.getPartner().getId().equals(partnerId)) {
             throw new RuntimeException("PartnerProject id " + projectId + " not belong to Partner id " + partnerId);
         }
-        PartnerProjectResponseDto responseDto = partnerProjectMapper.toPartnerProjectResponseDto(project);
-
-        List<Long> productIds = project.getProductIds();
-        List<ProductResponseDto> products = new ArrayList<>();
-        if (productIds != null) {
-            for (Long productId : productIds) {
-                ProductResponseDto product = productFeignClient.getProductById(productId);
-                products.add(product);
-            }
-        }
-        responseDto.setProducts(products);
-
-        return responseDto;
+        return entityToResponseWithProduct(project);
     }
 
     @Override
@@ -118,5 +107,21 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         }
 
         return partnerProjectResponseDtoList;
+    }
+
+    private PartnerProjectResponseDto entityToResponseWithProduct(PartnerProject project) {
+        PartnerProjectResponseDto responseDto = partnerProjectMapper.toPartnerProjectResponseDto(project);
+
+        List<Long> productIds = project.getProductIds();
+        List<ProductResponseDto> products = new ArrayList<>();
+        if (productIds != null) {
+            for (Long productId : productIds) {
+                ProductResponseDto product = productFeignClient.getProductById(productId);
+                products.add(product);
+            }
+        }
+        responseDto.setProducts(products);
+
+        return responseDto;
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class DuplicateKeyException extends RuntimeException {
 
     public DuplicateKeyException(String resourceName, String fieldName, Object fieldValue) {
-        super(String.format("%s with %s '%s' already exists.", resourceName, fieldName, fieldValue));
+        super(String.format("%s with %s %s already exists.", resourceName, fieldName, fieldValue));
     }
 
     public DuplicateKeyException(String message) {

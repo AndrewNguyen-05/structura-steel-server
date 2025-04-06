@@ -20,8 +20,7 @@ public class VehicleController {
     public ResponseEntity<VehicleResponseDto> createVehicle(
             @PathVariable Long partnerId,
             @RequestBody VehicleRequestDto dto) {
-        VehicleResponseDto created = vehicleService.createVehicle(partnerId, dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(vehicleService.createVehicle(partnerId, dto));
     }
 
     @PutMapping("/{vehicleId}")
@@ -29,16 +28,14 @@ public class VehicleController {
             @PathVariable Long partnerId,
             @PathVariable Long vehicleId,
             @RequestBody VehicleRequestDto dto) {
-        VehicleResponseDto updated = vehicleService.updateVehicle(partnerId, vehicleId, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(vehicleService.updateVehicle(partnerId, vehicleId, dto));
     }
 
     @GetMapping("/{vehicleId}")
     public ResponseEntity<VehicleResponseDto> getVehicle(
             @PathVariable Long partnerId,
             @PathVariable Long vehicleId) {
-        VehicleResponseDto dto = vehicleService.getVehicle(partnerId, vehicleId);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(vehicleService.getVehicle(partnerId, vehicleId));
     }
 
     @DeleteMapping("/{vehicleId}")
@@ -52,7 +49,6 @@ public class VehicleController {
     @GetMapping
     public ResponseEntity<List<VehicleResponseDto>> getAllVehicles(
             @PathVariable Long partnerId) {
-        List<VehicleResponseDto> dtos = vehicleService.getAllVehiclesByPartnerId(partnerId);
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(vehicleService.getAllVehiclesByPartnerId(partnerId));
     }
 }

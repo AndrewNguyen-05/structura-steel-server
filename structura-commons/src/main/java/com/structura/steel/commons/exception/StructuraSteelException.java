@@ -1,10 +1,12 @@
 package com.structura.steel.commons.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class StructuraSteelException extends RuntimeException {
-    private HttpStatus status;
-    private String message;
+    private final HttpStatus status;
+    private final String message;
 
     public StructuraSteelException(HttpStatus status, String message) {
         this.status = status;
@@ -15,10 +17,6 @@ public class StructuraSteelException extends RuntimeException {
         super(message);
         this.status = status;
         this.message = message1;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
     }
 
     @Override

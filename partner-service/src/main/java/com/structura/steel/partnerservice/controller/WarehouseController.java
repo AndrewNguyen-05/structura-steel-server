@@ -20,8 +20,7 @@ public class WarehouseController {
     public ResponseEntity<WarehouseResponseDto> createWarehouse(
             @PathVariable Long partnerId,
             @RequestBody WarehouseRequestDto dto) {
-        WarehouseResponseDto created = warehouseService.createWarehouse(partnerId, dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(warehouseService.createWarehouse(partnerId, dto));
     }
 
     @PutMapping("/{warehouseId}")
@@ -29,16 +28,14 @@ public class WarehouseController {
             @PathVariable Long partnerId,
             @PathVariable Long warehouseId,
             @RequestBody WarehouseRequestDto dto) {
-        WarehouseResponseDto updated = warehouseService.updateWarehouse(partnerId, warehouseId, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(warehouseService.updateWarehouse(partnerId, warehouseId, dto));
     }
 
     @GetMapping("/{warehouseId}")
     public ResponseEntity<WarehouseResponseDto> getWarehouse(
             @PathVariable Long partnerId,
             @PathVariable Long warehouseId) {
-        WarehouseResponseDto dto = warehouseService.getWarehouse(partnerId, warehouseId);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(warehouseService.getWarehouse(partnerId, warehouseId));
     }
 
     @DeleteMapping("/{warehouseId}")
@@ -52,7 +49,6 @@ public class WarehouseController {
     @GetMapping
     public ResponseEntity<List<WarehouseResponseDto>> getAllWarehouses(
             @PathVariable Long partnerId) {
-        List<WarehouseResponseDto> dtos = warehouseService.getAllWarehousesByPartnerId(partnerId);
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(warehouseService.getAllWarehousesByPartnerId(partnerId));
     }
 }
