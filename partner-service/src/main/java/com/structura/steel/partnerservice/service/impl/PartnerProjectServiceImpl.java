@@ -1,7 +1,11 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.exception.ResourceNotBelongToException;
+import com.structura.steel.commons.exception.ResourceNotFoundException;
+import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
+import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.partnerservice.client.ProductFeignClient;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -12,6 +16,10 @@ import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.service.PartnerProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +41,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     @Override
     public PartnerProjectResponseDto createPartnerProject(Long partnerId, PartnerProjectRequestDto dto) {
         Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
 
         PartnerProject project = partnerProjectMapper.toPartnerProject(dto);
         project.setPartner(partner);
@@ -46,13 +54,13 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     public PartnerProjectResponseDto updatePartnerProject(Long partnerId, Long projectId, PartnerProjectRequestDto dto) {
         // Xác thực Partner
         partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         PartnerProject existing = partnerProjectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("PartnerProject not found with id: " + projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner's project", "id", projectId));
 
         // Kiểm tra xem project có thuộc partnerId không (nếu cần)
         if (!existing.getPartner().getId().equals(partnerId)) {
-            throw new RuntimeException("PartnerProject id " + projectId + " không thuộc Partner id " + partnerId);
+            throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
         }
 
         partnerProjectMapper.updatePartnerProjectFromDto(dto, existing);
@@ -64,11 +72,11 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     public PartnerProjectResponseDto getPartnerProject(Long partnerId, Long projectId) {
         // Xác thực Partner
         partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         PartnerProject project = partnerProjectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("PartnerProject not found with id: " + projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner's project", "id", projectId));
         if (!project.getPartner().getId().equals(partnerId)) {
-            throw new RuntimeException("PartnerProject id " + projectId + " not belong to Partner id " + partnerId);
+            throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
         }
         return entityToResponseWithProduct(project);
     }
@@ -77,21 +85,36 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     public void deletePartnerProject(Long partnerId, Long projectId) {
         // Xác thực Partner
         partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         PartnerProject project = partnerProjectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("PartnerProject not found with id: " + projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner's project", "id", projectId));
         if (!project.getPartner().getId().equals(partnerId)) {
-            throw new RuntimeException("PartnerProject id " + projectId + " không thuộc Partner id " + partnerId);
+            throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
         }
         partnerProjectRepository.delete(project);
     }
 
     @Override
-    public List<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(Long partnerId) {
-        Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new RuntimeException("Partner not found with id: " + partnerId));
-        List<PartnerProject> projects = partner.getPartnerProjects();
-        List<PartnerProjectResponseDto> partnerProjectResponseDtoList = projects.stream()
+    public ObjectResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
+        partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+
+        // Tao sort
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        // Tao 1 pageable instance
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        // Tao 1 mang cac trang product su dung find all voi tham so la pageable
+        Page<PartnerProject> pages = partnerProjectRepository.getAllByPartnerId(partnerId, pageable);
+
+        // Lay ra gia tri (content) cua page
+        List<PartnerProject> projects = pages.getContent();
+
+        // Ep kieu sang dto
+        List<PartnerProjectResponseDto> content = projects.stream()
                 .map(partnerProjectMapper::toPartnerProjectResponseDto).toList();
 
         for(int i = 0; i < projects.size(); i++) {
@@ -103,10 +126,19 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
                     products.add(product);
                 }
             }
-            partnerProjectResponseDtoList.get(i).setProducts(products);
+            content.get(i).setProducts(products);
         }
 
-        return partnerProjectResponseDtoList;
+        // Gan gia tri (content) cua page vao ProductResponse de tra ve
+        ObjectResponse<PartnerProjectResponseDto> response = new ObjectResponse<>();
+        response.setContent(content);
+        response.setTotalElements(pages.getTotalElements());
+        response.setPageNo(pages.getNumber());
+        response.setPageSize(pages.getSize());
+        response.setTotalPages(pages.getTotalPages());
+        response.setLast(pages.isLast());
+
+        return response;
     }
 
     private PartnerProjectResponseDto entityToResponseWithProduct(PartnerProject project) {

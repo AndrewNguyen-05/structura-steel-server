@@ -1,9 +1,8 @@
 package com.structura.steel.partnerservice.service;
 
+import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.dto.request.VehicleRequestDto;
 import com.structura.steel.dto.response.VehicleResponseDto;
-
-import java.util.List;
 
 public interface VehicleService {
 
@@ -11,9 +10,9 @@ public interface VehicleService {
 
     VehicleResponseDto updateVehicle(Long partnerId, Long vehicleId, VehicleRequestDto dto);
 
-    VehicleResponseDto getVehicle(Long partnerId, Long vehicleId);
+    VehicleResponseDto getVehicleById(Long partnerId, Long vehicleId);
 
     void deleteVehicle(Long partnerId, Long vehicleId);
 
-    List<VehicleResponseDto> getAllVehiclesByPartnerId(Long partnerId);
+    ObjectResponse<VehicleResponseDto> getAllVehiclesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId);
 }

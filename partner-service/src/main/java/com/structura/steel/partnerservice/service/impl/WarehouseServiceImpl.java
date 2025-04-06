@@ -2,6 +2,7 @@ package com.structura.steel.partnerservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
+import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -11,6 +12,10 @@ import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.repository.WarehouseRepository;
 import com.structura.steel.partnerservice.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,10 +79,36 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public List<WarehouseResponseDto> getAllWarehousesByPartnerId(Long partnerId) {
-        Partner partner = partnerRepository.findById(partnerId)
+    public ObjectResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
+        partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        List<Warehouse> warehouses = partner.getWarehouses();
-        return warehouseMapper.toWarehouseResponseDtoList(warehouses);
+        // Tao sort
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        // Tao 1 pageable instance
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        // Tao 1 mang cac trang product su dung find all voi tham so la pageable
+        Page<Warehouse> pages = warehouseRepository.getAllByPartnerId(partnerId, pageable);
+
+        // Lay ra gia tri (content) cua page
+        List<Warehouse> warehouses = pages.getContent();
+
+        // Ep kieu sang dto
+        List<WarehouseResponseDto> content = warehouses.stream()
+                .map(warehouseMapper::toWarehouseResponseDto).toList();
+
+        // Gan gia tri (content) cua page vao ProductResponse de tra ve
+        ObjectResponse<WarehouseResponseDto> response = new ObjectResponse<>();
+        response.setContent(content);
+        response.setTotalElements(pages.getTotalElements());
+        response.setPageNo(pages.getNumber());
+        response.setPageSize(pages.getSize());
+        response.setTotalPages(pages.getTotalPages());
+        response.setLast(pages.isLast());
+
+        return response;
     }
 }

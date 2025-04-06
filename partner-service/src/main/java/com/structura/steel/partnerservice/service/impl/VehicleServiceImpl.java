@@ -3,15 +3,22 @@ package com.structura.steel.partnerservice.service.impl;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
+import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.dto.request.VehicleRequestDto;
+import com.structura.steel.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.dto.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
+import com.structura.steel.partnerservice.entity.PartnerProject;
 import com.structura.steel.partnerservice.entity.Vehicle;
 import com.structura.steel.partnerservice.mapper.VehicleMapper;
 import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.repository.VehicleRepository;
 import com.structura.steel.partnerservice.service.VehicleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +67,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public VehicleResponseDto getVehicle(Long partnerId, Long vehicleId) {
+    public VehicleResponseDto getVehicleById(Long partnerId, Long vehicleId) {
         partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
@@ -84,10 +91,36 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<VehicleResponseDto> getAllVehiclesByPartnerId(Long partnerId) {
-        Partner partner = partnerRepository.findById(partnerId)
+    public ObjectResponse<VehicleResponseDto> getAllVehiclesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
+        partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        List<Vehicle> vehicles = partner.getVehicles();
-        return vehicleMapper.toVehicleResponseDtoList(vehicles);
+        // Tao sort
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        // Tao 1 pageable instance
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        // Tao 1 mang cac trang product su dung find all voi tham so la pageable
+        Page<Vehicle> pages = vehicleRepository.getAllByPartnerId(partnerId, pageable);
+
+        // Lay ra gia tri (content) cua page
+        List<Vehicle> vehicles = pages.getContent();
+
+        // Ep kieu sang dto
+        List<VehicleResponseDto> content = vehicles.stream()
+                .map(vehicleMapper::toVehicleResponseDto).toList();
+
+        // Gan gia tri (content) cua page vao ProductResponse de tra ve
+        ObjectResponse<VehicleResponseDto> response = new ObjectResponse<>();
+        response.setContent(content);
+        response.setTotalElements(pages.getTotalElements());
+        response.setPageNo(pages.getNumber());
+        response.setPageSize(pages.getSize());
+        response.setTotalPages(pages.getTotalPages());
+        response.setLast(pages.isLast());
+
+        return response;
     }
 }

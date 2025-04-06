@@ -1,5 +1,7 @@
 package com.structura.steel.partnerservice.controller;
 
+import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.service.WarehouseService;
@@ -47,8 +49,13 @@ public class WarehouseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WarehouseResponseDto>> getAllWarehouses(
-            @PathVariable Long partnerId) {
-        return ResponseEntity.ok(warehouseService.getAllWarehousesByPartnerId(partnerId));
+    public ResponseEntity<ObjectResponse<WarehouseResponseDto>> getAllWarehouses(
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @PathVariable Long partnerId
+    ) {
+        return ResponseEntity.ok(warehouseService.getAllWarehousesByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId));
     }
 }

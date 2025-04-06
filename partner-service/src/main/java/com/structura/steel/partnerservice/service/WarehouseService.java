@@ -1,9 +1,8 @@
 package com.structura.steel.partnerservice.service;
 
+import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
-
-import java.util.List;
 
 public interface WarehouseService {
 
@@ -15,5 +14,5 @@ public interface WarehouseService {
 
     void deleteWarehouse(Long partnerId, Long warehouseId);
 
-    List<WarehouseResponseDto> getAllWarehousesByPartnerId(Long partnerId);
+    ObjectResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId);
 }

@@ -1,9 +1,8 @@
 package com.structura.steel.partnerservice.service;
 
+import com.structura.steel.commons.response.ObjectResponse;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
-
-import java.util.List;
 
 public interface PartnerProjectService {
 
@@ -15,5 +14,5 @@ public interface PartnerProjectService {
 
     void deletePartnerProject(Long partnerId, Long projectId);
 
-    List<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(Long partnerId);
+    ObjectResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId);
 }

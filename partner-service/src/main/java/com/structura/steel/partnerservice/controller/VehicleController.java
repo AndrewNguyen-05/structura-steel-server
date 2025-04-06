@@ -1,5 +1,7 @@
 package com.structura.steel.partnerservice.controller;
 
+import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.dto.request.VehicleRequestDto;
 import com.structura.steel.dto.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.service.VehicleService;
@@ -32,10 +34,10 @@ public class VehicleController {
     }
 
     @GetMapping("/{vehicleId}")
-    public ResponseEntity<VehicleResponseDto> getVehicle(
+    public ResponseEntity<VehicleResponseDto> getVehicleById(
             @PathVariable Long partnerId,
             @PathVariable Long vehicleId) {
-        return ResponseEntity.ok(vehicleService.getVehicle(partnerId, vehicleId));
+        return ResponseEntity.ok(vehicleService.getVehicleById(partnerId, vehicleId));
     }
 
     @DeleteMapping("/{vehicleId}")
@@ -47,8 +49,13 @@ public class VehicleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VehicleResponseDto>> getAllVehicles(
-            @PathVariable Long partnerId) {
-        return ResponseEntity.ok(vehicleService.getAllVehiclesByPartnerId(partnerId));
+    public ResponseEntity<ObjectResponse<VehicleResponseDto>> getAllVehicles(
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @PathVariable Long partnerId
+    ) {
+        return ResponseEntity.ok(vehicleService.getAllVehiclesByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId));
     }
 }

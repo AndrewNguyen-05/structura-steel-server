@@ -1,5 +1,7 @@
 package com.structura.steel.partnerservice.controller;
 
+import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.partnerservice.service.PartnerProjectService;
@@ -48,8 +50,13 @@ public class PartnerProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PartnerProjectResponseDto>> getAllPartnerProjects(
-            @PathVariable Long partnerId) {
-        return ResponseEntity.ok(partnerProjectService.getAllPartnerProjectsByPartnerId(partnerId));
+    public ResponseEntity<ObjectResponse<PartnerProjectResponseDto>> getAllPartnerProjects(
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @PathVariable Long partnerId
+    ) {
+        return ResponseEntity.ok(partnerProjectService.getAllPartnerProjectsByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId));
     }
 }
