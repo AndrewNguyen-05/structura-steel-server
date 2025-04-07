@@ -7,5 +7,5 @@ import com.structura.steel.dto.response.UserResponse;
 public interface UserService {
     RestResponse<UserResponse> createUser(CreateUserRequest request);
     RestResponse<UserResponse> getUser(String id);
-    void isEmailExist(String email);
+    String checkExistEmail(String email);
 }

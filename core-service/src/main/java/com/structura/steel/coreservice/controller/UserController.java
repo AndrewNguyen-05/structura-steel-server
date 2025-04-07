@@ -19,13 +19,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/check-email")
-    public ResponseEntity<Void> checkEmailExist(@RequestParam String email) {
-        userService.isEmailExist(email);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> checkEmailExist(@RequestParam String email) {
+        return ResponseEntity.ok(userService.checkExistEmail(email));
     }
 
     @GetMapping("/my-profile")
-    public ResponseEntity<RestResponse<UserResponse>> checkEmailExist() {
+    public ResponseEntity<RestResponse<UserResponse>> getUserProfile() {
         return ResponseEntity.ok(userService.getUser(SecurityUtils.getCurrentUserId()));
     }
 }

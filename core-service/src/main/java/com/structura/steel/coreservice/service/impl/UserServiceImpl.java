@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.RestResponse;
 import com.structura.steel.dto.request.CreateUserRequest;
@@ -48,10 +49,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void isEmailExist(String email) {
+    public String checkExistEmail(String email) {
         if (keycloakService.isEmailExist(email)) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateKeyException("User", "email", email);
         }
+        return "This email is available";
     }
 }
 
