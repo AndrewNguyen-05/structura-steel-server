@@ -2,10 +2,9 @@ package com.structura.steel.partnerservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
-import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.partnerservice.client.ProductFeignClient;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -95,7 +94,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     }
 
     @Override
-    public ObjectResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
+    public PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
         partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
 
@@ -130,7 +129,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         }
 
         // Gan gia tri (content) cua page vao ProductResponse de tra ve
-        ObjectResponse<PartnerProjectResponseDto> response = new ObjectResponse<>();
+        PagingResponse<PartnerProjectResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());

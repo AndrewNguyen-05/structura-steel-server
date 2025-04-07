@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.persistence.AuditEntity;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,27 +10,27 @@ import lombok.Setter;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "\"user\"")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User extends BaseEntity {
+public class User extends AuditEntity {
+    @Id
+    @Column(name = "id", nullable = false)
+    private String id;
 
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
-    @Column(name = "full_name")
-    private String fullName;
-
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     @ManyToMany
     @JoinTable(

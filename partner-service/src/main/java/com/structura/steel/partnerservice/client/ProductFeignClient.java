@@ -1,6 +1,6 @@
 package com.structura.steel.partnerservice.client;
 
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.ProductRequestDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -19,5 +19,5 @@ public interface ProductFeignClient {
     ProductResponseDto updateProduct(@PathVariable("id") Long id, @RequestBody ProductRequestDto requestDto);
 
     @GetMapping
-    ObjectResponse<ProductResponseDto> getAllProducts();
+    PagingResponse<ProductResponseDto> getAllProducts();
 }

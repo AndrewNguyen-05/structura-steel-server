@@ -1,5 +1,6 @@
 package com.structura.steel.commons.exception.exceptionHandlers;
 
+import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.exception.StructuraSteelException;
@@ -45,6 +46,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 webRequest.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<ErrorDetails> handleDuplicateKeyException(DuplicateKeyException ex,
+                                                                    WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                webRequest.getDescription(false)
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
 

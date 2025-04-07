@@ -2,6 +2,8 @@ server:
   port: 8010
   servlet:
     context-path: /core-service
+  error:
+    include-message: always
 
 spring:
   application:
@@ -49,7 +51,7 @@ management:
       probability: 1.0
 
 keycloak:
-  url: ${KC_URI:localhost:8008}
+  url: ${KC_URI:http://localhost:8008}
   realm:
     master: master
     structura: structura

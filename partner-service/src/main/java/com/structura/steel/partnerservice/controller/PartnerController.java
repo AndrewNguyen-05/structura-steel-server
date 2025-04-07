@@ -1,6 +1,6 @@
 package com.structura.steel.partnerservice.controller;
 
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.dto.request.PartnerRequestDto;
 import com.structura.steel.dto.response.PartnerResponseDto;
@@ -8,8 +8,6 @@ import com.structura.steel.partnerservice.service.PartnerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/partners")
@@ -19,7 +17,7 @@ public class PartnerController {
     private final PartnerService partnerService;
 
     @GetMapping
-    public ResponseEntity<ObjectResponse<PartnerResponseDto>> getAllPartners(
+    public ResponseEntity<PagingResponse<PartnerResponseDto>> getAllPartners(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,

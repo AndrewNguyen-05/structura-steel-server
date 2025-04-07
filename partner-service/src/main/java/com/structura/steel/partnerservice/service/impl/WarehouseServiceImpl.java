@@ -2,7 +2,7 @@ package com.structura.steel.partnerservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -79,7 +79,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public ObjectResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
+    public PagingResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId) {
         partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         // Tao sort
@@ -101,7 +101,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .map(warehouseMapper::toWarehouseResponseDto).toList();
 
         // Gan gia tri (content) cua page vao ProductResponse de tra ve
-        ObjectResponse<WarehouseResponseDto> response = new ObjectResponse<>();
+        PagingResponse<WarehouseResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());

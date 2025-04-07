@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ObjectResponse<T> {
+public class PagingResponse<T> {
     private List<T> content;
     private int pageNo;
     private int pageSize;

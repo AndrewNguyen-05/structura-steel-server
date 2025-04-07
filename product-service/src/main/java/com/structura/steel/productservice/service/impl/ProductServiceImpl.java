@@ -1,7 +1,7 @@
 package com.structura.steel.productservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.ProductRequestDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.productservice.entity.Product;
@@ -31,7 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public ObjectResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir) {
         // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductResponseDto> content = products.stream().map(productMapper::toProductResponseDto).collect(Collectors.toList());
 
         // Gan gia tri (content) cua page vao ProductResponse de tra ve
-        ObjectResponse<ProductResponseDto> response = new ObjectResponse<>();
+        PagingResponse<ProductResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());

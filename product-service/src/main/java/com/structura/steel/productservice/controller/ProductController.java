@@ -1,6 +1,6 @@
 package com.structura.steel.productservice.controller;
 
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.dto.request.ProductRequestDto;
 import com.structura.steel.dto.response.ProductResponseDto;
@@ -23,7 +23,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<ObjectResponse<ProductResponseDto>> getAllProducts(
+    public ResponseEntity<PagingResponse<ProductResponseDto>> getAllProducts(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,

@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceNotFoundException;
-import com.structura.steel.commons.response.ObjectResponse;
+import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.PartnerRequestDto;
 import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
@@ -89,7 +89,7 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     @Override
-    public ObjectResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagingResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir) {
         // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -109,7 +109,7 @@ public class PartnerServiceImpl implements PartnerService {
         List<PartnerResponseDto> content = products.stream().map(partnerMapper::toPartnerResponseDto).collect(Collectors.toList());
 
         // Gan gia tri (content) cua page vao ProductResponse de tra ve
-        ObjectResponse<PartnerResponseDto> response = new ObjectResponse<>();
+        PagingResponse<PartnerResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());
