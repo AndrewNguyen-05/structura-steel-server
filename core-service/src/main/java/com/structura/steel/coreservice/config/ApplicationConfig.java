@@ -21,7 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class})
 @Configuration
 @EnableScheduling
-//@EnableFeignClients(basePackages = "com.hometopia.coreservice.client")
+@EnableFeignClients(basePackages = "com.structura.steel.coreservice.client")
 @ConfigurationPropertiesScan
 @RequiredArgsConstructor
 public class ApplicationConfig {

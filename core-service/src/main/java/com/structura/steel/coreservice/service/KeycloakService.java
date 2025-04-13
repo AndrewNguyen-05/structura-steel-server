@@ -1,6 +1,7 @@
 package com.structura.steel.coreservice.service;
 
 import com.structura.steel.dto.request.CreateUserRequest;
+import com.structura.steel.dto.request.UpdateUserRequest;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -15,4 +16,5 @@ public interface KeycloakService {
     List<RoleRepresentation> getListClientRolesByUserId(String id);
     void deleteUser(String id);
     boolean isEmailExist(String email);
+    void updateUser(String id, UpdateUserRequest request);
 }

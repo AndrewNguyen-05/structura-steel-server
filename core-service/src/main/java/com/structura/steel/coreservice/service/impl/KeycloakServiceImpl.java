@@ -6,6 +6,7 @@ import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.coreservice.config.property.KeycloakProperty;
 import com.structura.steel.dto.request.CreateUserRequest;
 import com.structura.steel.coreservice.service.KeycloakService;
+import com.structura.steel.dto.request.UpdateUserRequest;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 String parsedError = parseErrorMessage(responseBody);
                 throw new DuplicateKeyException("Failed to create user: " + parsedError);
             }
-            log.info("Create user response from Keycloak: status {}, body {}", response.getStatus(), response.readEntity(String.class));
+            log.info("Create user response from Keycloak: status {}, body {}", response.getStatus(), responseBody);
 
             CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
             credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
@@ -127,6 +128,27 @@ public class KeycloakServiceImpl implements KeycloakService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void updateUser(String id, UpdateUserRequest request) {
+        UserResource userResource = realmResource.users().get(id);
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+
+        userRepresentation.setFirstName(request.firstName());
+        userRepresentation.setLastName(request.lastName());
+        userRepresentation.setEmail(request.email());
+
+        userResource.update(userRepresentation);
+
+        if (request.password() != null && !request.password().isBlank()) {
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(request.password());
+            credential.setTemporary(false);
+            userResource.resetPassword(credential);
+        }
+    }
+
 
     private String parseErrorMessage(String json) {
         try {

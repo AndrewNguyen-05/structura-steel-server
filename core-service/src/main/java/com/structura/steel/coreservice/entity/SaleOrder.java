@@ -15,11 +15,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class SaleOrder extends BaseEntity {
 
-    // Khóa ngoại đến partners (Partner Service) → lưu plain field
     @Column(name = "partner_id", nullable = false)
     private Long partnerId;
 
-    // Khóa ngoại đến partner_projects (Partner Service)
     @Column(name = "project_id")
     private Long projectId;
 
@@ -42,7 +40,9 @@ public class SaleOrder extends BaseEntity {
     @Column(name = "sale_orders_note")
     private String saleOrdersNote;
 
-    // Quan hệ 1-n với SaleOrderDetail
     @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL)
     private Set<SaleOrderDetail> saleOrderDetails;
+
+    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL)
+    private Set<SaleDebt> saleDebts;
 }

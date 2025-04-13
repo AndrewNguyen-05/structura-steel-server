@@ -13,12 +13,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class SaleOrderDetail extends BaseEntity {
 
-    // Quan hệ với SaleOrder (Core Service)
     @ManyToOne
     @JoinColumn(name = "id_sale_order")
     private SaleOrder saleOrder;
 
-    // Khóa ngoại đến products (Product Service)
     @Column(name = "product_id")
     private Long productId;
 
