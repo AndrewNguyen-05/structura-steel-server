@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.config;
 
+import com.structura.steel.commons.exception.exceptionHandlers.GlobalExceptionHandler;
 import com.structura.steel.commons.mapper.MapperConfig;
 import com.structura.steel.commons.persistence.AuditingConfig;
 import com.structura.steel.commons.security.SecurityConfig;
@@ -18,7 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
-@Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class})
+@Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class, GlobalExceptionHandler.class})
 @Configuration
 @EnableScheduling
 @EnableFeignClients(basePackages = "com.structura.steel.coreservice.client")

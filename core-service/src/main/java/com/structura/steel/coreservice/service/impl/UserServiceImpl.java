@@ -80,6 +80,7 @@ public class UserServiceImpl implements UserService {
                 newUser.setEmail(kcUser.getEmail());
                 newUser.setFirstName(kcUser.getFirstName());
                 newUser.setLastName(kcUser.getLastName());
+                newUser.setRealmRole(kcUser.getRealmRoles().get(0));
                 userRepository.save(newUser);
             }
         }
@@ -126,6 +127,7 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
+        user.setRealmRole(request.realmRole());
 
         userRepository.saveAndFlush(user);
 
@@ -164,6 +166,7 @@ public class UserServiceImpl implements UserService {
                     user.setFirstName(kcUser.getFirstName());
                     user.setLastName(kcUser.getLastName());
                     user.setEmail(kcUser.getEmail());
+                    user.setRealmRole(kcUser.getRealmRoles().get(0));
                     userRepository.saveAndFlush(user);
                 }
             }

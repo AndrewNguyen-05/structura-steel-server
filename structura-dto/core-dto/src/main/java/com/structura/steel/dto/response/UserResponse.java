@@ -5,5 +5,6 @@ public record UserResponse(
         String username,
         String email,
         String firstName,
-        String lastName
+        String lastName,
+        String realmRole
 ) {}

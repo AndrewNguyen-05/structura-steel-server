@@ -3,12 +3,13 @@ package com.structura.steel.dto.request;
 import jakarta.validation.constraints.NotBlank;
 
 public record UpdateUserRequest(
-        @NotBlank
+        @NotBlank(message = "First name can not blank")
         String firstName,
-        @NotBlank
+        @NotBlank(message = "Last name can not blank")
         String lastName,
-        @NotBlank
+        @NotBlank(message = "Email can not blank")
         String email,
-        String password
+        String password,
+        String realmRole
 ) {}
 

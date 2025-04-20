@@ -31,14 +31,15 @@ spring:
             - Path=/api/v1/core/**
           filters:
             - RewritePath=/api/v1/core, /core-service
-            - RewritePath=/api/v1/core//(?<segment>.*), /core-service/$\{segment}
+            - RewritePath=/api/v1/core/(?<segment>.*), /core-service/$\{segment}
 
         - id: keycloak
           uri: ${KEYCLOAK_URL:http://localhost:8008}
           predicates:
-            - Path=/api/auth/signin, /api/auth/token
+            - Path=/api/auth/**
           filters:
-            - SetPath=/realms/structura/protocol/openid-connect/token
+            - RewritePath=/api/auth/structura/signin, /realms/structura/protocol/openid-connect/token
+            - RewritePath=/api/auth/master/signin, /realms/master/protocol/openid-connect/token
 
         - id: product-service
           uri: lb://product-service

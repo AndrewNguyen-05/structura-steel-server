@@ -32,6 +32,9 @@ public class User extends AuditEntity {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Column(name = "role")
+    private String realmRole;
+
     @ManyToMany
     @JoinTable(
             name = "user_permissions",
