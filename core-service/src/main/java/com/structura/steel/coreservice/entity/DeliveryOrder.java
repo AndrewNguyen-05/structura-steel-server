@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(name = "delivery_orders")
@@ -62,4 +63,7 @@ public class DeliveryOrder extends BaseEntity {
 
     @Column(name = "delivery_order_note")
     private String deliveryOrderNote;
+
+    @OneToMany(mappedBy = "deliveryOrder", cascade = CascadeType.ALL)
+    private Set<DeliveryDebt> deliveryDebts;
 }

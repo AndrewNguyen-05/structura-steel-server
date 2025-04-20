@@ -45,4 +45,7 @@ public class PurchaseOrder extends BaseEntity {
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private Set<PurchaseOrderDetail> purchaseOrderDetails;
+
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
+    private Set<PurchaseDebt> purchaseDebts;
 }

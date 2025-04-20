@@ -1,0 +1,13 @@
+package com.structura.steel.dto.response;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+public record GetAllDeliveryOrderResponseDto(
+        Long id,
+        Long purchaseOrderId,
+        Long saleOrderId,
+        Instant deliveryDate,
+        BigDecimal totalDeliveryFee,
+        String deliveryType
+) {}
