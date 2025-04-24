@@ -46,7 +46,6 @@ spring:
           predicates:
             - Path=/api/v1/products/**
           filters:
-            - RewritePath=/api/v1/, /product-service
             - RewritePath=/api/v1/(?<segment>.*), /product-service/$\{segment}
 
         - id: partner-service
