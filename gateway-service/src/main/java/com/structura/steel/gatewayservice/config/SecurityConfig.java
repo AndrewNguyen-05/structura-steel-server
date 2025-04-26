@@ -45,8 +45,7 @@ public class SecurityConfig {
         return new AccessDeniedExceptionHandler(objectMapper);
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 //        corsConfig.applyPermitDefaultValues();
         corsConfig.setAllowedOrigins(Collections.singletonList("*"));
@@ -62,12 +61,11 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
-                .cors(cors -> corsConfigurationSource())
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/auth/**").permitAll()
-                        .pathMatchers("/api/users/check-email").permitAll()
+                        .pathMatchers("/api/v1/core/sale/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
