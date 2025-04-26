@@ -31,8 +31,10 @@ public class SaleDebtServiceImpl implements SaleDebtService {
 
     @Override
     public SaleDebtResponseDto createSaleDebt(SaleDebtRequestDto dto, Long saleId) {
-        saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
+        SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
         SaleDebt saleDebt = saleDebtMapper.toSaleDebt(dto);
+
+        saleDebt.setSaleOrder(saleOrder);
 
         SaleDebt savedSaleDebt = saleDebtRepository.save(saleDebt);
         return saleDebtMapper.toSaleDebtResponseDto(savedSaleDebt);

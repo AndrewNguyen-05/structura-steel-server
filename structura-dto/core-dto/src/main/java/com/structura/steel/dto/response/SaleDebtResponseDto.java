@@ -7,7 +7,6 @@ public record SaleDebtResponseDto(
         Long id,
         Long saleOrderId,
         Long projectId,
-        String orderType,
         BigDecimal amount,
         Instant paymentDate,
         Instant paidDate,

@@ -21,9 +21,6 @@ public class SaleDebt extends BaseEntity {
     @Column(name = "project_id")
     private Long projectId;
 
-    @Column(name = "order_type")
-    private String orderType; // "SALE" hoặc "PURCHASE"
-
     @Column(name = "amount")
     private BigDecimal amount;
 
