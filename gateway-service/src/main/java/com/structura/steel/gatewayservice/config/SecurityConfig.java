@@ -45,9 +45,10 @@ public class SecurityConfig {
         return new AccessDeniedExceptionHandler(objectMapper);
     }
 
-    private CorsConfigurationSource corsConfigurationSource() {
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-//        corsConfig.applyPermitDefaultValues();
+        corsConfig.applyPermitDefaultValues();
         corsConfig.setAllowedOrigins(Collections.singletonList("*"));
         corsConfig.setAllowedMethods(Collections.singletonList("*"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
@@ -65,7 +66,8 @@ public class SecurityConfig {
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/auth/**").permitAll()
-                        .pathMatchers("/api/v1/core/sale/**").permitAll()
+//                        .pathMatchers("/api/v1/products/**").permitAll()
+//                        .pathMatchers("/api/v1/core/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
