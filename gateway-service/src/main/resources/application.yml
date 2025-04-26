@@ -30,7 +30,6 @@ spring:
           predicates:
             - Path=/api/v1/core/**
           filters:
-            - RewritePath=/api/v1/core, /core-service
             - RewritePath=/api/v1/core/(?<segment>.*), /core-service/$\{segment}
 
         - id: keycloak
@@ -46,14 +45,14 @@ spring:
           predicates:
             - Path=/api/v1/products/**
           filters:
-            - RewritePath=/api/v1/(?<segment>.*), /product-service/$\{segment}
+            - RewritePath=/api/v1/products, /product-service
+            - RewritePath=/api/v1/products/(?<segment>.*), /product-service/$\{segment}
 
         - id: partner-service
           uri: lb://partner-service
           predicates:
             - Path=/api/v1/partners/**
           filters:
-            - RewritePath=/api/v1, /partner-service
             - RewritePath=/api/v1/(?<segment>.*), /partner-service/$\{segment}
 
 management:
