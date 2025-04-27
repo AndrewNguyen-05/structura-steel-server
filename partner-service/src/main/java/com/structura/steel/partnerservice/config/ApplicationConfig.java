@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
-@Import({GlobalExceptionHandler.class, SecurityConfig.class, AuditingConfig.class, MapperConfig.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class, GlobalExceptionHandler.class})
 @Configuration
 @EnableScheduling
 @EnableFeignClients(basePackages = "com.structura.steel.partnerservice.client")
