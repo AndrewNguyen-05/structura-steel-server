@@ -37,6 +37,9 @@ public class SaleOrder extends BaseEntity {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
+    @Column(name = "warehouse_id")
+    private Long warehouseId;
+
     @Column(name = "sale_orders_note")
     private String saleOrdersNote;
 

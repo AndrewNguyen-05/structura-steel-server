@@ -10,5 +10,6 @@ public record PurchaseOrderRequestDto(
         String userId,
         String status,
         BigDecimal totalAmount,
+        Long warehouseId,
         String purchaseOrdersNote
 ) {}

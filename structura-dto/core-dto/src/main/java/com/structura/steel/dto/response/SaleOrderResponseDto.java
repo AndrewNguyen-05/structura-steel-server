@@ -20,6 +20,7 @@ public class SaleOrderResponseDto{
     private String status;
     private String orderType;
     private BigDecimal totalAmount;
+    private Long warehouseId;
     private String saleOrdersNote;
     private Set<SaleOrderDetailResponseDto> saleOrderDetails;
     private Set<SaleDebtResponseDto> saleDebts;

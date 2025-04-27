@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @FeignClient(
         name = "product-service",
-        url = "http://localhost:8020/product-service",
+        url = "http://localhost:8020/product-service/products",
         fallback = ProductFeignClientFallback.class
 )
 public interface ProductFeignClient {

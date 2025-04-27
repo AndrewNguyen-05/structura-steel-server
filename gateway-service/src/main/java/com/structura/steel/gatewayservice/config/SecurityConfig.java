@@ -67,9 +67,6 @@ public class SecurityConfig {
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/auth/**").permitAll()
-//                        .pathMatchers("/api/v1/products/**").permitAll()
-//                        .pathMatchers("/api/v1/core/**").permitAll()
-//                        .pathMatchers("/api/v1/partners/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
