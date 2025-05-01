@@ -24,6 +24,8 @@ spring:
         prefer-ip-address: true
         query-passing: true
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
       routes:
         - id: core-service
           uri: lb://core-service
