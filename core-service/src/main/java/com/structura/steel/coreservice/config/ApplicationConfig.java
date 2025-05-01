@@ -22,7 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class, GlobalExceptionHandler.class})
 @Configuration
 @EnableScheduling
-@EnableFeignClients(basePackages = "com.structura.steel.coreservice.client")
+@EnableFeignClients(basePackages = "com.structura.steel.commons.client")
 @ConfigurationPropertiesScan
 @RequiredArgsConstructor
 public class ApplicationConfig {

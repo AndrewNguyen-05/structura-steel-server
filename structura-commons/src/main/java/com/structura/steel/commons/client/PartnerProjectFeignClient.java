@@ -1,4 +1,4 @@
-package com.structura.steel.coreservice.client;
+package com.structura.steel.commons.client;
 
 public interface PartnerProjectFeignClient {
 }

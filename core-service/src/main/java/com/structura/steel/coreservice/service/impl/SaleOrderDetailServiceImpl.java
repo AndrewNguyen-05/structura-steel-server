@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
@@ -10,6 +11,8 @@ import com.structura.steel.coreservice.repository.SaleOrderDetailRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
 import com.structura.steel.coreservice.service.SaleOrderDetailService;
 import com.structura.steel.dto.request.SaleOrderDetailRequestDto;
+import com.structura.steel.dto.response.GetAllSaleOrderDetailResponseDto;
+import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -29,6 +32,8 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
 
     private final SaleOrderDetailMapper saleOrderDetailMapper;
 
+    private final ProductFeignClient productFeignClient;
+
     @Override
     public SaleOrderDetailResponseDto createSaleOrderDetail(SaleOrderDetailRequestDto dto, Long saleId) {
         SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
@@ -36,7 +41,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         saleOrderDetail.setSaleOrder(saleOrder);
 
         SaleOrderDetail savedSaleOrderDetail = saleOrderDetailRepository.save(saleOrderDetail);
-        return saleOrderDetailMapper.toSaleOrderDetailResponseDto(savedSaleOrderDetail);
+        return entityToResponseWithProduct(savedSaleOrderDetail);
     }
 
     @Override
@@ -51,7 +56,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
 
         saleOrderDetailMapper.updateSaleOrderDetailFromDto(dto, existing);
         SaleOrderDetail updated = saleOrderDetailRepository.save(existing);
-        return saleOrderDetailMapper.toSaleOrderDetailResponseDto(updated);
+        return entityToResponseWithProduct(updated);
     }
 
     @Override
@@ -63,7 +68,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         if(!saleOrder.getSaleOrderDetails().contains(saleOrderDetail)) {
             throw new ResourceNotBelongToException("Sale detail", "id", id, "sale order", "id", saleId);
         }
-        return saleOrderDetailMapper.toSaleOrderDetailResponseDto(saleOrderDetail);
+        return entityToResponseWithProduct(saleOrderDetail);
     }
 
     @Override
@@ -79,17 +84,17 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     }
 
     @Override
-    public PagingResponse<SaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId) {
+    public PagingResponse<GetAllSaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAll(pageable);
         List<SaleOrderDetail> saleOrderDetails = pages.getContent();
-        List<SaleOrderDetailResponseDto> content = saleOrderDetails.stream()
-                .map(saleOrderDetailMapper::toSaleOrderDetailResponseDto)
+        List<GetAllSaleOrderDetailResponseDto> content = saleOrderDetails.stream()
+                .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)
                 .collect(Collectors.toList());
-        PagingResponse<SaleOrderDetailResponseDto> response = new PagingResponse<>();
+        PagingResponse<GetAllSaleOrderDetailResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());
@@ -97,5 +102,15 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         response.setTotalPages(pages.getTotalPages());
         response.setLast(pages.isLast());
         return response;
+    }
+
+    private SaleOrderDetailResponseDto entityToResponseWithProduct(SaleOrderDetail detail) {
+        SaleOrderDetailResponseDto responseDto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(detail);
+
+        Long productId = detail.getProductId();
+        ProductResponseDto product = productFeignClient.getProductById(productId);
+        responseDto.setProduct(product);
+
+        return responseDto;
     }
 }

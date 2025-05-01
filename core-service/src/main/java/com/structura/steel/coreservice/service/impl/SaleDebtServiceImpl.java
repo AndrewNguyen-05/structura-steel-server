@@ -1,16 +1,21 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.SaleDebt;
 import com.structura.steel.coreservice.entity.SaleOrder;
+import com.structura.steel.coreservice.entity.SaleOrderDetail;
 import com.structura.steel.coreservice.mapper.SaleDebtMapper;
 import com.structura.steel.coreservice.repository.SaleDebtRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
 import com.structura.steel.coreservice.service.SaleDebtService;
 import com.structura.steel.dto.request.SaleDebtRequestDto;
+import com.structura.steel.dto.response.GetAllSaleDebtResponseDto;
+import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.dto.response.SaleDebtResponseDto;
+import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -29,6 +34,8 @@ public class SaleDebtServiceImpl implements SaleDebtService {
 
     private final SaleDebtMapper saleDebtMapper;
 
+    private final ProductFeignClient productFeignClient;
+
     @Override
     public SaleDebtResponseDto createSaleDebt(SaleDebtRequestDto dto, Long saleId) {
         SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
@@ -37,7 +44,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         saleDebt.setSaleOrder(saleOrder);
 
         SaleDebt savedSaleDebt = saleDebtRepository.save(saleDebt);
-        return saleDebtMapper.toSaleDebtResponseDto(savedSaleDebt);
+        return entityToResponseWithProduct(savedSaleDebt);
     }
 
     @Override
@@ -51,7 +58,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         }
         saleDebtMapper.updateSaleDebtFromDto(dto, existing);
         SaleDebt updated = saleDebtRepository.save(existing);
-        return saleDebtMapper.toSaleDebtResponseDto(updated);
+        return entityToResponseWithProduct(updated);
     }
 
     @Override
@@ -64,7 +71,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             throw new ResourceNotBelongToException("Debt", "id", id, "sale order", "id", saleId);
         }
 
-        return saleDebtMapper.toSaleDebtResponseDto(saleDebt);
+        return entityToResponseWithProduct(saleDebt);
     }
 
     @Override
@@ -80,18 +87,18 @@ public class SaleDebtServiceImpl implements SaleDebtService {
     }
 
     @Override
-    public PagingResponse<SaleDebtResponseDto> getAllSaleDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId) {
+    public PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<SaleDebt> pages = saleDebtRepository.findAll(pageable);
         List<SaleDebt> saleDebts = pages.getContent();
-        List<SaleDebtResponseDto> content = saleDebts.stream()
-                .map(saleDebtMapper::toSaleDebtResponseDto)
+        List<GetAllSaleDebtResponseDto> content = saleDebts.stream()
+                .map(saleDebtMapper::toGetAllSaleDebtResponseDto)
                 .collect(Collectors.toList());
 
-        PagingResponse<SaleDebtResponseDto> response = new PagingResponse<>();
+        PagingResponse<GetAllSaleDebtResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());
@@ -99,5 +106,15 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         response.setTotalPages(pages.getTotalPages());
         response.setLast(pages.isLast());
         return response;
+    }
+
+    private SaleDebtResponseDto entityToResponseWithProduct(SaleDebt debt) {
+        SaleDebtResponseDto responseDto = saleDebtMapper.toSaleDebtResponseDto(debt);
+
+        Long productId = debt.getProductId();
+        ProductResponseDto product = productFeignClient.getProductById(productId);
+        responseDto.setProduct(product);
+
+        return responseDto;
     }
 }

@@ -2,6 +2,7 @@ package com.structura.steel.coreservice.mapper;
 
 import com.structura.steel.coreservice.entity.SaleDebt;
 import com.structura.steel.dto.request.SaleDebtRequestDto;
+import com.structura.steel.dto.response.GetAllSaleDebtResponseDto;
 import com.structura.steel.dto.response.SaleDebtResponseDto;
 import org.mapstruct.*;
 
@@ -18,6 +19,8 @@ public interface SaleDebtMapper {
 
     @Mapping(target = "saleOrder", ignore = true)
     void updateSaleDebtFromDto(SaleDebtRequestDto dto, @MappingTarget SaleDebt saleDebt);
+
+    GetAllSaleDebtResponseDto toGetAllSaleDebtResponseDto(SaleDebt saleDebt);
 
     List<SaleDebtResponseDto> toSaleDebtResponseDtoList(List<SaleDebt> saleDebts);
 }

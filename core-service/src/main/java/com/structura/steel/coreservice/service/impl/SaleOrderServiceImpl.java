@@ -3,7 +3,7 @@ package com.structura.steel.coreservice.service.impl;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.coreservice.client.PartnerFeignClient;
+import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.SaleOrderMapper;
@@ -15,7 +15,6 @@ import com.structura.steel.dto.response.GetAllSaleOrderResponseDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.SaleOrderResponseDto;
-import com.structura.steel.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

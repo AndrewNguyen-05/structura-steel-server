@@ -1,9 +1,9 @@
-package com.structura.steel.partnerservice.client;
+package com.structura.steel.commons.client;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.ProductRequestDto;
 import com.structura.steel.dto.response.ProductResponseDto;
-import com.structura.steel.partnerservice.client.fallback.ProductFeignClientFallback;
+import com.structura.steel.commons.client.fallback.ProductFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

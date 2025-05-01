@@ -4,8 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 public record SaleDebtRequestDto(
-        Long saleOrderId,
-        Long projectId,
+        Long productId,
         BigDecimal amount,
         Instant paymentDate,
         Instant paidDate,

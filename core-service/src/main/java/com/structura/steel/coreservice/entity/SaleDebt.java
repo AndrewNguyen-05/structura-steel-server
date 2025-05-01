@@ -18,8 +18,8 @@ public class SaleDebt extends BaseEntity {
     @JoinColumn(name = "sale_order_id")
     private SaleOrder saleOrder;
 
-    @Column(name = "project_id")
-    private Long projectId;
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "amount")
     private BigDecimal amount;

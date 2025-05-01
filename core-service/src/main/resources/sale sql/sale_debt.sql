@@ -8,7 +8,7 @@ INSERT INTO sale_debts
  debt_note,
  paid_date,
  payment_date,
- project_id,
+ product_id,
  status,
  sale_order_id)
 VALUES

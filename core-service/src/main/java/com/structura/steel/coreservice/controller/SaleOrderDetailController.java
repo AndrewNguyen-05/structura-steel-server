@@ -3,6 +3,7 @@ package com.structura.steel.coreservice.controller;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.dto.request.SaleOrderDetailRequestDto;
+import com.structura.steel.dto.response.GetAllSaleOrderDetailResponseDto;
 import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
 import com.structura.steel.coreservice.service.SaleOrderDetailService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class SaleOrderDetailController {
     private final SaleOrderDetailService saleOrderDetailService;
 
     @GetMapping
-    public ResponseEntity<PagingResponse<SaleOrderDetailResponseDto>> getAllSaleOrderDetails(
+    public ResponseEntity<PagingResponse<GetAllSaleOrderDetailResponseDto>> getAllSaleOrderDetails(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,

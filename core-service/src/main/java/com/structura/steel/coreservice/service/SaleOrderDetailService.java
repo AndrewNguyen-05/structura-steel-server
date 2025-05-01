@@ -2,6 +2,7 @@ package com.structura.steel.coreservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.SaleOrderDetailRequestDto;
+import com.structura.steel.dto.response.GetAllSaleOrderDetailResponseDto;
 import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
 
 public interface SaleOrderDetailService {
@@ -14,5 +15,5 @@ public interface SaleOrderDetailService {
 
     void deleteSaleOrderDetailById(Long id, Long saleId);
 
-    PagingResponse<SaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId);
+    PagingResponse<GetAllSaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId);
 }

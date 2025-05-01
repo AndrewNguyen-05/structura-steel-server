@@ -6,7 +6,7 @@ import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
-import com.structura.steel.partnerservice.client.ProductFeignClient;
+import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.partnerservice.entity.Partner;
 import com.structura.steel.partnerservice.entity.PartnerProject;
 import com.structura.steel.partnerservice.mapper.PartnerProjectMapper;

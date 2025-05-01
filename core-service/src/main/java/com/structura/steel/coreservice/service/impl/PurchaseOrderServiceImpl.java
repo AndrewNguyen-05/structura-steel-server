@@ -3,7 +3,7 @@ package com.structura.steel.coreservice.service.impl;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.coreservice.client.PartnerFeignClient;
+import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.PurchaseOrderMapper;
@@ -54,7 +54,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 purchaseOrder.getSupplierId(), purchaseOrder.getProjectId());
 
         PurchaseOrderResponseDto res = purchaseOrderMapper.toPurchaseOrderResponseDto(saved);
-        res.setSupplier(supplierResponse);
         res.setProject(partnerProject);
         return res;
     }
@@ -77,7 +76,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 po.getSupplierId(), po.getProjectId());
 
         PurchaseOrderResponseDto res = purchaseOrderMapper.toPurchaseOrderResponseDto(updated);
-        res.setSupplier(supplierResponse);
         res.setProject(partnerProject);
         return res;
     }
@@ -97,7 +95,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 po.getSupplierId(), po.getProjectId());
 
         PurchaseOrderResponseDto res = purchaseOrderMapper.toPurchaseOrderResponseDto(po);
-        res.setSupplier(supplierResponse);
         res.setProject(partnerProject);
         return res;
     }
