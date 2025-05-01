@@ -4,7 +4,6 @@ import com.structura.steel.gatewayservice.exception.AccessDeniedExceptionHandler
 import com.structura.steel.gatewayservice.exception.AuthenticationExceptionHandler;
 import com.structura.steel.gatewayservice.filter.JwtClaimsConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +66,6 @@ public class SecurityConfig {
                 .cors(cors -> corsConfigurationSource())
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth -> auth
-                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/auth/**").permitAll()
                         .anyExchange().authenticated()
