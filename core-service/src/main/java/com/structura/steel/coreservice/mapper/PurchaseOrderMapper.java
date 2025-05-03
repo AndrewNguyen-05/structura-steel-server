@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(uses = {PurchaseOrderDetailMapper.class, PurchaseDebtMapper.class})
 public interface PurchaseOrderMapper {
 
-    @Mapping(target = "user", ignore = true)      // gán trong service
     PurchaseOrder toPurchaseOrder(PurchaseOrderRequestDto dto);
 
     PurchaseOrderResponseDto toPurchaseOrderResponseDto(PurchaseOrder order);

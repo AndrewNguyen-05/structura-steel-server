@@ -14,6 +14,7 @@ import com.structura.steel.coreservice.repository.UserRepository;
 import com.structura.steel.coreservice.service.KeycloakService;
 import com.structura.steel.coreservice.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,6 +60,16 @@ public class UserServiceImpl implements UserService {
                 .map(RestResponse::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
     }
+
+    @Override
+    public RestResponse<UserResponse> getUserByUsername(String userName) {
+
+        return userRepository.findByUsername(userName)
+                .map(userMapper::toUserResponse)
+                .map(RestResponse::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", userName));
+    }
+
 
     @Override
     public String checkExistEmail(String email) {
@@ -160,13 +171,22 @@ public class UserServiceImpl implements UserService {
                     if (kcUser.getUsername().equalsIgnoreCase("service-account-admin-cli")) {
                         continue;
                     }
+
+                    //get roles
+                    List<String> names = keycloakService
+                            .getListRealmRolesByUserId(kcUser.getId())
+                            .stream()
+                            .map(RoleRepresentation::getName)
+                            .filter(name -> name.startsWith("ROLE_"))
+                            .toList();
+
                     User user = new User();
                     user.setId(kcUser.getId());
                     user.setUsername(kcUser.getUsername());
                     user.setFirstName(kcUser.getFirstName());
                     user.setLastName(kcUser.getLastName());
                     user.setEmail(kcUser.getEmail());
-                    user.setRealmRole(kcUser.getRealmRoles().get(0));
+                    user.setRealmRole(!names.isEmpty() ? names.get(0) : null);
                     userRepository.saveAndFlush(user);
                 }
             }

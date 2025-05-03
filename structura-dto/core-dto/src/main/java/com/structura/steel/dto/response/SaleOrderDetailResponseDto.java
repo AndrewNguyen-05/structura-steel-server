@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -17,4 +18,9 @@ public class SaleOrderDetailResponseDto {
     private BigDecimal weight;
     private BigDecimal unitPrice;
     private BigDecimal subtotal;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

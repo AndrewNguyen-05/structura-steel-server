@@ -19,4 +19,9 @@ public class SaleDebtResponseDto {
     private Instant paidDate;
     private String debtNote;
     private String status;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 };

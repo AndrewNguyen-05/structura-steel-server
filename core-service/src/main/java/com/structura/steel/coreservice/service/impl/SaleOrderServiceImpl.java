@@ -48,9 +48,6 @@ public class SaleOrderServiceImpl implements SaleOrderService {
             throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
         }
 
-        User user = userRepository.findById(dto.userId()).orElseThrow(() -> new ResourceNotFoundException("User", "id", dto.userId()));
-        saleOrder.setUser(user);
-
         SaleOrder savedSaleOrder = saleOrderRepository.save(saleOrder);
 
         PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(

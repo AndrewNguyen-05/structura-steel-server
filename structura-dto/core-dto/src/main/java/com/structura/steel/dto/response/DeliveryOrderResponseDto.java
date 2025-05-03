@@ -19,7 +19,6 @@ public class DeliveryOrderResponseDto {
     private Instant deliveryDate;
     private Long vehicleId;
     private String driverName;
-    private Long warehouseId;
     private String deliveryAddress;
     private String confirmationFromPartner;
     private String confirmationFromFactory;
@@ -31,4 +30,9 @@ public class DeliveryOrderResponseDto {
     private String deliveryOrderNote;
 
     private Set<DeliveryDebtResponseDto> deliveryDebts;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

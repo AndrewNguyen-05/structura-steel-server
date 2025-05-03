@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(uses = {SaleOrderDetailMapper.class, SaleDebtMapper.class})
 public interface SaleOrderMapper {
 
-    @Mapping(target = "user", ignore = true) // Xử lý riêng hoặc mapping theo nhu cầu
     SaleOrder toSaleOrder(SaleOrderRequestDto dto);
 
     SaleOrderResponseDto toSaleOrderResponseDto(SaleOrder saleOrder);

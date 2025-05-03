@@ -24,10 +24,6 @@ public class SaleOrder extends BaseEntity {
     @Column(name = "order_date")
     private Instant orderDate;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
     @Column(name = "status")
     private String status; // "Đã tạo", "Đã xác nhận", etc.
 
@@ -36,9 +32,6 @@ public class SaleOrder extends BaseEntity {
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
-
-    @Column(name = "warehouse_id")
-    private Long warehouseId;
 
     @Column(name = "sale_orders_note")
     private String saleOrdersNote;

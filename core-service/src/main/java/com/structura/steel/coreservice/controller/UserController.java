@@ -38,6 +38,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUser(SecurityUtils.getCurrentUserId()));
     }
 
+    @GetMapping("/{userName}")
+    public ResponseEntity<RestResponse<UserResponse>> getUserByUsername(@PathVariable String userName) {
+        return ResponseEntity.ok(userService.getUserByUsername(userName));
+    }
+
     @GetMapping
     public ResponseEntity<PagingResponse<UserResponse>> getAllUsers(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,

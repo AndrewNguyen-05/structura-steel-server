@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -20,5 +21,10 @@ public class PartnerProjectResponseDto{
     private String contactPerson;
     private String contactPersonPhone;
     private String address;
-    private List<ProductResponseDto> products;
+    private  List<ProductResponseDto> products;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

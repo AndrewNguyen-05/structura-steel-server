@@ -15,5 +15,10 @@ public record GetAllSaleOrderResponseDto(
     BigDecimal totalAmount,
     String saleOrdersNote,
     Set<SaleOrderDetailResponseDto>saleOrderDetails,
-    Set<SaleDebtResponseDto> saleDebts
+    Set<SaleDebtResponseDto> saleDebts,
+    Short version,
+    Instant createdAt,
+    Instant updatedAt,
+    String createdBy,
+    String updatedBy
 ) {}

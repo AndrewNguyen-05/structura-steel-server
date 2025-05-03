@@ -16,12 +16,15 @@ public class SaleOrderResponseDto{
     private PartnerResponseDto partner;
     private PartnerProjectResponseDto project;
     private Instant orderDate;
-    private UserResponse user;
     private String status;
     private String orderType;
     private BigDecimal totalAmount;
-    private Long warehouseId;
     private String saleOrdersNote;
     private Set<SaleOrderDetailResponseDto> saleOrderDetails;
     private Set<SaleDebtResponseDto> saleDebts;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

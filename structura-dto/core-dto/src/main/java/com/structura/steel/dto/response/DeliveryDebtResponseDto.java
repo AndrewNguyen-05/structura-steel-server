@@ -11,5 +11,10 @@ public record DeliveryDebtResponseDto(
         Instant paymentDate,
         Instant paidDate,
         String debtNote,
-        String status
+        String status,
+        Short version,
+        Instant createdAt,
+        Instant updatedAt,
+        String createdBy,
+        String updatedBy
 ) {}

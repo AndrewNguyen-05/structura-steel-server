@@ -33,10 +33,6 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "driver_name")
     private String driverName;
 
-    // Khóa ngoại đến warehouses (Partner Service)
-    @Column(name = "warehouse_id")
-    private Long warehouseId;
-
     @Column(name = "delivery_address")
     private String deliveryAddress;
 

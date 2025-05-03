@@ -17,12 +17,15 @@ public class PurchaseOrderResponseDto {
     private PartnerResponseDto supplier;           // Partner service
     private PartnerProjectResponseDto project;     // Partner‑project
     private Instant orderDate;
-    private UserResponse user;
     private String status;
     private BigDecimal totalAmount;
-    private Long warehouseId;
     private String purchaseOrdersNote;
 
     private Set<PurchaseOrderDetailResponseDto> purchaseOrderDetails;
     private Set<PurchaseDebtResponseDto> purchaseDebts;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

@@ -9,5 +9,10 @@ public record GetAllDeliveryOrderResponseDto(
         Long saleOrderId,
         Instant deliveryDate,
         BigDecimal totalDeliveryFee,
-        String deliveryType
+        String deliveryType,
+        Short version,
+        Instant createdAt,
+        Instant updatedAt,
+        String createdBy,
+        String updatedBy
 ) {}

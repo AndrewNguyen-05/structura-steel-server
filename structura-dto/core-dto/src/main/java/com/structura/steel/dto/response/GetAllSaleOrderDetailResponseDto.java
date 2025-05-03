@@ -1,6 +1,7 @@
 package com.structura.steel.dto.response;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 public record GetAllSaleOrderDetailResponseDto(
     Long id,
@@ -8,5 +9,10 @@ public record GetAllSaleOrderDetailResponseDto(
     BigDecimal quantity,
     BigDecimal weight,
     BigDecimal unitPrice,
-    BigDecimal subtotal
+    BigDecimal subtotal,
+    Short version,
+    Instant createdAt,
+    Instant updatedAt,
+    String createdBy,
+    String updatedBy
 ) {}

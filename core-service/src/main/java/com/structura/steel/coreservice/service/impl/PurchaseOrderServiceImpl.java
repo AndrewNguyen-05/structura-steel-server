@@ -44,10 +44,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                     supplierResponse.id(), "supplier", "id", supplierResponse.id());
         }
 
-        User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", dto.userId()));
-        purchaseOrder.setUser(user);
-
         PurchaseOrder saved = purchaseOrderRepository.save(purchaseOrder);
 
         PartnerProjectResponseDto partnerProject = partnerFeignClient.getPartnerProject(

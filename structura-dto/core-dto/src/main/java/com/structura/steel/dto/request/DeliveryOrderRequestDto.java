@@ -9,7 +9,6 @@ public record DeliveryOrderRequestDto(
         Instant deliveryDate,
         Long vehicleId,
         String driverName,
-        Long warehouseId,
         String deliveryAddress,
         String confirmationFromPartner,
         String confirmationFromFactory,

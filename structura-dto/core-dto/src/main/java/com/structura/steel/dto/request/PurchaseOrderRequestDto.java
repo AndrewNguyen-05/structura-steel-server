@@ -6,9 +6,7 @@ import java.time.Instant;
 public record PurchaseOrderRequestDto(
         Long projectId,
         Instant orderDate,
-        String userId,
         String status,
         BigDecimal totalAmount,
-        Long warehouseId,
         String purchaseOrdersNote
 ) {}

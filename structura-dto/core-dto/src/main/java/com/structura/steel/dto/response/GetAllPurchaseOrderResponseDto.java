@@ -9,5 +9,10 @@ public record GetAllPurchaseOrderResponseDto(
         Long projectId,
         Instant orderDate,
         String status,
-        BigDecimal totalAmount
+        BigDecimal totalAmount,
+        Short version,
+        Instant createdAt,
+        Instant updatedAt,
+        String createdBy,
+        String updatedBy
 ) {}

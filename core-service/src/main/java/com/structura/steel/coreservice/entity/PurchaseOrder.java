@@ -26,10 +26,6 @@ public class PurchaseOrder extends BaseEntity {
     @Column(name = "order_date")
     private Instant orderDate;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
     @Column(name = "status")
     private String status;
 
@@ -38,10 +34,6 @@ public class PurchaseOrder extends BaseEntity {
 
     @Column(name = "purchase_orders_note")
     private String purchaseOrdersNote;
-
-    // Khóa ngoại đến warehouses (Partner Service)
-    @Column(name = "warehouse_id")
-    private Long warehouseId;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private Set<PurchaseOrderDetail> purchaseOrderDetails;
