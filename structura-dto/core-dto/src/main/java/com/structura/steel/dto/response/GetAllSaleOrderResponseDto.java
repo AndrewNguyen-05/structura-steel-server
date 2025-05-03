@@ -9,7 +9,6 @@ public record GetAllSaleOrderResponseDto(
     Long partnerId,
     Long projectId,
     Instant orderDate,
-    UserResponse user,
     String status,
     String orderType,
     BigDecimal totalAmount,
