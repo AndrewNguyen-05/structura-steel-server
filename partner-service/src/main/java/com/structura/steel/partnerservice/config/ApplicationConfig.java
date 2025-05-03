@@ -1,5 +1,6 @@
 package com.structura.steel.partnerservice.config;
 
+import com.structura.steel.commons.config.FeignConfig;
 import com.structura.steel.commons.exception.exceptionHandlers.GlobalExceptionHandler;
 import com.structura.steel.commons.mapper.MapperConfig;
 import com.structura.steel.commons.persistence.AuditingConfig;
@@ -16,7 +17,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Import({SecurityConfig.class, AuditingConfig.class, MapperConfig.class, GlobalExceptionHandler.class})
 @Configuration
 @EnableScheduling
-@EnableFeignClients(basePackages = "com.structura.steel.commons.client")
+@EnableFeignClients(
+        basePackages = "com.structura.steel.commons.client",
+        defaultConfiguration = FeignConfig.class)
 @ConfigurationPropertiesScan
 @RequiredArgsConstructor
 public class ApplicationConfig {

@@ -5,7 +5,5 @@ import java.math.BigDecimal;
 public record SaleOrderDetailRequestDto(
         Long productId,
         BigDecimal quantity,
-        BigDecimal weight,
-        BigDecimal unitPrice,
-        BigDecimal subtotal
+        BigDecimal unitPrice
 ) {}

@@ -1,10 +1,12 @@
 package com.structura.steel.commons.exception.exceptionHandlers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.exception.StructuraSteelException;
 import com.structura.steel.commons.response.ErrorDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -21,7 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private final ObjectMapper mapper;
+
     // handle specific exception
 
     // Not found resource
@@ -96,5 +102,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             errors.put(fieldName, message);
         });
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    // handle plain feign exception
+    @ExceptionHandler(feign.FeignException.class)
+    public ResponseEntity<ErrorDetails> handleFeignClientException(feign.FeignException ex,
+                                                                   WebRequest req) {
+        ErrorDetails errorDetails;
+        try {
+            // partner might have sent a JSON ErrorDetails
+            errorDetails = mapper.readValue(ex.contentUTF8(), ErrorDetails.class);
+        } catch (Exception e) {
+            errorDetails = new ErrorDetails(new Date(), ex.getMessage(), req.getDescription(false));
+        }
+        return new ResponseEntity<>(errorDetails, HttpStatus.valueOf(ex.status()));
     }
 }

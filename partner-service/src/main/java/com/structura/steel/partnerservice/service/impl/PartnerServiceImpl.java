@@ -12,6 +12,7 @@ import com.structura.steel.partnerservice.mapper.PartnerProjectMapper;
 import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.service.PartnerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class PartnerServiceImpl implements PartnerService {
 
     private final PartnerRepository partnerRepository;
@@ -77,7 +79,14 @@ public class PartnerServiceImpl implements PartnerService {
     public PartnerResponseDto getPartnerById(Long id) {
         Partner partner = partnerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
-        return toPartnerResponseDtoWithProductInProject(partner);
+        PartnerResponseDto result;
+        try {
+            result = toPartnerResponseDtoWithProductInProject(partner);
+        } catch (Exception e) {
+            log.error("Exception: {}", e.getMessage());
+            return null;
+        }
+        return result;
     }
 
     @Override

@@ -2,9 +2,11 @@ package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
 import com.structura.steel.coreservice.mapper.PurchaseOrderDetailMapper;
 import com.structura.steel.coreservice.repository.PurchaseOrderDetailRepository;
+import com.structura.steel.coreservice.repository.PurchaseOrderRepository;
 import com.structura.steel.coreservice.service.PurchaseOrderDetailService;
 import com.structura.steel.dto.request.PurchaseOrderDetailRequestDto;
 import com.structura.steel.dto.response.PurchaseOrderDetailResponseDto;
@@ -21,22 +23,42 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailService {
 
+    private final PurchaseOrderRepository purchaseOrderRepository;
     private final PurchaseOrderDetailRepository purchaseOrderDetailRepository;
+
     private final PurchaseOrderDetailMapper purchaseOrderDetailMapper;
 
     @Override
     public PurchaseOrderDetailResponseDto createPurchaseOrderDetail(PurchaseOrderDetailRequestDto dto, Long purchaseId) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", purchaseId));
+
         PurchaseOrderDetail detail = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
+        detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+        detail.setPurchaseOrder(purchaseOrder);
+
         PurchaseOrderDetail saved = purchaseOrderDetailRepository.save(detail);
+        purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(detail.getSubtotal()));
+        purchaseOrderRepository.save(purchaseOrder);
+
         return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(saved);
     }
 
     @Override
     public PurchaseOrderDetailResponseDto updatePurchaseOrderDetail(Long id, PurchaseOrderDetailRequestDto dto, Long purchaseId) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", purchaseId));
+
         PurchaseOrderDetail existing = purchaseOrderDetailRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrderDetail", "id", id));
+
         purchaseOrderDetailMapper.updatePurchaseOrderDetailFromDto(dto, existing);
+        existing.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
         PurchaseOrderDetail updated = purchaseOrderDetailRepository.save(existing);
+
+        purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(updated.getSubtotal()));
+        purchaseOrderRepository.save(purchaseOrder);
+
         return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(updated);
     }
 

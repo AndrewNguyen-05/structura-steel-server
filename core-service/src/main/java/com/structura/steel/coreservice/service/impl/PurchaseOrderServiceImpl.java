@@ -20,6 +20,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             throw new ResourceNotBelongToException("Supplier's project", "id",
                     supplierResponse.id(), "supplier", "id", supplierResponse.id());
         }
+        purchaseOrder.setTotalAmount(new BigDecimal(0));
 
         PurchaseOrder saved = purchaseOrderRepository.save(purchaseOrder);
 
@@ -51,6 +53,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         PurchaseOrderResponseDto res = purchaseOrderMapper.toPurchaseOrderResponseDto(saved);
         res.setProject(partnerProject);
+        res.setSupplier(supplierResponse);
         return res;
     }
 
