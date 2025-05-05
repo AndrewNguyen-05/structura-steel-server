@@ -38,9 +38,11 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     public SaleOrderDetailResponseDto createSaleOrderDetail(SaleOrderDetailRequestDto dto, Long saleId) {
         SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
         SaleOrderDetail saleOrderDetail = saleOrderDetailMapper.toSaleOrderDetail(dto);
+        saleOrderDetail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
         saleOrderDetail.setSaleOrder(saleOrder);
 
         SaleOrderDetail savedSaleOrderDetail = saleOrderDetailRepository.save(saleOrderDetail);
+        saleOrder.setTotalAmount(saleOrder.getTotalAmount().add(saleOrderDetail.getSubtotal()));
         return entityToResponseWithProduct(savedSaleOrderDetail);
     }
 

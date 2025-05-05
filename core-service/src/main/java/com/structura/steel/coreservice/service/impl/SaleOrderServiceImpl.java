@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,8 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         if (!saleOrder.getPartnerId().equals(partnerResponse.id())) {
             throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
         }
+
+        saleOrder.setTotalAmount(new BigDecimal(0));
 
         SaleOrder savedSaleOrder = saleOrderRepository.save(saleOrder);
 
