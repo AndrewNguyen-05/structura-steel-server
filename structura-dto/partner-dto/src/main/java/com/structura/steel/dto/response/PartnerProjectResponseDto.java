@@ -1,7 +1,6 @@
 package com.structura.steel.dto.response;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
@@ -21,7 +20,7 @@ public class PartnerProjectResponseDto{
     private String contactPerson;
     private String contactPersonPhone;
     private String address;
-    private  List<ProductResponseDto> products;
+    private List<ProductResponseDto> products;
     private Short version;
     private Instant createdAt;
     private Instant updatedAt;

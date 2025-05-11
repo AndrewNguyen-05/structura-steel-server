@@ -18,6 +18,7 @@ public class SaleOrderResponseDto{
     private Instant orderDate;
     private String status;
     private String orderType;
+    private Long warehouseId;
     private BigDecimal totalAmount;
     private String saleOrdersNote;
     private Set<SaleOrderDetailResponseDto> saleOrderDetails;

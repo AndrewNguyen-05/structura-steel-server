@@ -7,6 +7,7 @@ public record SaleOrderRequestDto(
         Long partnerId,
         Long projectId,
         Instant orderDate,
+        Long warehouseId,
         String status,
         String orderType,
         BigDecimal totalAmount,

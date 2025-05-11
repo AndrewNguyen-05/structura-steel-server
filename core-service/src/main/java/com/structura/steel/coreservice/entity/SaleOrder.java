@@ -24,6 +24,9 @@ public class SaleOrder extends BaseEntity {
     @Column(name = "order_date")
     private Instant orderDate;
 
+    @Column(name = "warehouse_id")
+    private Long warehouseId;
+
     @Column(name = "status")
     private String status; // "Đã tạo", "Đã xác nhận", etc.
 
