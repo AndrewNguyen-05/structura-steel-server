@@ -122,6 +122,14 @@ public class ProductServiceImpl implements ProductService {
         return SteelCalculator.calculateSteelWeight(productMapper.toProductRequestDto(product));
     }
 
+    @Override
+    public List<ProductResponseDto> getProductsByIds(List<Long> ids) {
+        List<Product> products = productRepository.findAllById(ids);
+        return products.stream()
+                .map(productMapper::toProductResponseDto)
+                .collect(Collectors.toList());
+    }
+
 
     private void validateProductRequest(ProductRequestDto productRequestDto) {
         String name = productRequestDto.name().toLowerCase();

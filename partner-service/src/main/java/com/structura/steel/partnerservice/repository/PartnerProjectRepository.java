@@ -7,8 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 @Transactional
 public interface PartnerProjectRepository extends JpaRepository<PartnerProject, Long> {
     Page<PartnerProject> getAllByPartnerId(Long partnerId, Pageable pageable);
+
+    List<PartnerProject> findAllByIdInAndPartnerId(List<Long> ids, Long partnerId);
 }

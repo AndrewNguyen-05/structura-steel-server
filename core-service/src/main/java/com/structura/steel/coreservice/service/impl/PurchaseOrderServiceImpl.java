@@ -5,6 +5,7 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
+import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.PurchaseOrderMapper;
 import com.structura.steel.coreservice.repository.PurchaseOrderRepository;
@@ -12,6 +13,7 @@ import com.structura.steel.coreservice.repository.UserRepository;
 import com.structura.steel.coreservice.service.PurchaseOrderService;
 import com.structura.steel.dto.request.PurchaseOrderRequestDto;
 import com.structura.steel.dto.response.GetAllPurchaseOrderResponseDto;
+import com.structura.steel.dto.response.GetAllSaleOrderResponseDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.PurchaseOrderResponseDto;
@@ -19,9 +21,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -110,12 +116,65 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<PurchaseOrder> pages = purchaseOrderRepository.findAll(pageable);
-        List<GetAllPurchaseOrderResponseDto> content = pages.getContent().stream()
+        List<PurchaseOrder> purchaseOrders = pages.getContent();
+
+        if (CollectionUtils.isEmpty(purchaseOrders)) {
+            return new PagingResponse<>(Collections.emptyList(), pages.getNumber(), pages.getSize(),
+                    pages.getTotalElements(), pages.getTotalPages(), pages.isLast());
+        }
+
+        // GET PARTNER
+        List<GetAllPurchaseOrderResponseDto> content = purchaseOrders.stream()
                 .map(purchaseOrderMapper::toGetAllPurchaseOrderResponseDto)
                 .collect(Collectors.toList());
+
+        List<Long> supplierIds = content.stream()
+                .map(GetAllPurchaseOrderResponseDto::getSupplierId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!supplierIds.isEmpty()) {
+
+            List<PartnerResponseDto> partners = partnerFeignClient.getPartnersByIds(supplierIds);
+
+            Map<Long, String> partnerNameMap = partners.stream()
+                    .collect(Collectors.toMap(
+                            PartnerResponseDto::id,
+                            PartnerResponseDto::partnerName
+                    ));
+
+            content.forEach(dto -> {
+                String name = partnerNameMap.get(dto.getSupplierId());
+                dto.setSupplierName(name);
+            });
+        }
+
+        //GET PROJECT (tuong duong phia tren)
+        List<Long> projectIds = content.stream()
+                .map(GetAllPurchaseOrderResponseDto::getProjectId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!projectIds.isEmpty()) {
+            Long supplierId = content.get(0).getSupplierId();
+            List<PartnerProjectResponseDto> projects = partnerFeignClient
+                    .getProjectsBatchByIds(supplierId, projectIds);
+
+            Map<Long, String> projectNameMap = projects.stream()
+                    .collect(Collectors.toMap(
+                            PartnerProjectResponseDto::getId,
+                            PartnerProjectResponseDto::getProjectName
+                    ));
+
+            content.forEach(dto ->
+                    dto.setProjectName(projectNameMap.get(dto.getProjectId()))
+            );
+        }
 
         PagingResponse<GetAllPurchaseOrderResponseDto> response = new PagingResponse<>();
         response.setContent(content);

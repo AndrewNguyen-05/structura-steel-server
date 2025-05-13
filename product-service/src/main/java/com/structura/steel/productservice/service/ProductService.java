@@ -16,4 +16,5 @@ public interface ProductService {
     ProductResponseDto findByCode(String code);
     List<ProductResponseDto> findByName(String name);
     BigDecimal calculateWeight(Long productId);
+    List<ProductResponseDto> getProductsByIds(List<Long> ids);
 }

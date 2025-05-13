@@ -19,8 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -127,6 +129,17 @@ public class PartnerServiceImpl implements PartnerService {
         response.setLast(pages.isLast());
 
         return response;
+    }
+
+    @Override
+    public List<PartnerResponseDto> getPartnersByIds(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        List<Partner> partners = partnerRepository.findAllById(ids);
+        return partners.stream()
+                .map(partnerMapper::toPartnerResponseDto)
+                .collect(Collectors.toList());
     }
 
     private PartnerResponseDto toPartnerResponseDtoWithProductInProject(Partner partner) {

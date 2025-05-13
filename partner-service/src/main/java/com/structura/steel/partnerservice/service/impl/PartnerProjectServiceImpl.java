@@ -22,8 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -140,18 +142,38 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         return response;
     }
 
+    @Override
+    public List<PartnerProjectResponseDto> getProjectsByIds(Long partnerId, List<Long> ids) {
+        partnerProjectRepository.findById(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+
+        List<PartnerProject> projects = partnerProjectRepository.findAllByIdInAndPartnerId(ids, partnerId);
+
+        return projects.stream()
+                .map(this::entityToResponseWithProduct)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PartnerProjectResponseDto> getProjectsBatchByIds(List<Long> ids) {
+
+        List<PartnerProject> projects = partnerProjectRepository.findAllById(ids);
+
+        return projects.stream()
+                .map(this::entityToResponseWithProduct)
+                .collect(Collectors.toList());
+    }
+
     private PartnerProjectResponseDto entityToResponseWithProduct(PartnerProject project) {
         PartnerProjectResponseDto responseDto = partnerProjectMapper.toPartnerProjectResponseDto(project);
 
         List<Long> productIds = project.getProductIds();
-        List<ProductResponseDto> products = new ArrayList<>();
-        if (productIds != null) {
-            for (Long productId : productIds) {
-                ProductResponseDto product = productFeignClient.getProductById(productId);
-                products.add(product);
-            }
+        if (productIds != null && !productIds.isEmpty()) {
+            List<ProductResponseDto> products = productFeignClient.getProductsBatch(productIds);
+            responseDto.setProducts(products);
+        } else {
+            responseDto.setProducts(Collections.emptyList());
         }
-        responseDto.setProducts(products);
 
         return responseDto;
     }

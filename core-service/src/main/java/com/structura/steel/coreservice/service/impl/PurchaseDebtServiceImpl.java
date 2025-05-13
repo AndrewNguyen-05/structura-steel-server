@@ -92,7 +92,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
-        Page<PurchaseDebt> pages = purchaseDebtRepository.findAll(pageable);
+        Page<PurchaseDebt> pages = purchaseDebtRepository.findAllByPurchaseOrderId(purchaseId, pageable);
         List<PurchaseDebtResponseDto> content = pages.getContent().stream()
                 .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
                 .collect(Collectors.toList());

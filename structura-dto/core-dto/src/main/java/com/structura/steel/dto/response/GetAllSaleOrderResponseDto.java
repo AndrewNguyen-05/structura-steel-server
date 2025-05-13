@@ -1,23 +1,32 @@
 package com.structura.steel.dto.response;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Set;
 
-public record GetAllSaleOrderResponseDto(
-    Long id,
-    Long partnerId,
-    Long projectId,
-    Instant orderDate,
-    String status,
-    String orderType,
-    BigDecimal totalAmount,
-    String saleOrdersNote,
-    Set<SaleOrderDetailResponseDto>saleOrderDetails,
-    Set<SaleDebtResponseDto> saleDebts,
-    Short version,
-    Instant createdAt,
-    Instant updatedAt,
-    String createdBy,
-    String updatedBy
-) {}
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class GetAllSaleOrderResponseDto {
+    private Long id;
+    private Long partnerId;
+	private String partnerName;
+    private Long projectId;
+	private String projectName;
+    private Instant orderDate;
+    private String status;
+    private String orderType;
+    private BigDecimal totalAmount;
+    private String saleOrdersNote;
+    private Set<SaleOrderDetailResponseDto>saleOrderDetails;
+    private Set<SaleDebtResponseDto> saleDebts;
+    private Short version;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
+}

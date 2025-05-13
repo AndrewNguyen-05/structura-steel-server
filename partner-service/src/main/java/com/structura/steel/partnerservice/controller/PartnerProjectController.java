@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/partners/{partnerId}/projects")
 @RequiredArgsConstructor
@@ -56,5 +58,21 @@ public class PartnerProjectController {
             @PathVariable Long partnerId
     ) {
         return ResponseEntity.ok(partnerProjectService.getAllPartnerProjectsByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId));
+    }
+
+    @GetMapping("/batch")
+    public ResponseEntity<List<PartnerProjectResponseDto>> getProjectsBatch(
+            @PathVariable Long partnerId,
+            @RequestParam("ids") List<Long> ids
+    ) {
+        return ResponseEntity.ok(partnerProjectService.getProjectsByIds(partnerId, ids));
+    }
+
+    @GetMapping("/batch/ids")
+    public ResponseEntity<List<PartnerProjectResponseDto>> getProjectsBatchByIds(
+            @PathVariable("partnerId") Long partnerId,
+            @RequestParam("ids") List<Long> ids
+    ) {
+        return ResponseEntity.ok(partnerProjectService.getProjectsBatchByIds(ids));
     }
 }

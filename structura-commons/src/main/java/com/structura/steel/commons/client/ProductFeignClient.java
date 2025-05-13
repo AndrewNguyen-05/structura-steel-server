@@ -6,6 +6,8 @@ import com.structura.steel.dto.response.ProductResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient(
         name = "product-service",
         url = "http://localhost:8020/product-service/products"
@@ -23,4 +25,7 @@ public interface ProductFeignClient {
 
     @GetMapping
     PagingResponse<ProductResponseDto> getAllProducts();
+
+    @GetMapping("/batch")
+    List<ProductResponseDto> getProductsBatch(@RequestParam("ids") List<Long> ids);
 }

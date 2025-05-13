@@ -92,7 +92,7 @@ public class DeliveryDebtServiceImpl implements DeliveryDebtService {
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
-        Page<DeliveryDebt> pages = deliveryDebtRepository.findAll(pageable);
+        Page<DeliveryDebt> pages = deliveryDebtRepository.findAllByDeliveryOrderId(deliveryId, pageable);
         List<DeliveryDebtResponseDto> content = pages.getContent().stream()
                 .map(deliveryDebtMapper::toDeliveryDebtResponseDto)
                 .collect(Collectors.toList());

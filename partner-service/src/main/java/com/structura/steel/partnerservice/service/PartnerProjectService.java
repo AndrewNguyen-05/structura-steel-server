@@ -4,6 +4,8 @@ import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
 
+import java.util.List;
+
 public interface PartnerProjectService {
 
     PartnerProjectResponseDto createPartnerProject(Long partnerId, PartnerProjectRequestDto dto);
@@ -15,4 +17,8 @@ public interface PartnerProjectService {
     void deletePartnerProject(Long partnerId, Long projectId);
 
     PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId);
+
+    List<PartnerProjectResponseDto> getProjectsByIds(Long partnerId, List<Long> ids);
+
+    List<PartnerProjectResponseDto> getProjectsBatchByIds(List<Long> ids);
 }

@@ -68,4 +68,11 @@ public class ProductController {
     public ResponseEntity<BigDecimal> getProductWeight(@PathVariable Long id) {
         return ResponseEntity.ok(productService.calculateWeight(id));
     }
+
+    @GetMapping("/batch")
+    public ResponseEntity<List<ProductResponseDto>> getProductsBatch(
+            @RequestParam("ids") List<Long> ids
+    ) {
+        return ResponseEntity.ok(productService.getProductsByIds(ids));
+    }
 }

@@ -91,7 +91,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAll(pageable);
+        Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAllBySaleOrderId(saleId, pageable);
         List<SaleOrderDetail> saleOrderDetails = pages.getContent();
         List<GetAllSaleOrderDetailResponseDto> content = saleOrderDetails.stream()
                 .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)

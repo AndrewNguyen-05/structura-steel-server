@@ -6,7 +6,6 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.SaleDebt;
 import com.structura.steel.coreservice.entity.SaleOrder;
-import com.structura.steel.coreservice.entity.SaleOrderDetail;
 import com.structura.steel.coreservice.mapper.SaleDebtMapper;
 import com.structura.steel.coreservice.repository.SaleDebtRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
@@ -15,7 +14,6 @@ import com.structura.steel.dto.request.SaleDebtRequestDto;
 import com.structura.steel.dto.response.GetAllSaleDebtResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.dto.response.SaleDebtResponseDto;
-import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -92,7 +90,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<SaleDebt> pages = saleDebtRepository.findAll(pageable);
+        Page<SaleDebt> pages = saleDebtRepository.findAllBySaleOrderId(saleId, pageable);
         List<SaleDebt> saleDebts = pages.getContent();
         List<GetAllSaleDebtResponseDto> content = saleDebts.stream()
                 .map(saleDebtMapper::toGetAllSaleDebtResponseDto)

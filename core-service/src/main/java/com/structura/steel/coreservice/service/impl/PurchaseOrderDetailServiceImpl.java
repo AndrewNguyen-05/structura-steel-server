@@ -83,7 +83,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
-        Page<PurchaseOrderDetail> pages = purchaseOrderDetailRepository.findAll(pageable);
+        Page<PurchaseOrderDetail> pages = purchaseOrderDetailRepository.findAllByPurchaseOrderId(purchaseId, pageable);
         List<PurchaseOrderDetailResponseDto> content = pages.getContent().stream()
                 .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
                 .collect(Collectors.toList());

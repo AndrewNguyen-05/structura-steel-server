@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/partners")
 @RequiredArgsConstructor
@@ -30,6 +32,12 @@ public class PartnerController {
     public ResponseEntity<PartnerResponseDto> getPartnerById(@PathVariable Long id) {
         return ResponseEntity.ok(partnerService.getPartnerById(id));
     }
+
+    @GetMapping("/batch")
+    public ResponseEntity<List<PartnerResponseDto>> getPartnersByIds(@RequestParam List<Long> ids) {
+        return ResponseEntity.ok(partnerService.getPartnersByIds(ids));
+    }
+
 
     @PostMapping
     public ResponseEntity<PartnerResponseDto> createPartner(@RequestBody PartnerRequestDto partnerRequestDto) {

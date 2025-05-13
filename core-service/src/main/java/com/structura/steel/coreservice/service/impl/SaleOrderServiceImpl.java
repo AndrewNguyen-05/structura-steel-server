@@ -22,9 +22,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -137,9 +144,60 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         Page<SaleOrder> pages = saleOrderRepository.findAll(pageable);
         List<SaleOrder> saleOrders = pages.getContent();
 
+        if (CollectionUtils.isEmpty(saleOrders)) {
+            return new PagingResponse<>(Collections.emptyList(), pages.getNumber(), pages.getSize(),
+                    pages.getTotalElements(), pages.getTotalPages(), pages.isLast());
+        }
+
+        // GET PARTNER
         List<GetAllSaleOrderResponseDto> content = saleOrders.stream()
                 .map(saleOrderMapper::toGetAllSaleOrderResponseDto)
                 .collect(Collectors.toList());
+
+        List<Long> partnerIds = content.stream()
+                .map(GetAllSaleOrderResponseDto::getPartnerId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!partnerIds.isEmpty()) {
+
+            List<PartnerResponseDto> partners = partnerFeignClient.getPartnersByIds(partnerIds);
+
+            Map<Long, String> partnerNameMap = partners.stream()
+                    .collect(Collectors.toMap(
+                            PartnerResponseDto::id,
+                            PartnerResponseDto::partnerName
+                    ));
+
+            content.forEach(dto -> {
+                String name = partnerNameMap.get(dto.getPartnerId());
+                dto.setPartnerName(name);
+            });
+        }
+
+        //GET PROJECT (tuong duong phia tren)
+        List<Long> projectIds = content.stream()
+                .map(GetAllSaleOrderResponseDto::getProjectId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!projectIds.isEmpty()) {
+            Long partnerId = content.get(0).getPartnerId();
+            List<PartnerProjectResponseDto> projects = partnerFeignClient
+                    .getProjectsBatchByIds(partnerId, projectIds);
+
+            Map<Long, String> projectNameMap = projects.stream()
+                    .collect(Collectors.toMap(
+                            PartnerProjectResponseDto::getId,
+                            PartnerProjectResponseDto::getProjectName
+                    ));
+
+            content.forEach(dto ->
+                    dto.setProjectName(projectNameMap.get(dto.getProjectId()))
+            );
+        }
 
         PagingResponse<GetAllSaleOrderResponseDto> response = new PagingResponse<>();
         response.setContent(content);

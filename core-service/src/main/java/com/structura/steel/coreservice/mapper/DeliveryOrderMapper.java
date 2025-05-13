@@ -13,11 +13,15 @@ public interface DeliveryOrderMapper {
 
     DeliveryOrder toDeliveryOrder(DeliveryOrderRequestDto dto);
 
+    @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
+    @Mapping(target = "saleOrderId", source = "saleOrder.id")
     DeliveryOrderResponseDto toDeliveryOrderResponseDto(DeliveryOrder order);
 
     void updateDeliveryOrderFromDto(DeliveryOrderRequestDto dto,
                                     @MappingTarget DeliveryOrder order);
 
+    @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
+    @Mapping(target = "saleOrderId", source = "saleOrder.id")
     GetAllDeliveryOrderResponseDto toGetAllDeliveryOrderResponseDto(DeliveryOrder order);
 
     List<DeliveryOrderResponseDto> toDeliveryOrderResponseDtoList(List<DeliveryOrder> orders);
