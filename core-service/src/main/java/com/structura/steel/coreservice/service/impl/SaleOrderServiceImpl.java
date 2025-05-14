@@ -1,9 +1,11 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.SaleOrderMapper;
@@ -57,6 +59,7 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         }
 
         saleOrder.setTotalAmount(new BigDecimal(0));
+        saleOrder.setExportCode(CodeGenerator.generateCode(EntityType.EXPORT));
 
         SaleOrder savedSaleOrder = saleOrderRepository.save(saleOrder);
 

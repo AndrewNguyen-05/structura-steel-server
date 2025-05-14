@@ -23,6 +23,9 @@ public class Warehouse extends BaseEntity {
     @Column(name = "warehouse_name", nullable = false)
     private String warehouseName;
 
+    @Column(name = "warehouse_code")
+    private String warehouseCode;
+
     @Column(name = "warehouse_address")
     private String warehouseAddress;
 

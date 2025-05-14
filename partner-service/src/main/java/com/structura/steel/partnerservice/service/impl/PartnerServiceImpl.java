@@ -1,7 +1,9 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.PartnerRequestDto;
 import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
@@ -52,6 +54,7 @@ public class PartnerServiceImpl implements PartnerService {
         partner.setContactPersonPhone(dto.contactPersonPhone());
         partner.setBankName(dto.bankName());
         partner.setBankAccountNumber(dto.bankAccountNumber());
+        partner.setPartnerCode(CodeGenerator.generateCode(EntityType.PARTNER));
 
         Partner savedPartner = partnerRepository.save(partner);
         return partnerMapper.toPartnerResponseDto(savedPartner);

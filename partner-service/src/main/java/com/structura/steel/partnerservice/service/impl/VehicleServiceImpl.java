@@ -1,9 +1,11 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.VehicleRequestDto;
 import com.structura.steel.dto.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -42,6 +44,7 @@ public class VehicleServiceImpl implements VehicleService {
         }
 
         vehicle.setPartner(partner);
+        vehicle.setVehicleCode(CodeGenerator.generateCode(EntityType.VEHICLE));
         Vehicle saved = vehicleRepository.save(vehicle);
         return vehicleMapper.toVehicleResponseDto(saved);
     }

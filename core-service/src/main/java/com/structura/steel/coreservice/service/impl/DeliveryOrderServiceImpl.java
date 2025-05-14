@@ -1,7 +1,9 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.coreservice.entity.DeliveryOrder;
 import com.structura.steel.coreservice.mapper.DeliveryOrderMapper;
 import com.structura.steel.coreservice.repository.DeliveryOrderRepository;
@@ -28,6 +30,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     @Override
     public DeliveryOrderResponseDto createDeliveryOrder(DeliveryOrderRequestDto dto) {
         DeliveryOrder order = deliveryOrderMapper.toDeliveryOrder(dto);
+        order.setDeliveryCode(CodeGenerator.generateCode(EntityType.DELIVERY));
         DeliveryOrder saved = deliveryOrderRepository.save(order);
         return deliveryOrderMapper.toDeliveryOrderResponseDto(saved);
     }

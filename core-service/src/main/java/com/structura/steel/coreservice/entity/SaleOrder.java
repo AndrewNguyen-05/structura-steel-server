@@ -15,6 +15,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class SaleOrder extends BaseEntity {
 
+    @Column(name = "export_code")
+    private String exportCode;
+
     @Column(name = "partner_id", nullable = false)
     private Long partnerId;
 

@@ -1,8 +1,10 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.PartnerProjectRequestDto;
 import com.structura.steel.dto.response.PartnerProjectResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
@@ -46,6 +48,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
         PartnerProject project = partnerProjectMapper.toPartnerProject(dto);
         project.setPartner(partner);
+        project.setProjectCode(CodeGenerator.generateCode(EntityType.PROJECT));
         PartnerProject saved = partnerProjectRepository.save(project);
 
         return entityToResponseWithProduct(saved);

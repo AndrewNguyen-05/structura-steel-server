@@ -1,8 +1,10 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.entity.Partner;
@@ -36,6 +38,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
         Warehouse warehouse = warehouseMapper.toWarehouse(dto);
         warehouse.setPartner(partner);
+        warehouse.setWarehouseCode(CodeGenerator.generateCode(EntityType.PARTNER));
         Warehouse saved = warehouseRepository.save(warehouse);
         return warehouseMapper.toWarehouseResponseDto(saved);
     }

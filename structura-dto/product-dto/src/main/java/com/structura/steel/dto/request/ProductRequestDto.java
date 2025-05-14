@@ -7,9 +7,6 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 public record ProductRequestDto(
-        @NotBlank(message = "Code is mandatory")
-        @Size(min = 2, max = 20, message = "Code must be between 2 and 20 characters")
-        String code,
 
         @NotBlank(message = "Name is mandatory")
         @Size(min = 2, max = 255, message = "Name must be between 2 and 255 characters")

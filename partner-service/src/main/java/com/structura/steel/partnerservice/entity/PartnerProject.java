@@ -29,6 +29,9 @@ public class PartnerProject extends BaseEntity {
     @Column(name = "project_name")
     private String projectName;
 
+    @Column(name = "project_code")
+    private String projectCode;
+
     @Column(name = "project_address")
     private String projectAddress;
 

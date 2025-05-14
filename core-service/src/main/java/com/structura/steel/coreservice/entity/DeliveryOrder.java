@@ -23,6 +23,9 @@ public class DeliveryOrder extends BaseEntity {
     @JoinColumn(name = "sale_order_id")
     private SaleOrder saleOrder;
 
+    @Column(name = "delivery_code")
+    private String deliveryCode;
+
     @Column(name = "delivery_date")
     private Instant deliveryDate;
 

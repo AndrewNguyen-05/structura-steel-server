@@ -27,6 +27,9 @@ public class Partner extends BaseEntity {
     @Column(name = "partner_name", nullable = false)
     private String partnerName;
 
+    @Column(name = "partner_code", nullable = false)
+    private String partnerCode;
+
     @Column(name = "tax_code")
     private String taxCode;
 

@@ -15,6 +15,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class PurchaseOrder extends BaseEntity {
 
+    @Column(name = "import_code")
+    private String importCode;
+
     // Khóa ngoại đến partners (Partner Service)
     @Column(name = "supplier_id", nullable = false)
     private Long supplierId;

@@ -1,7 +1,9 @@
 package com.structura.steel.productservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.ProductRequestDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.productservice.entity.Product;
@@ -74,9 +76,9 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
         validateProductRequest(productRequestDto);
 
-        handleProductCodeAlreadyExist(productRequestDto.code());
-
         Product product = productMapper.toProduct(productRequestDto);
+        product.setCode(CodeGenerator.generateCode(EntityType.PRODUCT));
+
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponseDto(savedProduct);
     }
@@ -85,8 +87,6 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
-
-        handleProductCodeAlreadyExist(productRequestDto.code());
 
         productMapper.updateProductFromDto(productRequestDto, existingProduct);
         Product updatedProduct = productRepository.save(existingProduct);
@@ -153,12 +153,6 @@ public class ProductServiceImpl implements ProductService {
         }
         if (productRequestDto.length() == null) {
             throw new IllegalArgumentException("Length must not be null.");
-        }
-    }
-
-    private void handleProductCodeAlreadyExist(String code) {
-        if(productRepository.existsByCode(code)) {
-            throw new ResourceAlreadyExistException("Product", "code", code);
         }
     }
 }

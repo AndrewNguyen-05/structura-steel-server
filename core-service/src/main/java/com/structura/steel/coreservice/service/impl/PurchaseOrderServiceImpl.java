@@ -1,9 +1,11 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
+import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.User;
@@ -51,6 +53,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                     supplierResponse.id(), "supplier", "id", supplierResponse.id());
         }
         purchaseOrder.setTotalAmount(new BigDecimal(0));
+        purchaseOrder.setImportCode(CodeGenerator.generateCode(EntityType.IMPORT));
 
         PurchaseOrder saved = purchaseOrderRepository.save(purchaseOrder);
 
