@@ -1,11 +1,14 @@
 package com.structura.steel.productservice.service.impl;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.structura.steel.commons.enumeration.EntityType;
-import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.ProductRequestDto;
 import com.structura.steel.dto.response.ProductResponseDto;
+import com.structura.steel.productservice.elasticsearch.document.ProductDocument;
+import com.structura.steel.productservice.elasticsearch.repository.ProductSearchRepository;
 import com.structura.steel.productservice.entity.Product;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.productservice.helper.SteelCalculator;
@@ -13,27 +16,39 @@ import com.structura.steel.productservice.mapper.ProductMapper;
 import com.structura.steel.productservice.repository.ProductRepository;
 import com.structura.steel.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductSearchRepository productSearchRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
+
     private final ProductMapper productMapper;
 
     @Override
-    public PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
         // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -43,14 +58,26 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         // Tao 1 mang cac trang product su dung find all voi tham so la pageable
-        Page<Product> pages = this.productRepository.findAll(pageable);
+        Page<ProductDocument> pages;
+
+        try {
+            if (StringUtils.hasText(searchKeyword)) {
+                pages = productSearchRepository
+                        .findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(
+                                searchKeyword, searchKeyword, pageable);
+            } else {
+                pages = productSearchRepository.findAll(pageable);
+            }
+        } catch (Exception ex) {
+			log.error("Exception: {}", ex.getMessage());
+            pages = Page.empty(pageable);
+        }
 
         // Lay ra gia tri (content) cua page
-        List<Product> products = pages.getContent();
-
+        List<ProductDocument> products = pages.getContent();
 
         // Ep kieu sang dto
-        List<ProductResponseDto> content = products.stream().map(productMapper::toProductResponseDto).collect(Collectors.toList());
+        List<ProductResponseDto> content = products.stream().map(productMapper::toResponseDtoFromDocument).collect(Collectors.toList());
 
         // Gan gia tri (content) cua page vao ProductResponse de tra ve
         PagingResponse<ProductResponseDto> response = new PagingResponse<>();
@@ -80,6 +107,18 @@ public class ProductServiceImpl implements ProductService {
         product.setCode(CodeGenerator.generateCode(EntityType.PRODUCT));
 
         Product savedProduct = productRepository.save(product);
+
+        ProductDocument productDocument = productMapper.toDocument(savedProduct);
+
+        // *** GÁN TÊN SẢN PHẨM VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(savedProduct.getName())) {
+            productDocument.setSuggestion(savedProduct.getName()); // Chỉ lấy name
+        } else {
+            productDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        productSearchRepository.save(productDocument); // luu vao Elastic Search
+
         return productMapper.toProductResponseDto(savedProduct);
     }
 
@@ -90,6 +129,18 @@ public class ProductServiceImpl implements ProductService {
 
         productMapper.updateProductFromDto(productRequestDto, existingProduct);
         Product updatedProduct = productRepository.save(existingProduct);
+
+        ProductDocument productDocument = productMapper.toDocument(updatedProduct);
+
+        // *** GÁN TÊN SẢN PHẨM VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(updatedProduct.getName())) {
+            productDocument.setSuggestion(updatedProduct.getName()); // Chỉ lấy name
+        } else {
+            productDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        productSearchRepository.save(productDocument);
+
         return productMapper.toProductResponseDto(updatedProduct);
     }
 
@@ -98,20 +149,7 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         productRepository.delete(existingProduct);
-    }
-
-    @Override
-    public ProductResponseDto findByCode(String code) {
-        Product product = productRepository.findByCode(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Product", "code", code));
-        return productMapper.toProductResponseDto(product);
-    }
-
-    @Override
-    public List<ProductResponseDto> findByName(String name) {
-        return productRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(productMapper::toProductResponseDto)
-                .collect(Collectors.toList());
+        productSearchRepository.deleteById(id); // xoa luon trong ES
     }
 
     @Override
@@ -130,6 +168,19 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> suggest(String prefix, int size) {
+        if (!StringUtils.hasText(prefix)) {
+            return Collections.emptyList();
+        }
+        // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
+        var page = productSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        return page.getContent().stream()
+                .map(ProductDocument::getName)   // hoặc .getNameSuggest() tuỳ bạn
+                .distinct()
+                .toList();
+    }
 
     private void validateProductRequest(ProductRequestDto productRequestDto) {
         String name = productRequestDto.name().toLowerCase();

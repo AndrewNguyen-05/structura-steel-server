@@ -8,13 +8,20 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
-    PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir);
+
+    PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
+
     ProductResponseDto getProductById(Long id);
+
     ProductResponseDto createProduct(ProductRequestDto productRequestDto);
+
     ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto);
+
     void deleteProduct(Long id);
-    ProductResponseDto findByCode(String code);
-    List<ProductResponseDto> findByName(String name);
+
     BigDecimal calculateWeight(Long productId);
+
     List<ProductResponseDto> getProductsByIds(List<Long> ids);
+
+    List<String> suggest(String prefix, int size);
 }

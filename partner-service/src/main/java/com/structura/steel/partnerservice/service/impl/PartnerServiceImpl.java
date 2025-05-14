@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,7 +104,7 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     @Override
-    public PagingResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagingResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
         // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -113,11 +114,19 @@ public class PartnerServiceImpl implements PartnerService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         // Tao 1 mang cac trang product su dung find all voi tham so la pageable
-        Page<Partner> pages = partnerRepository.findAll(pageable);
+        Page<Partner> pages;
+
+        // Nếu searchKeyword có giá trị (không null và không rỗng)
+        if (StringUtils.hasText(searchKeyword)) {
+            // Gọi phương thức repository để tìm kiếm theo name hoặc code
+            pages = partnerRepository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(searchKeyword, searchKeyword, pageable);
+        } else {
+            // Nếu searchKeyword rỗng, thực hiện getAll như cũ
+            pages = this.partnerRepository.findAll(pageable);
+        }
 
         // Lay ra gia tri (content) cua page
         List<Partner> products = pages.getContent();
-
 
         // Ep kieu sang dto
         List<PartnerResponseDto> content = products.stream().map(partnerMapper::toPartnerResponseDto).collect(Collectors.toList());

@@ -16,7 +16,7 @@ public interface PartnerService {
 
     void deletePartnerById(Long id);
 
-    PagingResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir);
+    PagingResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
 
     List<PartnerResponseDto> getPartnersByIds(List<Long> ids);
 }

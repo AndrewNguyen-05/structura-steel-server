@@ -43,13 +43,54 @@ services:
       POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - structura-network
+
+  elasticsearch:
+    build: ./elasticsearch # Build từ Dockerfile bạn vừa tạo ở trên
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m # Quan trọng: Giới hạn RAM
+      - xpack.security.enabled=false   # Quan trọng: Tắt security cho dễ dev
+      - bootstrap.memory_lock=true     # Khuyến nghị bởi ES
+    ulimits: # Khuyến nghị bởi ES
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - structura-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.4 # Dùng cùng version với ES ở Dockerfile
+    container_name: kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    networks:
+      - structura-network
+    depends_on:
+      - elasticsearch
 
 volumes:
   consul:
     driver: local
+  elasticsearch_data:
+  postgres_data:
 
 networks:
   structura-network:
-    external: true
+    name: structura-network
+    driver: bridge
