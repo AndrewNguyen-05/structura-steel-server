@@ -13,6 +13,7 @@ import java.util.List;
 public class PartnerProjectResponseDto{
     private Long id;
     private Long partnerId;
+    private String projectCode;
     private String projectName;
     private String projectAddress;
     private String projectRepresentative;

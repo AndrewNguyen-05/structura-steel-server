@@ -14,6 +14,7 @@ import java.util.Set;
 public class PurchaseOrderResponseDto {
 
     private Long id;
+    private String importCode;
     private PartnerResponseDto supplier;           // Partner service
     private PartnerProjectResponseDto project;     // Partner‑project
     private Instant orderDate;

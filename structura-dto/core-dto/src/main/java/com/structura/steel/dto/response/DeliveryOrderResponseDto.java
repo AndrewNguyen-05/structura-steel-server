@@ -14,6 +14,7 @@ import java.util.Set;
 public class DeliveryOrderResponseDto {
 
     private Long id;
+    private String deliveryCode;
     private Long purchaseOrderId;
     private Long saleOrderId;
     private Instant deliveryDate;

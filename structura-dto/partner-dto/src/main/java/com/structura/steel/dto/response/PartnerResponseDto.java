@@ -7,6 +7,7 @@ public record PartnerResponseDto(
         Long id,
         String partnerType,
         String partnerName,
+		String partnerCode,
         String taxCode,
         String legalRepresentative,
         String legalRepresentativePhone,

@@ -13,6 +13,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SaleOrderResponseDto{
     private Long id;
+    private String exportCode;
     private PartnerResponseDto partner;
     private PartnerProjectResponseDto project;
     private Instant orderDate;
