@@ -119,7 +119,7 @@ public class PartnerServiceImpl implements PartnerService {
         // Nếu searchKeyword có giá trị (không null và không rỗng)
         if (StringUtils.hasText(searchKeyword)) {
             // Gọi phương thức repository để tìm kiếm theo name hoặc code
-            pages = partnerRepository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(searchKeyword, searchKeyword, pageable);
+            pages = partnerRepository.findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(searchKeyword, searchKeyword, pageable);
         } else {
             // Nếu searchKeyword rỗng, thực hiện getAll như cũ
             pages = this.partnerRepository.findAll(pageable);

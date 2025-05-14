@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PartnerRepository extends JpaRepository<Partner, Long> {
-	Page<Partner> findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(String nameKeyword, String codeKeyword, Pageable pageable);
+	Page<Partner> findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(String nameKeyword, String codeKeyword, Pageable pageable);
 }
