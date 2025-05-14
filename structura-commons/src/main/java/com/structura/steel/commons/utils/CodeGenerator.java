@@ -25,7 +25,7 @@ public class CodeGenerator {
 	}
 
 	public static String generateCode(EntityType entityType) {
-		String entityName = entityType.name();
+		String entityName = entityType.text();
 		String prefix = getPrefix(entityName);
 		String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 		String nanoPart = Long.toString(System.nanoTime(), 36).toUpperCase();
