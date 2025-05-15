@@ -49,10 +49,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+
+        String effectiveSortBy = sortBy; // Biến tạm để chứa tên trường sort cuối cùng
+
+        // Kiểm tra nếu sortBy là "code" hoặc "name" thì thêm ".keyword"
+        if ("code".equalsIgnoreCase(sortBy)) {
+            effectiveSortBy = "code.keyword";
+        } else if ("name".equalsIgnoreCase(sortBy)) {
+            effectiveSortBy = "name.keyword";
+        }
+
         // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+                ? Sort.by(effectiveSortBy).ascending()
+                : Sort.by(effectiveSortBy).descending();
 
         // Tao 1 pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);

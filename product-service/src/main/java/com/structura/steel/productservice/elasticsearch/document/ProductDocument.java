@@ -5,11 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -24,10 +20,20 @@ public class ProductDocument {
 	@Id
 	private Long id;
 
-	@Field(type = FieldType.Text, analyzer = "folding")
+	@MultiField(
+			mainField = @Field(type = FieldType.Text, analyzer = "folding"),
+			otherFields = {
+					@InnerField(suffix = "keyword", type = FieldType.Keyword)
+			}
+	)
 	private String code;
 
-	@Field(type = FieldType.Text, analyzer = "folding")
+	@MultiField(
+			mainField = @Field(type = FieldType.Text, analyzer = "folding"),
+			otherFields = {
+					@InnerField(suffix = "keyword", type = FieldType.Keyword)
+			}
+	)
 	private String name;
 	private BigDecimal unitWeight;
 	private BigDecimal length;
