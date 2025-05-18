@@ -137,6 +137,8 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
+        validateProductRequest(productRequestDto);
+
         productMapper.updateProductFromDto(productRequestDto, existingProduct);
         Product updatedProduct = productRepository.save(existingProduct);
 
@@ -187,7 +189,7 @@ public class ProductServiceImpl implements ProductService {
         // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
         var page = productSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
         return page.getContent().stream()
-                .map(ProductDocument::getName)   // hoặc .getNameSuggest() tuỳ bạn
+                .map(ProductDocument::getName)   // hoặc .getNameSuggest()
                 .distinct()
                 .toList();
     }

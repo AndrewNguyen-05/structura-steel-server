@@ -5,9 +5,12 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.dto.request.PartnerRequestDto;
+import com.structura.steel.dto.response.GetAllPartnerResponseDto;
 import com.structura.steel.dto.response.PartnerResponseDto;
 import com.structura.steel.dto.response.ProductResponseDto;
 import com.structura.steel.commons.client.ProductFeignClient;
+import com.structura.steel.partnerservice.elasticsearch.document.PartnerDocument;
+import com.structura.steel.partnerservice.elasticsearch.repository.PartnerSearchRepository;
 import com.structura.steel.partnerservice.entity.Partner;
 import com.structura.steel.partnerservice.mapper.PartnerMapper;
 import com.structura.steel.partnerservice.mapper.PartnerProjectMapper;
@@ -36,6 +39,7 @@ import java.util.stream.Collectors;
 public class PartnerServiceImpl implements PartnerService {
 
     private final PartnerRepository partnerRepository;
+    private final PartnerSearchRepository partnerSearchRepository;
 
     private final ProductFeignClient productFeignClient;
 
@@ -58,6 +62,18 @@ public class PartnerServiceImpl implements PartnerService {
         partner.setPartnerCode(CodeGenerator.generateCode(EntityType.PARTNER));
 
         Partner savedPartner = partnerRepository.save(partner);
+        try {
+            PartnerDocument partnerDocument = partnerMapper.toDocument(savedPartner);
+            if (StringUtils.hasText(savedPartner.getPartnerName())) {
+                partnerDocument.setSuggestion(savedPartner.getPartnerName());
+            } else {
+                partnerDocument.setSuggestion("");
+            }
+            partnerSearchRepository.save(partnerDocument);
+            log.info("Partner with ID {} and code {} saved to Elasticsearch.", savedPartner.getId(), savedPartner.getPartnerCode());
+        } catch (Exception e) {
+            log.error("Error saving partner with ID {} to Elasticsearch: {}", savedPartner.getId(), e.getMessage(), e);
+        }
         return partnerMapper.toPartnerResponseDto(savedPartner);
     }
 
@@ -78,6 +94,17 @@ public class PartnerServiceImpl implements PartnerService {
         existing.setBankAccountNumber(dto.bankAccountNumber());
 
         Partner updated = partnerRepository.save(existing);
+        try {
+            PartnerDocument partnerDocument = partnerMapper.toDocument(updated);
+            if (StringUtils.hasText(updated.getPartnerName())) {
+                partnerDocument.setSuggestion(updated.getPartnerName());
+            } else {
+                partnerDocument.setSuggestion("");
+            }
+            partnerSearchRepository.save(partnerDocument);
+        } catch (Exception e) {
+            log.error("Error saving partner with ID {} to Elasticsearch: {}", updated.getId(), e.getMessage(), e);
+        }
         return toPartnerResponseDtoWithProductInProject(updated);
     }
 
@@ -104,35 +131,46 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     @Override
-    public PagingResponse<PartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+    public PagingResponse<GetAllPartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+
+        String effectiveSortBy = sortBy;
+        if ("partnerCode".equalsIgnoreCase(sortBy)) {
+            effectiveSortBy = "partnerCode.keyword";
+        } else if ("partnerName".equalsIgnoreCase(sortBy)) {
+            effectiveSortBy = "partnerName.keyword";
+        }
         // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+                ? Sort.by(effectiveSortBy).ascending()
+                : Sort.by(effectiveSortBy).descending();
 
         // Tao 1 pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         // Tao 1 mang cac trang product su dung find all voi tham so la pageable
-        Page<Partner> pages;
+        Page<PartnerDocument> pages;
 
-        // Nếu searchKeyword có giá trị (không null và không rỗng)
-        if (StringUtils.hasText(searchKeyword)) {
-            // Gọi phương thức repository để tìm kiếm theo name hoặc code
-            pages = partnerRepository.findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(searchKeyword, searchKeyword, pageable);
-        } else {
-            // Nếu searchKeyword rỗng, thực hiện getAll như cũ
-            pages = this.partnerRepository.findAll(pageable);
+        try {
+            if (StringUtils.hasText(searchKeyword)) {
+                pages = partnerSearchRepository
+                        .findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(
+                                searchKeyword, searchKeyword, pageable);
+            } else {
+                pages = partnerSearchRepository.findAll(pageable);
+            }
+        } catch (Exception ex) {
+            log.error("Exception: {}", ex.getMessage());
+            pages = Page.empty(pageable);
         }
 
         // Lay ra gia tri (content) cua page
-        List<Partner> products = pages.getContent();
+        List<PartnerDocument> products = pages.getContent();
 
         // Ep kieu sang dto
-        List<PartnerResponseDto> content = products.stream().map(partnerMapper::toPartnerResponseDto).collect(Collectors.toList());
+        List<GetAllPartnerResponseDto> content = products.stream().map(partnerMapper::toResponseDtoFromDocument).collect(Collectors.toList());
 
         // Gan gia tri (content) cua page vao ProductResponse de tra ve
-        PagingResponse<PartnerResponseDto> response = new PagingResponse<>();
+        PagingResponse<GetAllPartnerResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
         response.setPageNo(pages.getNumber());
@@ -152,6 +190,20 @@ public class PartnerServiceImpl implements PartnerService {
         return partners.stream()
                 .map(partnerMapper::toPartnerResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> suggestPartners(String prefix, int size) {
+        if (!StringUtils.hasText(prefix)) {
+            return Collections.emptyList();
+        }
+        // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
+        var page = partnerSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        return page.getContent().stream()
+                .map(PartnerDocument::getPartnerName)
+                .distinct()
+                .toList();
     }
 
     private PartnerResponseDto toPartnerResponseDtoWithProductInProject(Partner partner) {
