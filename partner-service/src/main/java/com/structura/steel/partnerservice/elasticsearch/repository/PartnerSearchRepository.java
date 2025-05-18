@@ -12,6 +12,23 @@ public interface PartnerSearchRepository extends ElasticsearchRepository<Partner
     Page<PartnerDocument> findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(
             String partnerName, String partnerCode, Pageable pageable);
 
+    @Query("""
+          {
+            "multi_match": {
+              "query":    "?0",
+              "type":     "phrase_prefix",
+              "analyzer": "folding",
+              "fields": [
+                "partnerName",
+                "partnerName._2gram",
+                "partnerCode",
+                "partnerCode._2gram"
+              ]
+            }
+          }
+          """)
+    Page<PartnerDocument> searchByKeyword(String searchKeyword, Pageable pageable);
+
     // Suggestion query using the "suggestion" field (populated with partnerName)
     @Query("{\"multi_match\": {\"query\": \"?0\", \"type\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
     Page<PartnerDocument> findBySuggestionPrefix(String prefix, Pageable pageable);

@@ -72,9 +72,7 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             if (StringUtils.hasText(searchKeyword)) {
-                pages = productSearchRepository
-                        .findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(
-                                searchKeyword, searchKeyword, pageable);
+                pages = productSearchRepository.searchByKeyword(searchKeyword, pageable);
             } else {
                 pages = productSearchRepository.findAll(pageable);
             }

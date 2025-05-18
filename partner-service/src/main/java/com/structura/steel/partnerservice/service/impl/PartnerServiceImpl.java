@@ -152,9 +152,7 @@ public class PartnerServiceImpl implements PartnerService {
 
         try {
             if (StringUtils.hasText(searchKeyword)) {
-                pages = partnerSearchRepository
-                        .findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(
-                                searchKeyword, searchKeyword, pageable);
+                pages = partnerSearchRepository.searchByKeyword(searchKeyword, pageable);
             } else {
                 pages = partnerSearchRepository.findAll(pageable);
             }
