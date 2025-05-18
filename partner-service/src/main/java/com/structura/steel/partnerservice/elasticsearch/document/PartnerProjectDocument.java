@@ -1,7 +1,10 @@
 package com.structura.steel.partnerservice.elasticsearch.document;
 
-import jakarta.persistence.Column;
-import lombok.*;
+import com.structura.steel.partnerservice.entity.Partner;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -12,25 +15,21 @@ import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "partners")
+@Document(indexName = "projects")
 @Setting(settingPath = "elasticsearch/settings.json")
-public class PartnerDocument {
+public class PartnerProjectDocument {
 
     @Id
     private Long id;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "folding"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
-    private String partnerCode;
+    @Field(type = FieldType.Long)
+    private Long partnerId;
 
     @MultiField(
             mainField = @Field(type = FieldType.Text, analyzer = "folding"),
@@ -38,19 +37,24 @@ public class PartnerDocument {
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
-    private String partnerName;
+    private String projectName;
+
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "folding"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
+    private String projectCode;
 
     @Field(type = FieldType.Keyword)
-    private String partnerType;
+    private String projectAddress;
 
     @Field(type = FieldType.Keyword)
-    private String taxCode;
+    private String projectRepresentative;
 
     @Field(type = FieldType.Keyword)
-    private String legalRepresentative;
-
-    @Field(type = FieldType.Keyword)
-    private String legalRepresentativePhone;
+    private String projectRepresentativePhone;
 
     @Field(type = FieldType.Keyword)
     private String contactPerson;
@@ -59,10 +63,9 @@ public class PartnerDocument {
     private String contactPersonPhone;
 
     @Field(type = FieldType.Keyword)
-    private String bankName;
+    private String address;
 
-    @Field(type = FieldType.Keyword)
-    private String bankAccountNumber;
+    private List<Long> productIds;
 
     @Field(type = FieldType.Short)
     private Short version;
@@ -80,5 +83,5 @@ public class PartnerDocument {
     private String updatedBy;
 
     @Field(type = FieldType.Search_As_You_Type)
-    private String suggestion; // For partnerName suggestions
+    private String suggestion;
 }

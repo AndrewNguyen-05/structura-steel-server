@@ -16,7 +16,9 @@ public interface PartnerProjectService {
 
     void deletePartnerProject(Long partnerId, Long projectId);
 
-    PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId);
+    PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword);
+
+    List<String> suggestProjects(String prefix, int size);
 
     List<PartnerProjectResponseDto> getProjectsByIds(Long partnerId, List<Long> ids);
 

@@ -1,7 +1,10 @@
 package com.structura.steel.partnerservice.elasticsearch.document;
 
 import jakarta.persistence.Column;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -17,9 +20,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "partners")
+@Document(indexName = "warehouses")
 @Setting(settingPath = "elasticsearch/settings.json")
-public class PartnerDocument {
+public class WarehouseDocument {
 
     @Id
     private Long id;
@@ -30,7 +33,7 @@ public class PartnerDocument {
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
-    private String partnerCode;
+    private String warehouseName;
 
     @MultiField(
             mainField = @Field(type = FieldType.Text, analyzer = "folding"),
@@ -38,31 +41,10 @@ public class PartnerDocument {
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
-    private String partnerName;
+    private String warehouseCode;
 
     @Field(type = FieldType.Keyword)
-    private String partnerType;
-
-    @Field(type = FieldType.Keyword)
-    private String taxCode;
-
-    @Field(type = FieldType.Keyword)
-    private String legalRepresentative;
-
-    @Field(type = FieldType.Keyword)
-    private String legalRepresentativePhone;
-
-    @Field(type = FieldType.Keyword)
-    private String contactPerson;
-
-    @Field(type = FieldType.Keyword)
-    private String contactPersonPhone;
-
-    @Field(type = FieldType.Keyword)
-    private String bankName;
-
-    @Field(type = FieldType.Keyword)
-    private String bankAccountNumber;
+    private String warehouseAddress;
 
     @Field(type = FieldType.Short)
     private Short version;
@@ -80,5 +62,5 @@ public class PartnerDocument {
     private String updatedBy;
 
     @Field(type = FieldType.Search_As_You_Type)
-    private String suggestion; // For partnerName suggestions
+    private String suggestion;
 }

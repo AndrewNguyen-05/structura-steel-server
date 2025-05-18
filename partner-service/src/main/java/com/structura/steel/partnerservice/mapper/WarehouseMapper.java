@@ -2,6 +2,7 @@ package com.structura.steel.partnerservice.mapper;
 
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
+import com.structura.steel.partnerservice.elasticsearch.document.WarehouseDocument;
 import com.structura.steel.partnerservice.entity.Warehouse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,4 +22,12 @@ public interface WarehouseMapper {
     void updateWarehouseFromDto(WarehouseRequestDto dto, @MappingTarget Warehouse entity);
 
     List<WarehouseResponseDto> toWarehouseResponseDtoList(List<Warehouse> warehouses);
+
+    // --- Elasticsearch Document related mappings ---
+    WarehouseResponseDto toResponseDtoFromDocument(WarehouseDocument warehouseDocument);
+
+    @Mapping(target = "suggestion", ignore = true)
+    WarehouseDocument toDocument(Warehouse entity);
+
+    Warehouse fromDocument(WarehouseDocument doc);
 }

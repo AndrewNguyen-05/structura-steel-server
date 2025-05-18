@@ -55,9 +55,18 @@ public class PartnerProjectController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
-            @PathVariable Long partnerId
+            @PathVariable Long partnerId,
+            @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(partnerProjectService.getAllPartnerProjectsByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId));
+        return ResponseEntity.ok(partnerProjectService.getAllPartnerProjectsByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId, searchKeyword));
+    }
+
+    @GetMapping("/suggest")
+    public ResponseEntity<List<String>> suggest(
+            @RequestParam("prefix") String prefix,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(partnerProjectService.suggestProjects(prefix, size));
     }
 
     @GetMapping("/batch")
