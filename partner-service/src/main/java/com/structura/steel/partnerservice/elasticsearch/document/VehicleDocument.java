@@ -38,6 +38,9 @@ public class VehicleDocument {
     )
     private String vehicleCode;
 
+    @Field(type = FieldType.Long)
+    private Long partnerId;
+
     @Field(type = FieldType.Keyword)
     private String licensePlate;
 

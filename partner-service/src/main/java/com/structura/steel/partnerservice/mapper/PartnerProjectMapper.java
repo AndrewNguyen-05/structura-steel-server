@@ -27,7 +27,7 @@ public interface PartnerProjectMapper {
     PartnerProjectResponseDto toResponseDtoFromDocument(PartnerProjectDocument partnerProjectDocument);
 
     @Mapping(target = "suggestion", ignore = true)
-    @Mapping(source = "partner.id", target = "partnerId")
+    @Mapping(target = "partnerId", source = "partner.id")
     PartnerProjectDocument toDocument(PartnerProject entity);
 
     PartnerProject fromDocument(PartnerProjectDocument doc);

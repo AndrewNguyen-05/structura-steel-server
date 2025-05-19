@@ -27,6 +27,7 @@ public interface VehicleMapper {
     VehicleResponseDto toResponseDtoFromDocument(VehicleDocument vehicleDocument);
 
     @Mapping(target = "suggestion", ignore = true)
+    @Mapping(target = "partnerId", source = "partner.id")
     VehicleDocument toDocument(Vehicle entity);
 
     Vehicle fromDocument(VehicleDocument doc);

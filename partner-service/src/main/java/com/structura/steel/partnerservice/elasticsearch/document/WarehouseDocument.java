@@ -43,6 +43,9 @@ public class WarehouseDocument {
     )
     private String warehouseCode;
 
+    @Field(type = FieldType.Long)
+    private Long partnerId;
+
     @Field(type = FieldType.Keyword)
     private String warehouseAddress;
 

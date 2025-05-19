@@ -1,6 +1,5 @@
 package com.structura.steel.partnerservice.config.sync;
 
-import com.structura.steel.partnerservice.elasticsearch.document.VehicleDocument;
 import com.structura.steel.partnerservice.elasticsearch.document.WarehouseDocument;
 import com.structura.steel.partnerservice.elasticsearch.repository.WarehouseSearchRepository;
 import com.structura.steel.partnerservice.mapper.WarehouseMapper;

@@ -27,6 +27,7 @@ public interface WarehouseMapper {
     WarehouseResponseDto toResponseDtoFromDocument(WarehouseDocument warehouseDocument);
 
     @Mapping(target = "suggestion", ignore = true)
+    @Mapping(target = "partnerId", source = "partner.id")
     WarehouseDocument toDocument(Warehouse entity);
 
     Warehouse fromDocument(WarehouseDocument doc);

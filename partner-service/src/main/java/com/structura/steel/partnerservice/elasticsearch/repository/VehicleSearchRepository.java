@@ -15,10 +15,10 @@ public interface VehicleSearchRepository extends ElasticsearchRepository<Vehicle
               "type":     "phrase_prefix",
               "analyzer": "folding",
               "fields": [
-                "partnerName",
-                "partnerName._2gram",
-                "partnerCode",
-                "partnerCode._2gram"
+                "driverName",
+                "driverName._2gram",
+                "vehicleCode",
+                "vehicleCode._2gram"
               ]
             }
           }

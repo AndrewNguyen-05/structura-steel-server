@@ -1,13 +1,8 @@
 package com.structura.steel.partnerservice.config.sync;
 
-import com.structura.steel.partnerservice.elasticsearch.document.PartnerDocument;
 import com.structura.steel.partnerservice.elasticsearch.document.VehicleDocument;
-import com.structura.steel.partnerservice.elasticsearch.repository.PartnerSearchRepository;
 import com.structura.steel.partnerservice.elasticsearch.repository.VehicleSearchRepository;
-import com.structura.steel.partnerservice.entity.Vehicle;
-import com.structura.steel.partnerservice.mapper.PartnerMapper;
 import com.structura.steel.partnerservice.mapper.VehicleMapper;
-import com.structura.steel.partnerservice.repository.PartnerRepository;
 import com.structura.steel.partnerservice.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

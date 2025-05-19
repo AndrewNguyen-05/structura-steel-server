@@ -4,6 +4,8 @@ import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.WarehouseRequestDto;
 import com.structura.steel.dto.response.WarehouseResponseDto;
 
+import java.util.List;
+
 public interface WarehouseService {
 
     WarehouseResponseDto createWarehouse(Long partnerId, WarehouseRequestDto dto);
@@ -14,5 +16,7 @@ public interface WarehouseService {
 
     void deleteWarehouse(Long partnerId, Long warehouseId);
 
-    PagingResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId);
+    PagingResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword);
+
+    List<String> suggestWarehouses(String prefix, int size);
 }

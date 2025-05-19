@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void syncAllUsersFromKeycloakIfDbEmpty() {
+    public void syncAllUsersFromKeycloak() {
         // Lưu lại Authentication hiện tại (nếu có)
         var originalAuth = SecurityContextHolder.getContext().getAuthentication();
         // Thiết lập một Authentication tạm thời với tên là "System"
@@ -163,32 +163,28 @@ public class UserServiceImpl implements UserService {
                 new UsernamePasswordAuthenticationToken("System", null, List.of())
         );
         try {
-            long count = userRepository.count();
-            if (count == 0) {
-                // DB trống => quét Keycloak và thêm vào DB
-                List<UserRepresentation> kcUsers = keycloakService.getListUsers();
-                for (UserRepresentation kcUser : kcUsers) {
-                    if (kcUser.getUsername().equalsIgnoreCase("service-account-admin-cli")) {
-                        continue;
-                    }
-
-                    //get roles
-                    List<String> names = keycloakService
-                            .getListRealmRolesByUserId(kcUser.getId())
-                            .stream()
-                            .map(RoleRepresentation::getName)
-                            .filter(name -> name.startsWith("ROLE_"))
-                            .toList();
-
-                    User user = new User();
-                    user.setId(kcUser.getId());
-                    user.setUsername(kcUser.getUsername());
-                    user.setFirstName(kcUser.getFirstName());
-                    user.setLastName(kcUser.getLastName());
-                    user.setEmail(kcUser.getEmail());
-                    user.setRealmRole(!names.isEmpty() ? names.get(0) : null);
-                    userRepository.saveAndFlush(user);
+            List<UserRepresentation> kcUsers = keycloakService.getListUsers();
+            for (UserRepresentation kcUser : kcUsers) {
+                if (kcUser.getUsername().equalsIgnoreCase("service-account-admin-cli")) {
+                    continue;
                 }
+
+                //get roles
+                List<String> names = keycloakService
+                        .getListRealmRolesByUserId(kcUser.getId())
+                        .stream()
+                        .map(RoleRepresentation::getName)
+                        .filter(name -> name.startsWith("ROLE_"))
+                        .toList();
+
+                User user = new User();
+                user.setId(kcUser.getId());
+                user.setUsername(kcUser.getUsername());
+                user.setFirstName(kcUser.getFirstName());
+                user.setLastName(kcUser.getLastName());
+                user.setEmail(kcUser.getEmail());
+                user.setRealmRole(!names.isEmpty() ? names.get(0) : null);
+                userRepository.saveAndFlush(user);
             }
         } finally {
             // Khôi phục lại Authentication ban đầu sau khi đồng bộ

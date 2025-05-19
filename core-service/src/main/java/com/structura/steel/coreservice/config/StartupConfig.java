@@ -12,6 +12,6 @@ public class StartupConfig{
 
     @EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void initData() {
-        userService.syncAllUsersFromKeycloakIfDbEmpty();
+        userService.syncAllUsersFromKeycloak();
     }
 }
