@@ -54,6 +54,18 @@ public class VehicleServiceImpl implements VehicleService {
         vehicle.setPartner(partner);
         vehicle.setVehicleCode(CodeGenerator.generateCode(EntityType.VEHICLE));
         Vehicle saved = vehicleRepository.save(vehicle);
+
+        VehicleDocument vehicleDocument = vehicleMapper.toDocument(saved);
+
+        // *** GÁN TÊN VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(saved.getPartner().getPartnerName())) {
+            vehicleDocument.setSuggestion(saved.getPartner().getPartnerName()); // Chỉ lấy name
+        } else {
+            vehicleDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        vehicleSearchRepository.save(vehicleDocument); // luu vao Elastic Search
+
         return vehicleMapper.toVehicleResponseDto(saved);
     }
 
@@ -72,6 +84,18 @@ public class VehicleServiceImpl implements VehicleService {
         }
         vehicleMapper.updateVehicleFromDto(dto, existing);
         Vehicle updated = vehicleRepository.save(existing);
+
+        VehicleDocument vehicleDocument = vehicleMapper.toDocument(updated);
+
+        // *** GÁN TÊN VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(updated.getPartner().getPartnerName())) {
+            vehicleDocument.setSuggestion(updated.getPartner().getPartnerName()); // Chỉ lấy name
+        } else {
+            vehicleDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        vehicleSearchRepository.save(vehicleDocument); // luu vao Elastic Search
+
         return vehicleMapper.toVehicleResponseDto(updated);
     }
 
@@ -96,6 +120,8 @@ public class VehicleServiceImpl implements VehicleService {
         if (!vehicle.getPartner().getId().equals(partnerId)) {
             throw new ResourceNotBelongToException("Vehicle", "id", vehicleId, "partner", "id", partnerId);
         }
+        vehicleSearchRepository.deleteById(vehicle.getId()); // luu vao Elastic Search
+
         vehicleRepository.delete(vehicle);
     }
 

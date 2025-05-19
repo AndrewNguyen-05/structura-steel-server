@@ -55,6 +55,17 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         project.setProjectCode(CodeGenerator.generateCode(EntityType.PROJECT));
         PartnerProject saved = partnerProjectRepository.save(project);
 
+        PartnerProjectDocument partnerProjectDocument = partnerProjectMapper.toDocument(saved);
+
+        // *** GÁN TÊN VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(saved.getPartner().getPartnerName())) {
+            partnerProjectDocument.setSuggestion(saved.getPartner().getPartnerName()); // Chỉ lấy name
+        } else {
+            partnerProjectDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        partnerProjectSearchRepository.save(partnerProjectDocument); // luu vao Elastic Search
+
         return entityToResponseWithProduct(saved);
     }
 
@@ -73,6 +84,18 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
         partnerProjectMapper.updatePartnerProjectFromDto(dto, existing);
         PartnerProject updated = partnerProjectRepository.save(existing);
+
+        PartnerProjectDocument partnerProjectDocument = partnerProjectMapper.toDocument(updated);
+
+        // *** GÁN TÊN VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(updated.getPartner().getPartnerName())) {
+            partnerProjectDocument.setSuggestion(updated.getPartner().getPartnerName()); // Chỉ lấy name
+        } else {
+            partnerProjectDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        partnerProjectSearchRepository.save(partnerProjectDocument); // luu vao Elastic Search
+
         return entityToResponseWithProduct(updated);
     }
 
@@ -99,6 +122,9 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         if (!project.getPartner().getId().equals(partnerId)) {
             throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
         }
+
+        partnerProjectSearchRepository.deleteById(project.getId());
+
         partnerProjectRepository.delete(project);
     }
 

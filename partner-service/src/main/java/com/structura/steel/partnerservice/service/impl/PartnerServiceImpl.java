@@ -127,6 +127,7 @@ public class PartnerServiceImpl implements PartnerService {
         Partner partner = partnerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
 
+        partnerSearchRepository.deleteById(partner.getId());
         partnerRepository.delete(partner);
     }
 

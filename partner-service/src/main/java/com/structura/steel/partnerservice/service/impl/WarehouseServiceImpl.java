@@ -48,6 +48,18 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setPartner(partner);
         warehouse.setWarehouseCode(CodeGenerator.generateCode(EntityType.PARTNER));
         Warehouse saved = warehouseRepository.save(warehouse);
+
+        WarehouseDocument warehouseDocument = warehouseMapper.toDocument(saved);
+
+        // *** GÁN TÊN VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(saved.getPartner().getPartnerName())) {
+            warehouseDocument.setSuggestion(saved.getPartner().getPartnerName()); // Chỉ lấy name
+        } else {
+            warehouseDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        warehouseSearchRepository.save(warehouseDocument); // luu vao Elastic Search
+
         return warehouseMapper.toWarehouseResponseDto(saved);
     }
 
@@ -62,6 +74,18 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         warehouseMapper.updateWarehouseFromDto(dto, existing);
         Warehouse updated = warehouseRepository.save(existing);
+
+        WarehouseDocument warehouseDocument = warehouseMapper.toDocument(updated);
+
+        // *** GÁN TÊN VÀO TRƯỜNG "suggestion" ***
+        if (StringUtils.hasText(updated.getPartner().getPartnerName())) {
+            warehouseDocument.setSuggestion(updated.getPartner().getPartnerName()); // Chỉ lấy name
+        } else {
+            warehouseDocument.setSuggestion(""); // Hoặc null, để đảm bảo trường được gán
+        }
+
+        warehouseSearchRepository.save(warehouseDocument); // luu vao Elastic Search
+
         return warehouseMapper.toWarehouseResponseDto(updated);
     }
 
@@ -86,6 +110,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         if (!warehouse.getPartner().getId().equals(partnerId)) {
             throw new ResourceNotBelongToException("Warehouse", "id", warehouseId, "partner", "id", partnerId);
         }
+        warehouseSearchRepository.deleteById(warehouse.getId()); // luu vao Elastic Search
+
         warehouseRepository.delete(warehouse);
     }
 

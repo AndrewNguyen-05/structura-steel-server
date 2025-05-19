@@ -27,6 +27,9 @@ public class PurchaseOrderDetail extends BaseEntity {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
+    @Column(name = "weight")
+    private BigDecimal weight;
+
     @Column(name = "subtotal")
     private BigDecimal subtotal;
 }

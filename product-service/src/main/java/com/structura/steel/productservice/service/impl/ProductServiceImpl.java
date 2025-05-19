@@ -1,7 +1,5 @@
 package com.structura.steel.productservice.service.impl;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.CodeGenerator;
@@ -18,9 +16,6 @@ import com.structura.steel.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +38,6 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductSearchRepository productSearchRepository;
-    private final ElasticsearchOperations elasticsearchOperations;
 
     private final ProductMapper productMapper;
 
