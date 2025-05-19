@@ -4,6 +4,8 @@ import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.dto.request.PurchaseOrderDetailRequestDto;
 import com.structura.steel.dto.response.PurchaseOrderDetailResponseDto;
 
+import java.util.List;
+
 public interface PurchaseOrderDetailService {
 
     PurchaseOrderDetailResponseDto createPurchaseOrderDetail(PurchaseOrderDetailRequestDto dto, Long purchaseId);
@@ -15,4 +17,7 @@ public interface PurchaseOrderDetailService {
     void deletePurchaseOrderDetailById(Long id, Long purchaseId);
 
     PagingResponse<PurchaseOrderDetailResponseDto> getAllPurchaseOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long purchaseId);
+
+    List<PurchaseOrderDetailResponseDto> createPurchaseOrderDetailsBatch(List<PurchaseOrderDetailRequestDto> batchDto,
+                                                                         Long purchaseId);
 }

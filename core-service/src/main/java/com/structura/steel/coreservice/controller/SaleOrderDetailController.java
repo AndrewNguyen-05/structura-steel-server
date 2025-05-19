@@ -6,9 +6,12 @@ import com.structura.steel.dto.request.SaleOrderDetailRequestDto;
 import com.structura.steel.dto.response.GetAllSaleOrderDetailResponseDto;
 import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
 import com.structura.steel.coreservice.service.SaleOrderDetailService;
+import feign.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/sale/{saleId}/details")
@@ -48,5 +51,11 @@ public class SaleOrderDetailController {
     public ResponseEntity<Void> deleteSaleOrderDetail(@PathVariable Long id, @PathVariable Long saleId) {
         saleOrderDetailService.deleteSaleOrderDetailById(id, saleId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<SaleOrderDetailResponseDto>> createDetailsBatch(@PathVariable Long saleId,
+                                                                        @RequestBody List<SaleOrderDetailRequestDto> batchDto) {
+        return ResponseEntity.ok(saleOrderDetailService.createSaleOrderDetailsBatch(batchDto, saleId));
     }
 }

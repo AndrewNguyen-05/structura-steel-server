@@ -15,6 +15,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,5 +97,40 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
         response.setTotalPages(pages.getTotalPages());
         response.setLast(pages.isLast());
         return response;
+    }
+
+    @Override
+    public List<PurchaseOrderDetailResponseDto> createPurchaseOrderDetailsBatch(
+            List<PurchaseOrderDetailRequestDto> batchDto,
+            Long purchaseId) {
+
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", purchaseId));
+
+        // 1. build all entities
+        List<PurchaseOrderDetail> entities = batchDto.stream()
+                .map(dto -> {
+                    PurchaseOrderDetail detail = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
+                    detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+                    detail.setPurchaseOrder(purchaseOrder);
+                    return detail;
+                })
+                .toList();
+
+        // 2. save in one go
+        List<PurchaseOrderDetail> saved = purchaseOrderDetailRepository.saveAll(entities);
+
+        // 3. update purchase total once
+        BigDecimal batchTotal = saved.stream()
+                .map(PurchaseOrderDetail::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(batchTotal));
+        purchaseOrderRepository.save(purchaseOrder);
+
+        // 4. map to response DTOs
+        return saved.stream()
+                .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                .toList();
     }
 }

@@ -18,8 +18,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +44,12 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     public SaleOrderDetailResponseDto createSaleOrderDetail(SaleOrderDetailRequestDto dto, Long saleId) {
         SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
         SaleOrderDetail saleOrderDetail = saleOrderDetailMapper.toSaleOrderDetail(dto);
+
+        BigDecimal productWeight = productFeignClient.getProductWeight(dto.productId());
+        if (productWeight == null) {
+            throw new RuntimeException("Could not fetch weight for product id: " + dto.productId());
+        }
+        saleOrderDetail.setWeight(dto.quantity().multiply(productWeight));
         saleOrderDetail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
         saleOrderDetail.setSaleOrder(saleOrder);
 
@@ -104,6 +116,64 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         response.setTotalPages(pages.getTotalPages());
         response.setLast(pages.isLast());
         return response;
+    }
+
+    @Override
+    public List<SaleOrderDetailResponseDto> createSaleOrderDetailsBatch(List<SaleOrderDetailRequestDto> batchDto, Long saleId) {
+
+        SaleOrder saleOrder = saleOrderRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
+
+        // 1. Lay tat ca product theo detail
+        List<Long> productIds = batchDto.stream()
+                .map(SaleOrderDetailRequestDto::productId)
+                .distinct()
+                .toList();
+
+        List<ProductResponseDto> products = productFeignClient.getProductsBatch(productIds);
+
+        Map<Long, ProductResponseDto> productMap = products.stream()
+                .collect(Collectors.toMap(ProductResponseDto::id, Function.identity()));
+
+        // tinh toan khluong
+        Map<Long, BigDecimal> weightMap = productIds.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        productFeignClient::getProductWeight
+                ));
+
+        // 2. Convert sang entities
+        List<SaleOrderDetail> entities = new ArrayList<>(batchDto.size());
+
+        for (SaleOrderDetailRequestDto dto : batchDto) {
+            SaleOrderDetail e = saleOrderDetailMapper.toSaleOrderDetail(dto);
+
+            BigDecimal unitWeight = weightMap.get(dto.productId());
+            e.setWeight(unitWeight.multiply(dto.quantity()));
+            e.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+            e.setSaleOrder(saleOrder);
+
+            entities.add(e);
+        }
+
+        // 3. Luu tat ca
+        List<SaleOrderDetail> saved = saleOrderDetailRepository.saveAll(entities);
+
+        // 4. update tat ca
+        BigDecimal newTotal = saved.stream()
+                .map(SaleOrderDetail::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        saleOrder.setTotalAmount(saleOrder.getTotalAmount().add(newTotal));
+
+        // 5.  Map to response
+        return saved.stream()
+                .map(d -> {
+                    SaleOrderDetailResponseDto dto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(d);
+                    dto.setProduct(productMap.get(d.getProductId()));
+                    return dto;
+                })
+                .toList();
     }
 
     private SaleOrderDetailResponseDto entityToResponseWithProduct(SaleOrderDetail detail) {
