@@ -106,6 +106,40 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         return response;
     }
 
+    @Override
+    public List<SaleDebtResponseDto> createSaleDebtsBatch(
+            List<SaleDebtRequestDto> batchDto,
+            Long saleId) {
+
+        SaleOrder saleOrder = saleOrderRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
+
+        // 1. Map each DTO → entity, set relationship & any computed fields
+        List<SaleDebt> entities = batchDto.stream()
+                .map(dto -> {
+                    SaleDebt debt = saleDebtMapper.toSaleDebt(dto);
+                    debt.setSaleOrder(saleOrder);
+                    return debt;
+                })
+                .toList();
+
+        // 2. Save all in one go
+        List<SaleDebt> saved = saleDebtRepository.saveAll(entities);
+
+        // 3. (Optional) If you need to update saleOrder totals or other side-effects,
+        //    do it here and save saleOrder.
+
+        // 4. Map back to response DTOs (and enrich with product if needed)
+        return saved.stream()
+                .map(d -> {
+                    SaleDebtResponseDto out = saleDebtMapper.toSaleDebtResponseDto(d);
+                    // if you want to include product info:
+                    // out.setProduct(productFeignClient.getProductById(d.getProductId()));
+                    return out;
+                })
+                .toList();
+    }
+
     private SaleDebtResponseDto entityToResponseWithProduct(SaleDebt debt) {
         SaleDebtResponseDto responseDto = saleDebtMapper.toSaleDebtResponseDto(debt);
 

@@ -5,6 +5,8 @@ import com.structura.steel.dto.request.SaleDebtRequestDto;
 import com.structura.steel.dto.response.GetAllSaleDebtResponseDto;
 import com.structura.steel.dto.response.SaleDebtResponseDto;
 
+import java.util.List;
+
 public interface SaleDebtService {
 
     SaleDebtResponseDto createSaleDebt(SaleDebtRequestDto dto, Long saleId);
@@ -16,4 +18,6 @@ public interface SaleDebtService {
     void deleteSaleDebtById(Long id, Long saleId);
 
     PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId);
+
+    List<SaleDebtResponseDto> createSaleDebtsBatch(List<SaleDebtRequestDto> batchDto, Long saleId);
 }

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/purchase/{purchaseId}/debts")
 @RequiredArgsConstructor
@@ -50,5 +52,13 @@ public class PurchaseDebtController {
     public ResponseEntity<Void> deletePurchaseDebt(@PathVariable Long id, @PathVariable Long purchaseId) {
         purchaseDebtService.deletePurchaseDebtById(id, purchaseId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<PurchaseDebtResponseDto>> createPurchaseDebtsBatch(
+            @PathVariable Long purchaseId,
+            @RequestBody List<PurchaseDebtRequestDto> batchDto) {
+
+        return ResponseEntity.ok(purchaseDebtService.createPurchaseDebtsBatch(batchDto, purchaseId));
     }
 }

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/sale/{saleId}/debts")
 @RequiredArgsConstructor
@@ -48,5 +50,13 @@ public class SaleDebtController {
     public ResponseEntity<Void> deleteSaleDebt(@PathVariable Long id, @PathVariable Long saleId) {
         saleDebtService.deleteSaleDebtById(id, saleId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<SaleDebtResponseDto>> createSaleDebtsBatch(
+            @PathVariable Long saleId,
+            @RequestBody List<SaleDebtRequestDto> batchDto) {
+
+        return ResponseEntity.ok(saleDebtService.createSaleDebtsBatch(batchDto, saleId));
     }
 }

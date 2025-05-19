@@ -106,4 +106,34 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         response.setLast(pages.isLast());
         return response;
     }
+
+    @Override
+    public List<PurchaseDebtResponseDto> createPurchaseDebtsBatch(
+            List<PurchaseDebtRequestDto> batchDto,
+            Long purchaseId) {
+
+        // 1. ensure parent exists
+        PurchaseOrder po = purchaseOrderRepository.findById(purchaseId)
+                .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", purchaseId));
+
+        // 2. map DTOs → entities
+        List<PurchaseDebt> entities = batchDto.stream()
+                .map(dto -> {
+                    PurchaseDebt debt = purchaseDebtMapper.toPurchaseDebt(dto);
+                    debt.setPurchaseOrder(po);
+                    return debt;
+                })
+                .toList();
+
+        // 3. save all at once
+        List<PurchaseDebt> saved = purchaseDebtRepository.saveAll(entities);
+
+        // 4. (optional) any side-effects on PurchaseOrder? e.g. update totals
+
+        // 5. map back to response DTOs
+        return saved.stream()
+                .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
+                .toList();
+    }
+
 }
