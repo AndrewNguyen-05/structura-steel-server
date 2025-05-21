@@ -155,7 +155,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
             if (StringUtils.hasText(searchKeyword)) {
                 pages = partnerProjectSearchRepository.searchByKeyword(searchKeyword, pageable);
             } else {
-                pages = partnerProjectSearchRepository.findAll(pageable);
+                pages = partnerProjectSearchRepository.getAllByPartnerId(partnerId, pageable);
             }
         } catch (Exception ex) {
             log.error("Exception: {}", ex.getMessage());

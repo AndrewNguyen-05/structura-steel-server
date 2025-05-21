@@ -1,6 +1,5 @@
 package com.structura.steel.partnerservice.elasticsearch.document;
 
-import jakarta.persistence.Column;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;

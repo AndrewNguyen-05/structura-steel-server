@@ -142,7 +142,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             if (StringUtils.hasText(searchKeyword)) {
                 pages = warehouseSearchRepository.searchByKeyword(searchKeyword, pageable);
             } else {
-                pages = warehouseSearchRepository.findAll(pageable);
+                pages = warehouseSearchRepository.getAllByPartnerId(partnerId, pageable);
             }
         } catch (Exception ex) {
             log.error("Exception: {}", ex.getMessage());

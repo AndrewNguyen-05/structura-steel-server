@@ -5,6 +5,8 @@ import com.structura.steel.dto.request.SaleOrderRequestDto;
 import com.structura.steel.dto.response.GetAllSaleOrderResponseDto;
 import com.structura.steel.dto.response.SaleOrderResponseDto;
 
+import java.util.List;
+
 public interface SaleOrderService {
 
     SaleOrderResponseDto createSaleOrder(SaleOrderRequestDto dto);
@@ -16,4 +18,6 @@ public interface SaleOrderService {
     void deleteSaleOrderById(Long id);
 
     PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+
+    List<String> suggestSales(String prefix, int size);
 }

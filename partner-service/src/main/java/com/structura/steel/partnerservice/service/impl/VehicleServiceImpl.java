@@ -152,7 +152,7 @@ public class VehicleServiceImpl implements VehicleService {
             if (StringUtils.hasText(searchKeyword)) {
                 pages = vehicleSearchRepository.searchByKeyword(searchKeyword, pageable);
             } else {
-                pages = vehicleSearchRepository.findAll(pageable);
+                pages = vehicleSearchRepository.getAllByPartnerId(partnerId, pageable);
             }
         } catch (Exception ex) {
             log.error("Exception: {}", ex.getMessage());

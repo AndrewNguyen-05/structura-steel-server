@@ -5,6 +5,8 @@ import com.structura.steel.dto.request.DeliveryOrderRequestDto;
 import com.structura.steel.dto.response.DeliveryOrderResponseDto;
 import com.structura.steel.dto.response.GetAllDeliveryOrderResponseDto;
 
+import java.util.List;
+
 public interface DeliveryOrderService {
 
     DeliveryOrderResponseDto createDeliveryOrder(DeliveryOrderRequestDto dto);
@@ -16,4 +18,6 @@ public interface DeliveryOrderService {
     void deleteDeliveryOrderById(Long id);
 
     PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+
+    List<String> suggestDeliveries(String prefix, int size);
 }

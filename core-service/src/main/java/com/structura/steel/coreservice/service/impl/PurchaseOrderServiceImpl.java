@@ -6,6 +6,8 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.utils.CodeGenerator;
+import com.structura.steel.coreservice.elasticsearch.document.PurchaseOrderDocument;
+import com.structura.steel.coreservice.elasticsearch.repository.PurchaseOrderSearchRepository;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.User;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -42,6 +45,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     private final PurchaseOrderMapper purchaseOrderMapper;
     private final PartnerFeignClient partnerFeignClient;
+    private final PurchaseOrderSearchRepository purchaseOrderSearchRepository;
 
     @Override
     public PurchaseOrderResponseDto createPurchaseOrder(PurchaseOrderRequestDto dto) {
@@ -187,5 +191,19 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         response.setTotalPages(pages.getTotalPages());
         response.setLast(pages.isLast());
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> suggestPurchases(String prefix, int size) {
+        if (!StringUtils.hasText(prefix)) {
+            return Collections.emptyList();
+        }
+        // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
+        var page = purchaseOrderSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        return page.getContent().stream()
+                .map(PurchaseOrderDocument::getImportCode)
+                .distinct()
+                .toList();
     }
 }

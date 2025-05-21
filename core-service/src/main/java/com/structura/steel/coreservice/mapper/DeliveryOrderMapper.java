@@ -1,9 +1,11 @@
 package com.structura.steel.coreservice.mapper;
 
+import com.structura.steel.coreservice.elasticsearch.document.DeliveryOrderDocument;
 import com.structura.steel.coreservice.entity.DeliveryOrder;
 import com.structura.steel.dto.request.DeliveryOrderRequestDto;
 import com.structura.steel.dto.response.DeliveryOrderResponseDto;
 import com.structura.steel.dto.response.GetAllDeliveryOrderResponseDto;
+import com.structura.steel.dto.response.GetAllPartnerResponseDto;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -25,4 +27,12 @@ public interface DeliveryOrderMapper {
     GetAllDeliveryOrderResponseDto toGetAllDeliveryOrderResponseDto(DeliveryOrder order);
 
     List<DeliveryOrderResponseDto> toDeliveryOrderResponseDtoList(List<DeliveryOrder> orders);
+
+    // --- Elasticsearch Document related mappings ---
+    GetAllDeliveryOrderResponseDto toResponseDtoFromDocument(DeliveryOrderDocument deliveryOrderDocument);
+
+    @Mapping(target = "suggestion", ignore = true)
+    DeliveryOrderDocument toDocument(DeliveryOrder entity);
+
+    DeliveryOrder fromDocument(DeliveryOrderDocument doc);
 }

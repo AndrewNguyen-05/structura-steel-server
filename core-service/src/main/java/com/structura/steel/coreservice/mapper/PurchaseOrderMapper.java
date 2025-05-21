@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.mapper;
 
+import com.structura.steel.coreservice.elasticsearch.document.PurchaseOrderDocument;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.dto.request.PurchaseOrderRequestDto;
 import com.structura.steel.dto.response.GetAllPurchaseOrderResponseDto;
@@ -21,4 +22,12 @@ public interface PurchaseOrderMapper {
     GetAllPurchaseOrderResponseDto toGetAllPurchaseOrderResponseDto(PurchaseOrder order);
 
     List<PurchaseOrderResponseDto> toPurchaseOrderResponseDtoList(List<PurchaseOrder> orders);
+
+    // --- Elasticsearch Document related mappings ---
+    GetAllPurchaseOrderResponseDto toResponseDtoFromDocument(PurchaseOrderDocument purchaseOrderDocument);
+
+    @Mapping(target = "suggestion", ignore = true)
+    PurchaseOrderDocument toDocument(PurchaseOrder entity);
+
+    PurchaseOrder fromDocument(PurchaseOrderDocument doc);
 }

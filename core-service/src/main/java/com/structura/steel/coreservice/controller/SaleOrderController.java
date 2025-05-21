@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/sale")
 @RequiredArgsConstructor
@@ -24,6 +26,14 @@ public class SaleOrderController {
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         return ResponseEntity.ok(saleOrderService.getAllSaleOrders(pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @GetMapping("/suggest")
+    public ResponseEntity<List<String>> suggest(
+            @RequestParam("prefix") String prefix,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(saleOrderService.suggestSales(prefix, size));
     }
 
     @GetMapping("/{id}")

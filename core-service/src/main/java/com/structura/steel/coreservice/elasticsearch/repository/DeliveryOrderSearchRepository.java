@@ -1,12 +1,12 @@
-package com.structura.steel.partnerservice.elasticsearch.repository;
+package com.structura.steel.coreservice.elasticsearch.repository;
 
-import com.structura.steel.partnerservice.elasticsearch.document.WarehouseDocument;
+import com.structura.steel.coreservice.elasticsearch.document.DeliveryOrderDocument;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-public interface WarehouseSearchRepository extends ElasticsearchRepository<WarehouseDocument, Long> {
+public interface DeliveryOrderSearchRepository extends ElasticsearchRepository<DeliveryOrderDocument, Long> {
 
     @Query("""
           {
@@ -15,19 +15,17 @@ public interface WarehouseSearchRepository extends ElasticsearchRepository<Wareh
               "type":     "phrase_prefix",
               "analyzer": "folding",
               "fields": [
-                "warehouseName",
-                "warehouseName._2gram",
-                "warehouseCode",
-                "warehouseCode._2gram"
+                "deliveryCode",
+                "deliveryCode._2gram",
+                "driverName",
+                "driverName._2gram"
               ]
             }
           }
           """)
-    Page<WarehouseDocument> searchByKeyword(String searchKeyword, Pageable pageable);
+    Page<DeliveryOrderDocument> searchByKeyword(String searchKeyword, Pageable pageable);
 
     // Suggestion query using the "suggestion" field (populated with partnerName)
     @Query("{\"multi_match\": {\"query\": \"?0\", \"type\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
-    Page<WarehouseDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
-
-    Page<WarehouseDocument> getAllByPartnerId(Long partnerId, Pageable pageable);
+    Page<DeliveryOrderDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
 }

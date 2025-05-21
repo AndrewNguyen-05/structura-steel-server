@@ -5,6 +5,8 @@ import com.structura.steel.dto.request.PurchaseOrderRequestDto;
 import com.structura.steel.dto.response.GetAllPurchaseOrderResponseDto;
 import com.structura.steel.dto.response.PurchaseOrderResponseDto;
 
+import java.util.List;
+
 public interface PurchaseOrderService {
 
     PurchaseOrderResponseDto createPurchaseOrder(PurchaseOrderRequestDto dto);
@@ -16,4 +18,6 @@ public interface PurchaseOrderService {
     void deletePurchaseOrderById(Long id);
 
     PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+
+    List<String> suggestPurchases(String prefix, int size);
 }

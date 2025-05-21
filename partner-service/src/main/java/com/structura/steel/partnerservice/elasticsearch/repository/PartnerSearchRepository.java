@@ -1,6 +1,7 @@
 package com.structura.steel.partnerservice.elasticsearch.repository;
 
 import com.structura.steel.partnerservice.elasticsearch.document.PartnerDocument;
+import com.structura.steel.partnerservice.entity.PartnerProject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
