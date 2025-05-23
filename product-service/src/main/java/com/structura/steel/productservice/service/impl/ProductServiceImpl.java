@@ -101,7 +101,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto getProductById(Long id) {
-        Product product = productRepository.findByIdAndDeletedFalse(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
         return productMapper.toProductResponseDto(product);

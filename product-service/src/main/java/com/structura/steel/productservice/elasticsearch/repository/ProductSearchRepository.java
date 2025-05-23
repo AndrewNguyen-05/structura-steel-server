@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface ProductSearchRepository extends ElasticsearchRepository<ProductDocument, Long> {
 
@@ -26,15 +27,17 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
                       "code._2gram"
                     ]
                   }
+                },
+                {
+                	"term": { "deleted": ?1 }
                 }
-              ],
-              "must_not": [
-                { "term": { "deleted": ?1 } }
               ]
             }
           }
-          """)
-	Page<ProductDocument> searchByKeyword(String searchKeyword, boolean deleted, Pageable pageable);
+         """)
+	Page<ProductDocument> searchByKeyword(String searchKeyword,
+										  boolean deleted,
+										  Pageable pageable);
 
 	@Query("""
         {
