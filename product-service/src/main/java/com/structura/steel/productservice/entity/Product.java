@@ -36,7 +36,7 @@ public class Product extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "product_type", nullable = false)
-    private ProductType type;
+    private ProductType productType;
 
     private BigDecimal width;
 

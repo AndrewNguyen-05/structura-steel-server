@@ -14,7 +14,7 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
           {
             "multi_match": {
               "query":    "?0",
-              "type":     "phrase_prefix",
+              "productType":     "phrase_prefix",
               "analyzer": "folding",
               "fields": [
                 "name",
@@ -27,7 +27,7 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
           """)
 	Page<ProductDocument> searchByKeyword(String searchKeyword, Pageable pageable);
 
-	@Query("{\"multi_match\": {\"query\": \"?0\", \"type\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
+	@Query("{\"multi_match\": {\"query\": \"?0\", \"productType\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
 	Page<ProductDocument> findBySuggestionPrefix(String prefixKeyword, Pageable pageable);
 	// "?0" sẽ lấy giá trị của tham số đầu tiên (prefixKeyword)
 }

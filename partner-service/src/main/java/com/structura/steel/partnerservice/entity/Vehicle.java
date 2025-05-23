@@ -1,8 +1,11 @@
 package com.structura.steel.partnerservice.entity;
 
+import com.structura.steel.commons.enumeration.VehicleType;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,8 +23,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Vehicle extends BaseEntity {
 
-    @Column(name = "vehicle_type")
-    private String vehicleType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vehicle_type", nullable = false)
+    private VehicleType vehicleType;
 
     @Column(name = "vehicle_code")
     private String vehicleCode;

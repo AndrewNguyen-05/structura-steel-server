@@ -1,5 +1,6 @@
 package com.structura.steel.partnerservice.elasticsearch.document;
 
+import com.structura.steel.commons.enumeration.PartnerType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -40,7 +41,7 @@ public class PartnerDocument {
     private String partnerName;
 
     @Field(type = FieldType.Keyword)
-    private String partnerType;
+    private PartnerType partnerType;
 
     @Field(type = FieldType.Keyword)
     private String taxCode;

@@ -12,5 +12,5 @@ public enum ProductType {
 	/** Box section (“hộp”) */
 	BOX,
 	/** Shaped steel (“hình”) */
-	SHAPED
+	SHAPED;
 }

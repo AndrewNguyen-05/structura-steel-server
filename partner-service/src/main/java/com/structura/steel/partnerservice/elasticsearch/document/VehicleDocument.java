@@ -1,5 +1,6 @@
 package com.structura.steel.partnerservice.elasticsearch.document;
 
+import com.structura.steel.commons.enumeration.VehicleType;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,7 @@ public class VehicleDocument {
     private Long id;
 
     @Field(type = FieldType.Keyword)
-    private String vehicleType;
+    private VehicleType vehicleType;
 
     @MultiField(
             mainField = @Field(type = FieldType.Text, analyzer = "folding"),

@@ -44,7 +44,7 @@ public class ProductDocument {
 	private String name;
 
 	@Field(type = FieldType.Keyword)
-	private ProductType type;
+	private ProductType productType;
 	private BigDecimal unitWeight;
 	private BigDecimal length;
 	private BigDecimal width;

@@ -13,7 +13,7 @@ public interface VehicleSearchRepository extends ElasticsearchRepository<Vehicle
           {
             "multi_match": {
               "query":    "?0",
-              "type":     "phrase_prefix",
+              "productType":     "phrase_prefix",
               "analyzer": "folding",
               "fields": [
                 "driverName",
@@ -27,7 +27,7 @@ public interface VehicleSearchRepository extends ElasticsearchRepository<Vehicle
     Page<VehicleDocument> searchByKeyword(String searchKeyword, Pageable pageable);
 
     // Suggestion query using the "suggestion" field (populated with partnerName)
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"type\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
+    @Query("{\"multi_match\": {\"query\": \"?0\", \"productType\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
     Page<VehicleDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
 
     Page<VehicleDocument> getAllByPartnerId(Long partnerId, Pageable pageable);

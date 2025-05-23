@@ -114,7 +114,7 @@ public class SteelCalculator {
             }
         }
 
-        throw new UnsupportedOperationException("Cannot determine steel type from product name: " + dto.name());
+        throw new UnsupportedOperationException("Cannot determine steel productType from product name: " + dto.name());
     }
 
     private static BigDecimal getRectangleVolume(BigDecimal thickness, BigDecimal width, BigDecimal length) {

@@ -1,11 +1,13 @@
 package com.structura.steel.commons.dto.partner.response;
 
+import com.structura.steel.commons.enumeration.PartnerType;
+
 import java.time.Instant;
 import java.util.List;
 
 public record PartnerResponseDto(
         Long id,
-        String partnerType,
+        PartnerType partnerType,
         String partnerName,
 		String partnerCode,
         String taxCode,

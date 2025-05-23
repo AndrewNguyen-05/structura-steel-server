@@ -1,11 +1,13 @@
 package com.structura.steel.commons.dto.partner.request;
 
+import com.structura.steel.commons.enumeration.PartnerType;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 public record PartnerRequestDto(
-        String partnerType,
+        @NotNull(message = "Partner productType must not be null")
+        PartnerType partnerType,
 
         @NotNull(message = "Partner name must not be null")
         String partnerName,

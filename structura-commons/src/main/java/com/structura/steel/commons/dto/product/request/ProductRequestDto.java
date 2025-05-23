@@ -16,7 +16,7 @@ public record ProductRequestDto(
         BigDecimal unitWeight,
 
         @NotNull(message = "Type is mandatory")
-        ProductType type,
+        ProductType productType,
 
         @NotNull(message = "Length cannot be null")
         BigDecimal length,

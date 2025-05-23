@@ -1,8 +1,11 @@
 package com.structura.steel.partnerservice.entity;
 
+import com.structura.steel.commons.enumeration.PartnerType;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -12,7 +15,6 @@ import lombok.Setter;
 
 import java.util.List;
 
-
 @Entity
 @Table(name = "partners")
 @Getter
@@ -21,8 +23,9 @@ import java.util.List;
 @AllArgsConstructor
 public class Partner extends BaseEntity {
 
-    @Column(name = "partner_type")
-    private String partnerType; // "Cá nhân", "Dự án", "Đại lý"
+    @Enumerated(EnumType.STRING)
+    @Column(name = "partner_type", nullable = false)
+    private PartnerType partnerType;
 
     @Column(name = "partner_name", nullable = false)
     private String partnerName;

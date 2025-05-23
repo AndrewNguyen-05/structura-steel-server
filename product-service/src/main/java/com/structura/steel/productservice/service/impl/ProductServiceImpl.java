@@ -187,7 +187,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void validateProductRequest(ProductRequestDto dto) {
-        ProductType type = dto.type();
+        ProductType type = dto.productType();
         // always require length
         if (dto.length() == null) {
             throw new IllegalArgumentException("Length must not be null.");

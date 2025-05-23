@@ -10,7 +10,7 @@ public record ProductResponseDto (
     String code,
     String name,
     BigDecimal unitWeight,
-	ProductType type,
+	ProductType productType,
 	BigDecimal length,
     BigDecimal width,
     BigDecimal height,
