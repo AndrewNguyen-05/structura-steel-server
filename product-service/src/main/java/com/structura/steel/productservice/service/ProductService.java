@@ -9,13 +9,17 @@ import java.util.List;
 
 public interface ProductService {
 
-    PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
+    PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword, boolean deleted);
 
     ProductResponseDto getProductById(Long id);
+
+    ProductResponseDto restoreProductById(Long id);
 
     ProductResponseDto createProduct(ProductRequestDto productRequestDto);
 
     ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto);
+
+    void softDeleteProduct(Long id);
 
     void deleteProduct(Long id);
 
@@ -23,5 +27,5 @@ public interface ProductService {
 
     List<ProductResponseDto> getProductsByIds(List<Long> ids);
 
-    List<String> suggest(String prefix, int size);
+    List<String> suggest(String prefix, int size, boolean deleted);
 }

@@ -9,6 +9,9 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    boolean existsById(Long id);
-    Page<Product> findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(String nameKeyword, String codeKeyword, Pageable pageable);
+    Page<Product> findByDeletedFalseAndNameContainingIgnoreCaseOrDeletedFalseAndCodeContainingIgnoreCase(String nameKeyword, String codeKeyword, Pageable pageable);
+
+    Optional<Product> findByIdAndDeletedFalse(Long id);
+
+    List<Product> findAllByIdInAndDeletedFalse(List<Long> ids);
 }

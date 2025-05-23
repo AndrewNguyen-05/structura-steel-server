@@ -53,6 +53,9 @@ public class ProductDocument {
 	private BigDecimal diameter;
 	private String standard;
 
+	@Field(type = FieldType.Boolean)
+	private Boolean deleted;
+
 	@Field(type = FieldType.Short)
 	private Short version;
 

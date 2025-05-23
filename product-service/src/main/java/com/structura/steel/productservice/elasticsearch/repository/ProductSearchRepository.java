@@ -8,26 +8,52 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 public interface ProductSearchRepository extends ElasticsearchRepository<ProductDocument, Long> {
 
-	Page<ProductDocument> findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(String nameKeyword, String codeKeyword, Pageable pageable);
+	Page<ProductDocument> findAllByDeleted(boolean deleted, Pageable page);
 
 	@Query("""
           {
-            "multi_match": {
-              "query":    "?0",
-              "productType":     "phrase_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "name",
-                "partnerName._2gram",
-                "code",
-                "partnerCode._2gram"
+            "bool": {
+              "must": [
+                {
+                  "multi_match": {
+                    "query": "?0",
+                    "type": "phrase_prefix",
+                    "analyzer": "folding",
+                    "fields": [
+                      "name",
+                      "name._2gram",
+                      "code",
+                      "code._2gram"
+                    ]
+                  }
+                }
+              ],
+              "must_not": [
+                { "term": { "deleted": ?1 } }
               ]
             }
           }
           """)
-	Page<ProductDocument> searchByKeyword(String searchKeyword, Pageable pageable);
+	Page<ProductDocument> searchByKeyword(String searchKeyword, boolean deleted, Pageable pageable);
 
-	@Query("{\"multi_match\": {\"query\": \"?0\", \"productType\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
-	Page<ProductDocument> findBySuggestionPrefix(String prefixKeyword, Pageable pageable);
+	@Query("""
+        {
+          "bool": {
+            "must": [
+              {
+                "multi_match": {
+                  "query": "?0",
+                  "type": "bool_prefix",
+                  "fields": ["suggestion", "suggestion._2gram", "suggestion._3gram"]
+                }
+              }
+            ],
+            "must_not": [
+              { "term": { "deleted": ?1 } }
+            ]
+          }
+        }
+        """)
+	Page<ProductDocument> findBySuggestionPrefix(String prefixKeyword, boolean deleted, Pageable pageable);
 	// "?0" sẽ lấy giá trị của tham số đầu tiên (prefixKeyword)
 }

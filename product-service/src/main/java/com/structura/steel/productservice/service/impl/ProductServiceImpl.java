@@ -42,7 +42,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public PagingResponse<ProductResponseDto> getAllProducts(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+    public PagingResponse<ProductResponseDto> getAllProducts(
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir,
+            String searchKeyword,
+            boolean deleted) {
 
         String effectiveSortBy = sortBy; // Biến tạm để chứa tên trường sort cuối cùng
 
@@ -66,9 +72,9 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             if (StringUtils.hasText(searchKeyword)) {
-                pages = productSearchRepository.searchByKeyword(searchKeyword, pageable);
+                pages = productSearchRepository.searchByKeyword(searchKeyword, deleted, pageable);
             } else {
-                pages = productSearchRepository.findAll(pageable);
+                pages = productSearchRepository.findAllByDeleted(deleted, pageable);
             }
         } catch (Exception ex) {
 			log.error("Exception: {}", ex.getMessage());
@@ -95,8 +101,24 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto getProductById(Long id) {
+        Product product = productRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+
+        return productMapper.toProductResponseDto(product);
+    }
+
+    @Override
+    public ProductResponseDto restoreProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+        ProductDocument productDocument = productSearchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+
+        product.setDeleted(false);
+        productDocument.setDeleted(false);
+
+        productRepository.save(product);
+        productSearchRepository.save(productDocument);
 
         return productMapper.toProductResponseDto(product);
     }
@@ -126,13 +148,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto) {
-        Product existingProduct = productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
         validateProductRequest(productRequestDto);
 
-        productMapper.updateProductFromDto(productRequestDto, existingProduct);
-        Product updatedProduct = productRepository.save(existingProduct);
+        productMapper.updateProductFromDto(productRequestDto, product);
+        Product updatedProduct = productRepository.save(product);
 
         ProductDocument productDocument = productMapper.toDocument(updatedProduct);
 
@@ -149,10 +171,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProduct(Long id) {
-        Product existingProduct = productRepository.findById(id)
+    public void softDeleteProduct(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
-        productRepository.delete(existingProduct);
+        ProductDocument productDocument = productSearchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+
+        product.setDeleted(true);
+        productDocument.setDeleted(true);
+
+        productRepository.save(product);
+        productSearchRepository.save(productDocument);
+    }
+
+    @Override
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+        productRepository.delete(product);
         productSearchRepository.deleteById(id); // xoa luon trong ES
     }
 
@@ -174,14 +210,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> suggest(String prefix, int size) {
+    public List<String> suggest(String prefix, int size, boolean deleted) {
         if (!StringUtils.hasText(prefix)) {
             return Collections.emptyList();
         }
         // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
-        var page = productSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        var page = productSearchRepository.findBySuggestionPrefix(prefix, deleted, PageRequest.of(0, size));
+
         return page.getContent().stream()
-                .map(ProductDocument::getName)   // hoặc .getNameSuggest()
+                .map(ProductDocument::getName)
                 .distinct()
                 .toList();
     }

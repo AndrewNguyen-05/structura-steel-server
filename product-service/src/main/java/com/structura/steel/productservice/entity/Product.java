@@ -47,4 +47,7 @@ public class Product extends BaseEntity {
     private BigDecimal diameter; // đường kính
 
     private String standard;
+
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 }

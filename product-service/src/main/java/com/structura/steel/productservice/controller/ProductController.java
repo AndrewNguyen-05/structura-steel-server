@@ -29,17 +29,19 @@ public class ProductController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED, required = false) boolean deleted,
             @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(productService.getAllProducts(pageNo, pageSize, sortBy, sortDir, searchKeyword));
+        return ResponseEntity.ok(productService.getAllProducts(pageNo, pageSize, sortBy, sortDir, searchKeyword, deleted));
     }
 
     @GetMapping("/suggest")
     public ResponseEntity<List<String>> suggest(
-            @RequestParam("prefix") String prefix,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "prefix") String prefix,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "deleted", required = false) boolean deleted
     ) {
-        return ResponseEntity.ok(productService.suggest(prefix, size));
+        return ResponseEntity.ok(productService.suggest(prefix, size, deleted));
     }
 
     @GetMapping("/{id}")
@@ -55,6 +57,17 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto) {
         return ResponseEntity.ok(productService.updateProduct(id, productRequestDto));
+    }
+
+    @PutMapping("/restore/{id}")
+    public ResponseEntity<ProductResponseDto> restoreProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.restoreProductById(id));
+    }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDeleteProduct(@PathVariable Long id) {
+        productService.softDeleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

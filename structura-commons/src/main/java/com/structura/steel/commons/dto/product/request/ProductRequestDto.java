@@ -25,5 +25,6 @@ public record ProductRequestDto(
         BigDecimal height,
         BigDecimal thickness,
         BigDecimal diameter,
-        String standard
+        String standard,
+        boolean deleted
 ) {}
