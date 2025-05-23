@@ -2,8 +2,8 @@ package com.structura.steel.partnerservice.controller;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
-import com.structura.steel.dto.request.VehicleRequestDto;
-import com.structura.steel.dto.response.VehicleResponseDto;
+import com.structura.steel.commons.dto.partner.request.VehicleRequestDto;
+import com.structura.steel.commons.dto.partner.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

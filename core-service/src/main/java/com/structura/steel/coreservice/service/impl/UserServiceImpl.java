@@ -4,10 +4,9 @@ import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.response.RestResponse;
-import com.structura.steel.dto.request.CreateUserRequest;
-import com.structura.steel.dto.request.UpdateUserRequest;
-import com.structura.steel.dto.response.PartnerResponseDto;
-import com.structura.steel.dto.response.UserResponse;
+import com.structura.steel.commons.dto.core.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.response.UserResponse;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.UserMapper;
 import com.structura.steel.coreservice.repository.UserRepository;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

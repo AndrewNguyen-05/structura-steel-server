@@ -1,8 +1,8 @@
 package com.structura.steel.partnerservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.VehicleRequestDto;
-import com.structura.steel.dto.response.VehicleResponseDto;
+import com.structura.steel.commons.dto.partner.request.VehicleRequestDto;
+import com.structura.steel.commons.dto.partner.response.VehicleResponseDto;
 
 import java.util.List;
 

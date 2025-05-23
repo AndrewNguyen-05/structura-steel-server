@@ -1,7 +1,7 @@
 package com.structura.steel.coreservice.service;
 
-import com.structura.steel.dto.request.CreateUserRequest;
-import com.structura.steel.dto.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 

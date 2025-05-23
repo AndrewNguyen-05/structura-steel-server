@@ -9,16 +9,15 @@ import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.coreservice.elasticsearch.document.SaleOrderDocument;
 import com.structura.steel.coreservice.elasticsearch.repository.SaleOrderSearchRepository;
 import com.structura.steel.coreservice.entity.SaleOrder;
-import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.SaleOrderMapper;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
 import com.structura.steel.coreservice.repository.UserRepository;
 import com.structura.steel.coreservice.service.SaleOrderService;
-import com.structura.steel.dto.request.SaleOrderRequestDto;
-import com.structura.steel.dto.response.GetAllSaleOrderResponseDto;
-import com.structura.steel.dto.response.PartnerProjectResponseDto;
-import com.structura.steel.dto.response.PartnerResponseDto;
-import com.structura.steel.dto.response.SaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.SaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.GetAllSaleOrderResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.core.response.SaleOrderResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,13 +29,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service

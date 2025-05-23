@@ -1,8 +1,11 @@
 package com.structura.steel.productservice.entity;
 
 import com.structura.steel.commons.persistence.BaseEntity;
+import com.structura.steel.commons.enumeration.ProductType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +33,10 @@ public class Product extends BaseEntity {
 
     @Column(name = "length", nullable = false)
     private BigDecimal length;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "product_type", nullable = false)
+    private ProductType type;
 
     private BigDecimal width;
 

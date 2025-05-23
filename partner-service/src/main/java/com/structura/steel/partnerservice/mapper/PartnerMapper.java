@@ -1,14 +1,12 @@
 package com.structura.steel.partnerservice.mapper;
 
-import com.structura.steel.dto.request.PartnerRequestDto;
-import com.structura.steel.dto.response.GetAllPartnerResponseDto;
-import com.structura.steel.dto.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.partner.request.PartnerRequestDto;
+import com.structura.steel.commons.dto.partner.response.GetAllPartnerResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import com.structura.steel.partnerservice.elasticsearch.document.PartnerDocument;
 import com.structura.steel.partnerservice.entity.*;
 import org.mapstruct.*;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @Mapper(uses = {PartnerProjectMapper.class, VehicleMapper.class, WarehouseMapper.class})

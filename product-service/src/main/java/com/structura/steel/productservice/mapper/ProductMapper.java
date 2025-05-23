@@ -1,16 +1,11 @@
 package com.structura.steel.productservice.mapper;
 
-import com.structura.steel.dto.request.ProductRequestDto;
-import com.structura.steel.dto.response.ProductResponseDto;
+import com.structura.steel.commons.dto.product.request.ProductRequestDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.productservice.elasticsearch.document.ProductDocument;
 import com.structura.steel.productservice.entity.Product;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
-
-import java.time.Instant;
-import java.util.Date;
 
 @Mapper
 public interface ProductMapper {

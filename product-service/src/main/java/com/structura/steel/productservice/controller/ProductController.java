@@ -2,8 +2,8 @@ package com.structura.steel.productservice.controller;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
-import com.structura.steel.dto.request.ProductRequestDto;
-import com.structura.steel.dto.response.ProductResponseDto;
+import com.structura.steel.commons.dto.product.request.ProductRequestDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.productservice.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

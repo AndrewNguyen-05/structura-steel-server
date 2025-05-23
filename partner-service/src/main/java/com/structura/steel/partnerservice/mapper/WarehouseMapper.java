@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.mapper;
 
-import com.structura.steel.dto.request.WarehouseRequestDto;
-import com.structura.steel.dto.response.WarehouseResponseDto;
+import com.structura.steel.commons.dto.partner.request.WarehouseRequestDto;
+import com.structura.steel.commons.dto.partner.response.WarehouseResponseDto;
 import com.structura.steel.partnerservice.elasticsearch.document.WarehouseDocument;
 import com.structura.steel.partnerservice.entity.Warehouse;
 import org.mapstruct.Mapper;

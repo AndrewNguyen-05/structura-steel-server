@@ -1,8 +1,8 @@
 package com.structura.steel.coreservice.mapper;
 
 import com.structura.steel.coreservice.entity.DeliveryDebt;
-import com.structura.steel.dto.request.DeliveryDebtRequestDto;
-import com.structura.steel.dto.response.DeliveryDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.DeliveryDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.DeliveryDebtResponseDto;
 import org.mapstruct.*;
 
 import java.util.List;

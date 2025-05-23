@@ -1,8 +1,8 @@
 package com.structura.steel.coreservice.mapper;
 
 import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
-import com.structura.steel.dto.request.PurchaseOrderDetailRequestDto;
-import com.structura.steel.dto.response.PurchaseOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.PurchaseOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
 import org.mapstruct.*;
 
 import java.util.List;

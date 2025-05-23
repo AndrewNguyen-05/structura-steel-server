@@ -1,7 +1,7 @@
 package com.structura.steel.partnerservice.mapper;
 
-import com.structura.steel.dto.request.VehicleRequestDto;
-import com.structura.steel.dto.response.VehicleResponseDto;
+import com.structura.steel.commons.dto.partner.request.VehicleRequestDto;
+import com.structura.steel.commons.dto.partner.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.elasticsearch.document.VehicleDocument;
 import com.structura.steel.partnerservice.entity.Vehicle;
 import org.mapstruct.Mapper;

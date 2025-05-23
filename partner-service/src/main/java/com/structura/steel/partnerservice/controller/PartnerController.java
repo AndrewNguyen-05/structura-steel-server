@@ -2,9 +2,9 @@ package com.structura.steel.partnerservice.controller;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
-import com.structura.steel.dto.request.PartnerRequestDto;
-import com.structura.steel.dto.response.GetAllPartnerResponseDto;
-import com.structura.steel.dto.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.partner.request.PartnerRequestDto;
+import com.structura.steel.commons.dto.partner.response.GetAllPartnerResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import com.structura.steel.partnerservice.service.PartnerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

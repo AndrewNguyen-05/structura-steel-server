@@ -1,5 +1,6 @@
 package com.structura.steel.productservice.elasticsearch.document;
 
+import com.structura.steel.commons.enumeration.ProductType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,6 +42,9 @@ public class ProductDocument {
 			}
 	)
 	private String name;
+
+	@Field(type = FieldType.Keyword)
+	private ProductType type;
 	private BigDecimal unitWeight;
 	private BigDecimal length;
 	private BigDecimal width;

@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.coreservice.config.property.KeycloakProperty;
-import com.structura.steel.dto.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.CreateUserRequest;
 import com.structura.steel.coreservice.service.KeycloakService;
-import com.structura.steel.dto.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,6 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

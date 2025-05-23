@@ -4,8 +4,8 @@ import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.response.RestResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.commons.utils.SecurityUtils;
-import com.structura.steel.dto.request.UpdateUserRequest;
-import com.structura.steel.dto.response.UserResponse;
+import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.response.UserResponse;
 import com.structura.steel.coreservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")

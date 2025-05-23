@@ -1,8 +1,8 @@
 package com.structura.steel.partnerservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.WarehouseRequestDto;
-import com.structura.steel.dto.response.WarehouseResponseDto;
+import com.structura.steel.commons.dto.partner.request.WarehouseRequestDto;
+import com.structura.steel.commons.dto.partner.response.WarehouseResponseDto;
 
 import java.util.List;
 

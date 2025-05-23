@@ -3,19 +3,19 @@ package com.structura.steel.productservice.service.impl;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.CodeGenerator;
-import com.structura.steel.dto.request.ProductRequestDto;
-import com.structura.steel.dto.response.ProductResponseDto;
+import com.structura.steel.commons.dto.product.request.ProductRequestDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.productservice.elasticsearch.document.ProductDocument;
 import com.structura.steel.productservice.elasticsearch.repository.ProductSearchRepository;
 import com.structura.steel.productservice.entity.Product;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
+import com.structura.steel.commons.enumeration.ProductType;
 import com.structura.steel.productservice.helper.SteelCalculator;
 import com.structura.steel.productservice.mapper.ProductMapper;
 import com.structura.steel.productservice.repository.ProductRepository;
 import com.structura.steel.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -186,28 +186,37 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
     }
 
-    private void validateProductRequest(ProductRequestDto productRequestDto) {
-        String name = productRequestDto.name().toLowerCase();
-
-        if (name.contains("vằn") || name.contains("cây")) {
-            if (productRequestDto.diameter() == null || productRequestDto.length() == null) {
-                throw new IllegalArgumentException("Diameter and length must not be null for ribbed bar products.");
-            }
-        } else if (name.contains("cuộn") || name.contains("tấm")) {
-            if (productRequestDto.thickness() == null || productRequestDto.width() == null || productRequestDto.length() == null) {
-                throw new IllegalArgumentException("Thickness, width, and length must not be null for coil/plate products.");
-            }
-        } else if (name.contains("ống") || name.contains("hộp")) {
-            if (productRequestDto.thickness() == null || productRequestDto.diameter() == null || productRequestDto.length() == null) {
-                throw new IllegalArgumentException("Thickness, diameter, and length must not be null for pipe/box products.");
-            }
-        } else if (name.contains("hình")) {
-            if (productRequestDto.unitWeight() == null || productRequestDto.length() == null) {
-                throw new IllegalArgumentException("Unit weight and length must not be null for shaped steel products.");
-            }
-        }
-        if (productRequestDto.length() == null) {
+    private void validateProductRequest(ProductRequestDto dto) {
+        ProductType type = dto.type();
+        // always require length
+        if (dto.length() == null) {
             throw new IllegalArgumentException("Length must not be null.");
         }
+
+        switch (type) {
+            case RIBBED_BAR -> {
+                require(dto.diameter(), "Diameter must not be null for ribbed bar.");
+                // length already checked
+            }
+            case COIL, PLATE -> {
+                require(dto.thickness(), "Thickness must not be null for coil/plate.");
+                require(dto.width(),     "Width must not be null for coil/plate.");
+            }
+            case PIPE, BOX -> {
+                require(dto.thickness(), "Thickness must not be null for pipe/box.");
+                require(dto.diameter(),  "Diameter must not be null for pipe/box.");
+            }
+            case SHAPED -> {
+                require(dto.unitWeight(), "Unit weight must not be null for shaped steel.");
+            }
+            default -> { /* no extra */ }
+        }
     }
+
+    private void require(Object fieldValue, String message) {
+        if (fieldValue == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
 }

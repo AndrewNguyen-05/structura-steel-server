@@ -1,8 +1,8 @@
 package com.structura.steel.coreservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.PurchaseOrderDetailRequestDto;
-import com.structura.steel.dto.response.PurchaseOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.PurchaseOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
 
 import java.util.List;
 

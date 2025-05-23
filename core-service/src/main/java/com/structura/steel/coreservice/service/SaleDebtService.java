@@ -1,9 +1,9 @@
 package com.structura.steel.coreservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.SaleDebtRequestDto;
-import com.structura.steel.dto.response.GetAllSaleDebtResponseDto;
-import com.structura.steel.dto.response.SaleDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.SaleDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.GetAllSaleDebtResponseDto;
+import com.structura.steel.commons.dto.core.response.SaleDebtResponseDto;
 
 import java.util.List;
 

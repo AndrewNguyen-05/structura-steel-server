@@ -1,7 +1,7 @@
 package com.structura.steel.commons.client;
 
-import com.structura.steel.dto.response.PartnerProjectResponseDto;
-import com.structura.steel.dto.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

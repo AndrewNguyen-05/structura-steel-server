@@ -1,8 +1,8 @@
 package com.structura.steel.coreservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.PurchaseDebtRequestDto;
-import com.structura.steel.dto.response.PurchaseDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.PurchaseDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.PurchaseDebtResponseDto;
 
 import java.util.List;
 

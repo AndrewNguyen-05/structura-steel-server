@@ -1,9 +1,9 @@
 package com.structura.steel.partnerservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.PartnerRequestDto;
-import com.structura.steel.dto.response.GetAllPartnerResponseDto;
-import com.structura.steel.dto.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.partner.request.PartnerRequestDto;
+import com.structura.steel.commons.dto.partner.response.GetAllPartnerResponseDto;
+import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 
 import java.util.List;
 

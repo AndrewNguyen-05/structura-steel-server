@@ -2,11 +2,10 @@ package com.structura.steel.coreservice.controller;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
-import com.structura.steel.dto.request.SaleOrderDetailRequestDto;
-import com.structura.steel.dto.response.GetAllSaleOrderDetailResponseDto;
-import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.SaleOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.response.GetAllSaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.response.SaleOrderDetailResponseDto;
 import com.structura.steel.coreservice.service.SaleOrderDetailService;
-import feign.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

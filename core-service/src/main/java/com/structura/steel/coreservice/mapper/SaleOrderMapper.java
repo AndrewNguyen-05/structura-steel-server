@@ -2,9 +2,9 @@ package com.structura.steel.coreservice.mapper;
 
 import com.structura.steel.coreservice.elasticsearch.document.SaleOrderDocument;
 import com.structura.steel.coreservice.entity.SaleOrder;
-import com.structura.steel.dto.request.SaleOrderRequestDto;
-import com.structura.steel.dto.response.GetAllSaleOrderResponseDto;
-import com.structura.steel.dto.response.SaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.SaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.GetAllSaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.SaleOrderResponseDto;
 import org.mapstruct.*;
 
 import java.util.List;

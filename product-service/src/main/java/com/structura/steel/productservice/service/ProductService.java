@@ -1,8 +1,8 @@
 package com.structura.steel.productservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.dto.request.ProductRequestDto;
-import com.structura.steel.dto.response.ProductResponseDto;
+import com.structura.steel.commons.dto.product.request.ProductRequestDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 
 import java.math.BigDecimal;
 import java.util.List;

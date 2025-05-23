@@ -10,21 +10,19 @@ import com.structura.steel.coreservice.mapper.SaleOrderDetailMapper;
 import com.structura.steel.coreservice.repository.SaleOrderDetailRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
 import com.structura.steel.coreservice.service.SaleOrderDetailService;
-import com.structura.steel.dto.request.SaleOrderDetailRequestDto;
-import com.structura.steel.dto.response.GetAllSaleOrderDetailResponseDto;
-import com.structura.steel.dto.response.ProductResponseDto;
-import com.structura.steel.dto.response.SaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.SaleOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.response.GetAllSaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
+import com.structura.steel.commons.dto.core.response.SaleOrderDetailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
