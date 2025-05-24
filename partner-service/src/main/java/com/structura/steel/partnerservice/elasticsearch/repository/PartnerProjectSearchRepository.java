@@ -7,41 +7,43 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-public interface PartnerProjectSearchRepository extends ElasticsearchRepository<PartnerProjectDocument, Long> {
+public interface PartnerProjectSearchRepository extends ElasticsearchRepository<PartnerProjectDocument,Long> {
+
+    Page<PartnerProjectDocument> getAllByPartnerIdAndDeleted(Long partnerId, boolean deleted, Pageable p);
 
     @Query("""
-          {
-            "multi_match": {
-              "query": "?0",
-              "type": "bool_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "projectName",
-                "projectName._2gram",
-                "projectCode",
-                "projectCode._2gram"
-              ]
-            }
-          }
-          """)
-    Page<PartnerProjectDocument> searchByKeyword(String searchKeyword, Pageable pageable);
+      {
+        "bool": {
+          "must": [
+            { "multi_match": {
+                "query": "?0", 
+                "type": "bool_prefix", 
+                "analyzer": "folding",
+                "fields":[ "projectName","projectName._2gram","projectCode","projectCode._2gram" ]
+            }},
+            { "term": { "partnerId": ?1 }},
+            { "term": { "deleted":   ?2 }}
+          ]
+        }
+      }
+    """)
+    Page<PartnerProjectDocument> searchByKeywordAndPartnerId(String kw, Long partnerId, boolean deleted, Pageable p);
 
-    // Suggestion query using the "suggestion" field (populated with partnerName)
     @Query("""
-          {
-            "multi_match": {
-              "query": "?0",
-              "type": "bool_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "suggestion",
-                "suggestion._2gram",
-                "suggestion._3gram"
-              ]
-            }
-          }
-          """)
-    Page<PartnerProjectDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
-
-    Page<PartnerProjectDocument> getAllByPartnerId(Long partnerId, Pageable pageable);
+      {
+        "bool": {
+          "must":[
+            { "multi_match": {
+                "query":"?0",
+                "type":"bool_prefix",
+                "analyzer":"folding",
+                "fields":[ "suggestion","suggestion._2gram","suggestion._3gram" ]
+            }},
+            { "term": { "partnerId": ?2 }},
+            { "term": { "deleted": ?1 }}
+          ]
+        }
+      }
+    """)
+    Page<PartnerProjectDocument> findBySuggestionPrefix(String prefix, boolean deleted, Long partnerId, Pageable p);
 }

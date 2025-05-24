@@ -49,24 +49,41 @@ public class PartnerProjectController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/soft-delete/{projectId}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long partnerId, @PathVariable Long projectId) {
+        partnerProjectService.softDeletePartnerProject(partnerId, projectId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{projectId}")
+    public ResponseEntity<PartnerProjectResponseDto> restore(
+            @PathVariable Long partnerId, @PathVariable Long projectId) {
+        return ResponseEntity.ok(partnerProjectService.restorePartnerProject(partnerId, projectId));
+    }
+
     @GetMapping
-    public ResponseEntity<PagingResponse<PartnerProjectResponseDto>> getAllPartnerProjects(
-            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
-            @PathVariable Long partnerId,
-            @RequestParam(value = "search", required = false) String searchKeyword
+    public ResponseEntity<PagingResponse<PartnerProjectResponseDto>> list(
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "false") boolean deleted,
+            @PathVariable Long partnerId
     ) {
-        return ResponseEntity.ok(partnerProjectService.getAllPartnerProjectsByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId, searchKeyword));
+        return ResponseEntity.ok(
+                partnerProjectService.getAllPartnerProjectsByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId, search, deleted)
+        );
     }
 
     @GetMapping("/suggest")
     public ResponseEntity<List<String>> suggest(
+            @PathVariable Long partnerId,
             @RequestParam("prefix") String prefix,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue="false") boolean deleted
     ) {
-        return ResponseEntity.ok(partnerProjectService.suggestProjects(prefix, size));
+        return ResponseEntity.ok(partnerProjectService.suggestProjects(prefix, size, deleted, partnerId));
     }
 
     @GetMapping("/batch")

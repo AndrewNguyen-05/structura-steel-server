@@ -47,8 +47,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
     @Override
     public PartnerProjectResponseDto createPartnerProject(Long partnerId, PartnerProjectRequestDto dto) {
-        Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+        Partner partner = getValidPartner(partnerId);
 
         PartnerProject project = partnerProjectMapper.toPartnerProject(dto);
         project.setPartner(partner);
@@ -71,16 +70,8 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
     @Override
     public PartnerProjectResponseDto updatePartnerProject(Long partnerId, Long projectId, PartnerProjectRequestDto dto) {
-        // Xác thực Partner
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        PartnerProject existing = partnerProjectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner's project", "id", projectId));
-
-        // Kiểm tra xem project có thuộc partnerId không (nếu cần)
-        if (!existing.getPartner().getId().equals(partnerId)) {
-            throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
-        }
+        getValidPartner(partnerId);
+        PartnerProject existing = getValidProject(partnerId, projectId, false);
 
         partnerProjectMapper.updatePartnerProjectFromDto(dto, existing);
         PartnerProject updated = partnerProjectRepository.save(existing);
@@ -101,27 +92,15 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
     @Override
     public PartnerProjectResponseDto getPartnerProject(Long partnerId, Long projectId) {
-        // Xác thực Partner
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        PartnerProject project = partnerProjectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner's project", "id", projectId));
-        if (!project.getPartner().getId().equals(partnerId)) {
-            throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
-        }
+        getValidPartner(partnerId);
+        PartnerProject project = getValidProject(partnerId, projectId, false);
         return entityToResponseWithProduct(project);
     }
 
     @Override
     public void deletePartnerProject(Long partnerId, Long projectId) {
-        // Xác thực Partner
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        PartnerProject project = partnerProjectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner's project", "id", projectId));
-        if (!project.getPartner().getId().equals(partnerId)) {
-            throw new ResourceNotBelongToException("Partner's project", "id", projectId, "partner", "id", partnerId);
-        }
+        getValidPartner(partnerId);
+        PartnerProject project = getValidProject(partnerId, projectId, true);
 
         partnerProjectSearchRepository.deleteById(project.getId());
 
@@ -129,9 +108,32 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     }
 
     @Override
-    public PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword) {
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+    public void softDeletePartnerProject(Long partnerId, Long projectId) {
+        getValidPartner(partnerId);
+        PartnerProject project = getValidProject(partnerId, projectId, false);
+
+        project.setDeleted(true);
+        partnerProjectRepository.save(project);
+        saveToElasticsearch(project);
+        log.info("Project with ID {} soft-deleted.", projectId);
+    }
+
+    @Override
+    public PartnerProjectResponseDto restorePartnerProject(Long partnerId, Long projectId) {
+        getValidPartner(partnerId);
+        PartnerProject project = getValidProject(partnerId, projectId, true);
+
+        project.setDeleted(false);
+        PartnerProject restored = partnerProjectRepository.save(project);
+        saveToElasticsearch(restored);
+        log.info("Project with ID {} restored.", projectId);
+
+        return entityToResponseWithProduct(restored);
+    }
+
+    @Override
+    public PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword, boolean deleted) {
+        getValidPartner(partnerId);
 
         String effectiveSortBy = sortBy;
         if ("projectCode".equalsIgnoreCase(sortBy)) {
@@ -140,35 +142,34 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
             effectiveSortBy = "projectName.keyword";
         }
 
-        // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(effectiveSortBy).ascending()
                 : Sort.by(effectiveSortBy).descending();
 
-        // Tao 1 pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-
-        // Tao 1 mang cac trang product su dung find all voi tham so la pageable
         Page<PartnerProjectDocument> pages;
 
         try {
             if (StringUtils.hasText(searchKeyword)) {
-                pages = partnerProjectSearchRepository.searchByKeyword(searchKeyword, pageable);
+                pages = partnerProjectSearchRepository.searchByKeywordAndPartnerId(searchKeyword, partnerId, deleted, pageable);
             } else {
-                pages = partnerProjectSearchRepository.getAllByPartnerId(partnerId, pageable);
+                pages = partnerProjectSearchRepository.getAllByPartnerIdAndDeleted(partnerId, deleted, pageable);
             }
         } catch (Exception ex) {
-            log.error("Exception: {}", ex.getMessage());
+            log.error("Elasticsearch query failed for projects (Partner ID: {}): {}", partnerId, ex.getMessage(), ex);
             pages = Page.empty(pageable);
         }
 
         // Lay ra gia tri (content) cua page
         List<PartnerProjectDocument> projects = pages.getContent();
 
-        // Ep kieu sang dto
-        List<PartnerProjectResponseDto> content = projects.stream()
-                .map(partnerProjectMapper::toResponseDtoFromDocument).toList();
 
+        // Ep kieu
+        List<PartnerProjectResponseDto> content = projects.stream()
+                .map(partnerProjectMapper::toResponseDtoFromDocument)
+                .collect(Collectors.toList());
+
+        // Fetch product details
         for(int i = 0; i < projects.size(); i++) {
             List<Long> productIds = projects.get(i).getProductIds();
             List<ProductResponseDto> products = new ArrayList<>();
@@ -181,7 +182,6 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
             content.get(i).setProducts(products);
         }
 
-        // Gan gia tri (content) cua page vao ProductResponse de tra ve
         PagingResponse<PartnerProjectResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
@@ -195,22 +195,22 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> suggestProjects(String prefix, int size) {
+    public List<String> suggestProjects(String prefix, int size, boolean deleted, Long partnerId) {
+        getValidPartner(partnerId);
         if (!StringUtils.hasText(prefix)) {
             return Collections.emptyList();
         }
-        // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
-        var page = partnerProjectSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        Pageable pageable = PageRequest.of(0, size);
+        Page<PartnerProjectDocument> page = partnerProjectSearchRepository.findBySuggestionPrefix(prefix, deleted, partnerId, pageable);
         return page.getContent().stream()
                 .map(PartnerProjectDocument::getProjectName)
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<PartnerProjectResponseDto> getProjectsByIds(Long partnerId, List<Long> ids) {
-        partnerProjectRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+        getValidPartner(partnerId);
 
         List<PartnerProject> projects = partnerProjectRepository.findAllByIdInAndPartnerId(ids, partnerId);
 
@@ -227,6 +227,41 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         return projects.stream()
                 .map(this::entityToResponseWithProduct)
                 .collect(Collectors.toList());
+    }
+
+    private Partner getValidPartner(Long partnerId) {
+        return partnerRepository.findByIdAndDeletedFalse(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId + " (or it might be deleted)"));
+    }
+
+    private PartnerProject getValidProject(Long partnerId, Long projectId, boolean expectDeleted) {
+        PartnerProject project = partnerProjectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
+        if (!project.getPartner().getId().equals(partnerId)) {
+            throw new ResourceNotBelongToException("Project", "id", projectId, "partner", "id", partnerId);
+        }
+
+        if (project.getDeleted() != expectDeleted) {
+            throw new ResourceNotFoundException("Project", "id", projectId +
+                    (expectDeleted ? " (is not deleted)" : " (is deleted)"));
+        }
+
+        return project;
+    }
+
+    private void saveToElasticsearch(PartnerProject project) {
+        try {
+            PartnerProjectDocument doc = partnerProjectMapper.toDocument(project);
+            String suggestion = (project.getProjectCode() != null ? project.getProjectCode() : "") + " "
+                    + (project.getProjectName() != null ? project.getProjectName() : "");
+            doc.setSuggestion(suggestion.trim());
+            doc.setDeleted(project.getDeleted()); // Ensure deleted is set
+            partnerProjectSearchRepository.save(doc);
+            log.info("Project with ID {} saved to Elasticsearch.", project.getId());
+        } catch (Exception e) {
+            log.error("Error saving project with ID {} to Elasticsearch: {}", project.getId(), e.getMessage(), e);
+        }
     }
 
     private PartnerProjectResponseDto entityToResponseWithProduct(PartnerProject project) {

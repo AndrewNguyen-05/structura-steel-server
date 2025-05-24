@@ -52,4 +52,7 @@ public class PartnerProject extends BaseEntity {
     @Column(name = "product_ids", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private List<Long> productIds;
+
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 }
