@@ -50,7 +50,6 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
 				  "analyzer": "folding",
 				  "fields": [
 					"suggestion",
-					"suggestion._index_prefix",
 					"suggestion._2gram",
 					"suggestion._3gram"
 				  ]

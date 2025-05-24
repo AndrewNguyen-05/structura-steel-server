@@ -25,17 +25,19 @@ public class PartnerController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @RequestParam(value= "deleted", defaultValue = AppConstants.DELETED) boolean deleted,
             @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(partnerService.getAllPartners(pageNo, pageSize, sortBy, sortDir, searchKeyword));
+        return ResponseEntity.ok(partnerService.getAllPartners(pageNo, pageSize, sortBy, sortDir, deleted, searchKeyword));
     }
 
     @GetMapping("/suggest")
     public ResponseEntity<List<String>> suggest(
             @RequestParam("prefix") String prefix,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value= "deleted", defaultValue = AppConstants.DELETED) boolean deleted
     ) {
-        return ResponseEntity.ok(partnerService.suggestPartners(prefix, size));
+        return ResponseEntity.ok(partnerService.suggestPartners(prefix, deleted, size));
     }
 
     @GetMapping("/{id}")
@@ -58,6 +60,17 @@ public class PartnerController {
     public ResponseEntity<PartnerResponseDto> updatePartner(@PathVariable Long id,
                                                             @RequestBody PartnerRequestDto partnerRequestDto) {
         return ResponseEntity.ok(partnerService.updatePartner(id, partnerRequestDto));
+    }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDeletePartner(@PathVariable Long id) {
+        partnerService.softDeletePartnerById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{id}")
+    public ResponseEntity<PartnerResponseDto> restorePartner(@PathVariable Long id) {
+        return ResponseEntity.ok(partnerService.restorePartnerById(id));
     }
 
     @DeleteMapping("/{id}")

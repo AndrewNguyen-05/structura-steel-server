@@ -9,41 +9,60 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 public interface PartnerSearchRepository extends ElasticsearchRepository<PartnerDocument, Long> {
 
-    // Search by partnerName or partnerCode (case-insensitive, using 'folding' analyzer)
-    Page<PartnerDocument> findByPartnerNameContainingIgnoreCaseOrPartnerCodeContainingIgnoreCase(
-            String partnerName, String partnerCode, Pageable pageable);
+    Page<PartnerDocument> findAllByDeleted(boolean deleted, Pageable page);
 
     @Query("""
           {
-            "multi_match": {
-              "query": "?0",
-              "type": "bool_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "partnerName",
-                "partnerName._2gram",
-                "partnerCode",
-                "partnerCode._2gram"
+            "bool": {
+              "must": [
+                {
+                  "multi_match": {
+                    "query": "?0",
+                    "type": "bool_prefix",
+                    "analyzer": "folding",
+                    "fields": [
+                        "partnerName",
+                        "partnerName._2gram",
+                        "partnerCode",
+                        "partnerCode._2gram"
+                    ]
+                  }
+                },
+                {
+                	"term": { "deleted": ?1 }
+                }
               ]
             }
           }
-          """)
-    Page<PartnerDocument> searchByKeyword(String searchKeyword, Pageable pageable);
+         """)
+    Page<PartnerDocument> searchByKeyword(String searchKeyword,
+                                          boolean deleted,
+                                          Pageable pageable);
 
     // Suggestion query using the "suggestion" field (populated with partnerName)
     @Query("""
-          {
-            "multi_match": {
-              "query": "?0",
-              "type": "bool_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "suggestion",
-                "suggestion._2gram",
-                "suggestion._3gram"
-              ]
-            }
-          }
-          """)
-    Page<PartnerDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
+		{
+		  "bool": {
+			"must": [
+			  {
+				"multi_match": {
+				  "query": "?0",
+				  "type": "bool_prefix",
+				  "analyzer": "folding",
+				  "fields": [
+					"suggestion",
+					"suggestion._2gram",
+					"suggestion._3gram"
+				  ]
+				}
+			  },
+			  {
+				"term": { "deleted": ?1 }
+			  }
+			]
+		  }
+		}
+		""")
+    Page<PartnerDocument> findBySuggestionPrefix(String prefixKeyword, boolean deleted, Pageable pageable);
+    // "?0" sẽ lấy giá trị của tham số đầu tiên (prefixKeyword)
 }

@@ -17,9 +17,13 @@ public interface PartnerService {
 
     void deletePartnerById(Long id);
 
-    PagingResponse<GetAllPartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
+    PagingResponse<GetAllPartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted, String searchKeyword);
 
     List<PartnerResponseDto> getPartnersByIds(List<Long> ids);
 
-    List<String> suggestPartners(String prefix, int size);
+    List<String> suggestPartners(String prefix, boolean deleted, int size);
+
+    void softDeletePartnerById(Long id);
+
+    PartnerResponseDto restorePartnerById(Long id);
 }

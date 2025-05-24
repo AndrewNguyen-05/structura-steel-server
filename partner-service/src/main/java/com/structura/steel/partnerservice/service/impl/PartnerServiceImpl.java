@@ -132,7 +132,8 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     @Override
-    public PagingResponse<GetAllPartnerResponseDto> getAllPartners(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+    public PagingResponse<GetAllPartnerResponseDto> getAllPartners(
+            int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted, String searchKeyword) {
 
         String effectiveSortBy = sortBy;
         if ("partnerCode".equalsIgnoreCase(sortBy)) {
@@ -153,9 +154,9 @@ public class PartnerServiceImpl implements PartnerService {
 
         try {
             if (StringUtils.hasText(searchKeyword)) {
-                pages = partnerSearchRepository.searchByKeyword(searchKeyword, pageable);
+                pages = partnerSearchRepository.searchByKeyword(searchKeyword, deleted, pageable);
             } else {
-                pages = partnerSearchRepository.findAll(pageable);
+                pages = partnerSearchRepository.findAllByDeleted(deleted, pageable);
             }
         } catch (Exception ex) {
             log.error("Exception: {}", ex.getMessage());
@@ -193,16 +194,46 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> suggestPartners(String prefix, int size) {
+    public List<String> suggestPartners(String prefix, boolean deleted, int size) {
         if (!StringUtils.hasText(prefix)) {
             return Collections.emptyList();
         }
         // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
-        var page = partnerSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        var page = partnerSearchRepository.findBySuggestionPrefix(prefix, deleted, PageRequest.of(0, size));
         return page.getContent().stream()
                 .map(PartnerDocument::getPartnerName)
                 .distinct()
                 .toList();
+    }
+
+    @Override
+    public void softDeletePartnerById(Long id) {
+        Partner partner = partnerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
+        PartnerDocument doc = partnerSearchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
+
+        partner.setDeleted(true);
+        doc.setDeleted(true);
+
+        partnerRepository.save(partner);
+        partnerSearchRepository.save(doc);
+    }
+
+    @Override
+    public PartnerResponseDto restorePartnerById(Long id) {
+        Partner partner = partnerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
+        PartnerDocument doc = partnerSearchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", id));
+
+        partner.setDeleted(false);
+        doc.setDeleted(false);
+
+        partnerRepository.save(partner);
+        partnerSearchRepository.save(doc);
+
+        return partnerMapper.toPartnerResponseDto(partner);
     }
 
     private PartnerResponseDto toPartnerResponseDtoWithProductInProject(Partner partner) {

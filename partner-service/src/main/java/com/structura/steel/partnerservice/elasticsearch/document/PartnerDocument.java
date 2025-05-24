@@ -79,6 +79,9 @@ public class PartnerDocument {
     @Field(type = FieldType.Keyword)
     private String updatedBy;
 
+    @Field(type = FieldType.Boolean)
+    private Boolean deleted;
+
     @Field(type = FieldType.Search_As_You_Type)
     private String suggestion; // For partnerName suggestions
 }

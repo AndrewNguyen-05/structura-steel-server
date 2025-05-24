@@ -62,5 +62,8 @@ public class Partner extends BaseEntity {
 
     @OneToMany(mappedBy = "partner")
     private List<Warehouse> warehouses;
+
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 }
 
