@@ -8,39 +8,62 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 public interface WarehouseSearchRepository extends ElasticsearchRepository<WarehouseDocument, Long> {
 
-    @Query("""
-          {
-            "multi_match": {
-              "query": "?0",
-              "type": "bool_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "warehouseName",
-                "warehouseName._2gram",
-                "warehouseCode",
-                "warehouseCode._2gram"
-              ]
-            }
-          }
-          """)
-    Page<WarehouseDocument> searchByKeyword(String searchKeyword, Pageable pageable);
+    Page<WarehouseDocument> getAllByPartnerIdAndDeleted(Long partnerId, boolean deleted, Pageable pageable);
 
-    // Suggestion query using the "suggestion" field (populated with partnerName)
     @Query("""
-          {
-            "multi_match": {
-              "query": "?0",
-              "type": "bool_prefix",
-              "analyzer": "folding",
-              "fields": [
-                "suggestion",
-                "suggestion._2gram",
-                "suggestion._3gram"
-              ]
-            }
-          }
-          """)
-    Page<WarehouseDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
+      {
+        "bool": {
+          "must": [
+            {
+              "multi_match": {
+                "query": "?0",
+                "type": "bool_prefix",
+                "analyzer": "folding",
+                "fields": [
+                  "warehouseName",        "warehouseName._2gram",
+                  "warehouseCode",        "warehouseCode._2gram"
+                ]
+              }
+            },
+            { "term": { "deleted":   ?1 } },
+            { "term": { "partnerId": ?2 } }
+          ]
+        }
+      }
+    """)
+    Page<WarehouseDocument> searchByKeywordAndPartnerId(
+            String searchKeyword,
+            boolean deleted,
+            Long partnerId,
+            Pageable pageable
+    );
 
-    Page<WarehouseDocument> getAllByPartnerId(Long partnerId, Pageable pageable);
+    @Query("""
+      {
+        "bool": {
+          "must": [
+            {
+              "multi_match": {
+                "query": "?0",
+                "type": "bool_prefix",
+                "analyzer": "folding",
+                "fields": [
+                  "suggestion",
+                  "suggestion._2gram",
+                  "suggestion._3gram"
+                ]
+              }
+            },
+            { "term": { "deleted":   ?1 } },
+            { "term": { "partnerId": ?2 } }
+          ]
+        }
+      }
+    """)
+    Page<WarehouseDocument> findBySuggestionPrefix(
+            String prefixKeyword,
+            boolean deleted,
+            Long partnerId,
+            Pageable pageable
+    );
 }

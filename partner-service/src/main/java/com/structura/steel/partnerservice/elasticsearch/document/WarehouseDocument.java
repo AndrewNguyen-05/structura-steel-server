@@ -64,6 +64,13 @@ public class WarehouseDocument {
     @Field(type = FieldType.Keyword)
     private String updatedBy;
 
-    @Field(type = FieldType.Search_As_You_Type)
+    @Field(type = FieldType.Boolean)
+    private Boolean deleted;
+
+    @Field(
+            type = FieldType.Search_As_You_Type,
+            analyzer = "folding",
+            searchAnalyzer = "folding"
+    )
     private String suggestion;
 }

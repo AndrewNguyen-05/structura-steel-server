@@ -6,7 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
-    Page<Warehouse> getAllByPartnerId(Long partnerId, Pageable pageable);
+
+    Page<Warehouse> findAllByPartnerIdAndDeleted(Long partnerId, boolean deleted, Pageable pageable);
+
+    Optional<Warehouse> findByIdAndPartnerIdAndDeleted(Long id, Long partnerId, boolean deleted);
+
+    Optional<Warehouse> findByIdAndPartnerId(Long id, Long partnerId);
 }

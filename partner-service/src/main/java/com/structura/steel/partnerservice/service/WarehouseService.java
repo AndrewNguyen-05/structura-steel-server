@@ -16,7 +16,24 @@ public interface WarehouseService {
 
     void deleteWarehouse(Long partnerId, Long warehouseId);
 
-    PagingResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword);
+    void softDeleteWarehouse(Long partnerId, Long warehouseId);
 
-    List<String> suggestWarehouses(String prefix, int size);
+    WarehouseResponseDto restoreWarehouse(Long partnerId, Long warehouseId);
+
+    PagingResponse<WarehouseResponseDto> getAllWarehousesByPartnerId(
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir,
+            Long partnerId,
+            String searchKeyword,
+            boolean deleted
+    );
+
+    List<String> suggestWarehouses(
+            String prefix,
+            int size,
+            boolean deleted,
+            Long partnerId
+    );
 }

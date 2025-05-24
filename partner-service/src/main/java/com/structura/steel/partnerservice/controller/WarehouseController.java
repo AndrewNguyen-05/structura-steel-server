@@ -48,23 +48,50 @@ public class WarehouseController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/soft-delete/{warehouseId}")
+    public ResponseEntity<Void> softDeleteWarehouse(
+            @PathVariable Long partnerId,
+            @PathVariable Long warehouseId
+    ) {
+        warehouseService.softDeleteWarehouse(partnerId, warehouseId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{warehouseId}")
+    public ResponseEntity<WarehouseResponseDto> restoreWarehouse(
+            @PathVariable Long partnerId,
+            @PathVariable Long warehouseId
+    ) {
+        return ResponseEntity.ok(warehouseService.restoreWarehouse(partnerId, warehouseId));
+    }
+
     @GetMapping
     public ResponseEntity<PagingResponse<WarehouseResponseDto>> getAllWarehouses(
-            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE)   int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY)       String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION)String sortDir,
             @PathVariable Long partnerId,
-            @RequestParam(value = "search", required = false) String searchKeyword
+            @RequestParam(value = "search",  required = false) String searchKeyword,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED)   boolean deleted
     ) {
-        return ResponseEntity.ok(warehouseService.getAllWarehousesByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId, searchKeyword));
+        return ResponseEntity.ok(
+                warehouseService.getAllWarehousesByPartnerId(
+                        pageNo, pageSize, sortBy, sortDir,
+                        partnerId, searchKeyword, deleted
+                )
+        );
     }
 
     @GetMapping("/suggest")
     public ResponseEntity<List<String>> suggest(
             @RequestParam("prefix") String prefix,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED) boolean deleted,
+            @PathVariable Long partnerId
     ) {
-        return ResponseEntity.ok(warehouseService.suggestWarehouses(prefix, size));
+        return ResponseEntity.ok(
+                warehouseService.suggestWarehouses(prefix, size, deleted, partnerId)
+        );
     }
 }
