@@ -12,6 +12,7 @@ public class AppConstants {
     public static final String DEFAULT_SORT_BY = "id";
     public static final String DEFAULT_SORT_DIRECTION = "asc";
     public static final String DELETED = "false";
+    public static final String GET_ALL = "false";
 
     public static final String DELIMITER_COMMA = ",";
     public static final String EMPTY_STRING = "";

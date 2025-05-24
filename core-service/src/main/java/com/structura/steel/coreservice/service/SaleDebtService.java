@@ -17,7 +17,7 @@ public interface SaleDebtService {
 
     void deleteSaleDebtById(Long id, Long saleId);
 
-    PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId);
+    PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId);
 
     List<SaleDebtResponseDto> createSaleDebtsBatch(List<SaleDebtRequestDto> batchDto, Long saleId);
 }

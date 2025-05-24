@@ -18,7 +18,7 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
                 {
                   "multi_match": {
                     "query": "?0",
-                    "type": "phrase_prefix",
+                    "type": "bool_prefix",
                     "analyzer": "folding",
                     "fields": [
                       "name",
@@ -40,23 +40,29 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
 										  Pageable pageable);
 
 	@Query("""
-        {
-          "bool": {
-            "must": [
-              {
-                "multi_match": {
-                  "query": "?0",
-                  "type": "bool_prefix",
-                  "fields": ["suggestion", "suggestion._2gram", "suggestion._3gram"]
-                }
-              }
-            ],
-            "must_not": [
-              { "term": { "deleted": ?1 } }
-            ]
-          }
-        }
-        """)
+		{
+		  "bool": {
+			"must": [
+			  {
+				"multi_match": {
+				  "query": "?0",
+				  "type": "bool_prefix",
+				  "analyzer": "folding",
+				  "fields": [
+					"suggestion",
+					"suggestion._index_prefix",
+					"suggestion._2gram",
+					"suggestion._3gram"
+				  ]
+				}
+			  },
+			  {
+				"term": { "deleted": ?1 }
+			  }
+			]
+		  }
+		}
+		""")
 	Page<ProductDocument> findBySuggestionPrefix(String prefixKeyword, boolean deleted, Pageable pageable);
 	// "?0" sẽ lấy giá trị của tham số đầu tiên (prefixKeyword)
 }

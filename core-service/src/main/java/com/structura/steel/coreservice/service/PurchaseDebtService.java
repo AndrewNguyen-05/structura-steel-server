@@ -16,7 +16,7 @@ public interface PurchaseDebtService {
 
     void deletePurchaseDebtById(Long id, Long purchaseId);
 
-    PagingResponse<PurchaseDebtResponseDto> getAllPurchaseDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long purchaseId);
+    PagingResponse<PurchaseDebtResponseDto> getAllPurchaseDebts(int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long purchaseId);
 
     List<PurchaseDebtResponseDto> createPurchaseDebtsBatch(List<PurchaseDebtRequestDto> batchDto, Long purchaseId);
 }

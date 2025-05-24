@@ -22,8 +22,9 @@ public class DeliveryDebtController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir,
+            @RequestParam(value = "all", defaultValue = AppConstants.GET_ALL) boolean all,
             @PathVariable Long deliveryId) {
-        return ResponseEntity.ok(deliveryDebtService.getAllDeliveryDebts(pageNo, pageSize, sortBy, sortDir, deliveryId));
+        return ResponseEntity.ok(deliveryDebtService.getAllDeliveryDebts(pageNo, pageSize, sortBy, sortDir, all, deliveryId));
     }
 
     @GetMapping("/{id}")

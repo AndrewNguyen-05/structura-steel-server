@@ -14,5 +14,5 @@ public interface DeliveryDebtService {
 
     void deleteDeliveryDebtById(Long id, Long deliveryId);
 
-    PagingResponse<DeliveryDebtResponseDto> getAllDeliveryDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long deliveryId);
+    PagingResponse<DeliveryDebtResponseDto> getAllDeliveryDebts(int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long deliveryId);
 }

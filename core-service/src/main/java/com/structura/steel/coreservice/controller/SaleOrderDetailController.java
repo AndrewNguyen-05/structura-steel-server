@@ -25,8 +25,9 @@ public class SaleOrderDetailController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @RequestParam(value = "all", defaultValue = AppConstants.GET_ALL) boolean all,
             @PathVariable Long saleId) {
-        return ResponseEntity.ok(saleOrderDetailService.getAllSaleOrderDetails(pageNo, pageSize, sortBy, sortDir, saleId));
+        return ResponseEntity.ok(saleOrderDetailService.getAllSaleOrderDetails(pageNo, pageSize, sortBy, sortDir, all, saleId));
     }
 
     @GetMapping("/{id}")

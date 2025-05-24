@@ -1,9 +1,11 @@
 package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.ProductFeignClient;
+import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.SaleOrderDetail;
 import com.structura.steel.coreservice.mapper.SaleOrderDetailMapper;
@@ -96,24 +98,42 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     }
 
     @Override
-    public PagingResponse<GetAllSaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAllBySaleOrderId(saleId, pageable);
-        List<SaleOrderDetail> saleOrderDetails = pages.getContent();
-        List<GetAllSaleOrderDetailResponseDto> content = saleOrderDetails.stream()
-                .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)
-                .collect(Collectors.toList());
-        PagingResponse<GetAllSaleOrderDetailResponseDto> response = new PagingResponse<>();
-        response.setContent(content);
-        response.setTotalElements(pages.getTotalElements());
-        response.setPageNo(pages.getNumber());
-        response.setPageSize(pages.getSize());
-        response.setTotalPages(pages.getTotalPages());
-        response.setLast(pages.isLast());
-        return response;
+    public PagingResponse<GetAllSaleOrderDetailResponseDto> getAllSaleOrderDetails(
+            int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId) {
+        if(all) {
+            List<SaleOrderDetail> allDetails = saleOrderDetailRepository.findAllBySaleOrderId(saleId);
+            List<GetAllSaleOrderDetailResponseDto> content = allDetails.stream()
+                    .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)
+                    .collect(Collectors.toList());
+
+            // Tạo PagingResponse "giả" chứa tất cả
+            PagingResponse<GetAllSaleOrderDetailResponseDto> response = new PagingResponse<>();
+            response.setContent(content);
+            response.setTotalElements((long) content.size());
+            response.setPageNo(0);
+            response.setPageSize(content.size()); // Page size = total
+            response.setTotalPages(1);
+            response.setLast(true);
+            return response;
+        } else {
+            Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+            Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAllBySaleOrderId(saleId, pageable);
+            List<SaleOrderDetail> saleOrderDetails = pages.getContent();
+            List<GetAllSaleOrderDetailResponseDto> content = saleOrderDetails.stream()
+                    .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)
+                    .collect(Collectors.toList());
+            PagingResponse<GetAllSaleOrderDetailResponseDto> response = new PagingResponse<>();
+            response.setContent(content);
+            response.setTotalElements(pages.getTotalElements());
+            response.setPageNo(pages.getNumber());
+            response.setPageSize(pages.getSize());
+            response.setTotalPages(pages.getTotalPages());
+            response.setLast(pages.isLast());
+            return response;
+        }
     }
 
     @Override

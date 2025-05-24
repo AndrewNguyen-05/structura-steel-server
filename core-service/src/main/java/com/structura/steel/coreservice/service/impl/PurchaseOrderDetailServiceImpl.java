@@ -78,25 +78,43 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
     }
 
     @Override
-    public PagingResponse<PurchaseOrderDetailResponseDto> getAllPurchaseOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long purchaseId) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+    public PagingResponse<PurchaseOrderDetailResponseDto> getAllPurchaseOrderDetails(
+            int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long purchaseId) {
+        if(all) {
+            List<PurchaseOrderDetail> allDetails = purchaseOrderDetailRepository.findAllByPurchaseOrderId(purchaseId);
+            List<PurchaseOrderDetailResponseDto> content = allDetails.stream()
+                    .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                    .collect(Collectors.toList());
 
-        Page<PurchaseOrderDetail> pages = purchaseOrderDetailRepository.findAllByPurchaseOrderId(purchaseId, pageable);
-        List<PurchaseOrderDetailResponseDto> content = pages.getContent().stream()
-                .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
-                .collect(Collectors.toList());
+            // Tạo PagingResponse "giả" chứa tất cả
+            PagingResponse<PurchaseOrderDetailResponseDto> response = new PagingResponse<>();
+            response.setContent(content);
+            response.setTotalElements((long) content.size());
+            response.setPageNo(0);
+            response.setPageSize(content.size()); // Page size = total
+            response.setTotalPages(1);
+            response.setLast(true);
+            return response;
+        } else {
+            Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
-        PagingResponse<PurchaseOrderDetailResponseDto> response = new PagingResponse<>();
-        response.setContent(content);
-        response.setTotalElements(pages.getTotalElements());
-        response.setPageNo(pages.getNumber());
-        response.setPageSize(pages.getSize());
-        response.setTotalPages(pages.getTotalPages());
-        response.setLast(pages.isLast());
-        return response;
+            Page<PurchaseOrderDetail> pages = purchaseOrderDetailRepository.findAllByPurchaseOrderId(purchaseId, pageable);
+            List<PurchaseOrderDetailResponseDto> content = pages.getContent().stream()
+                    .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                    .collect(Collectors.toList());
+
+            PagingResponse<PurchaseOrderDetailResponseDto> response = new PagingResponse<>();
+            response.setContent(content);
+            response.setTotalElements(pages.getTotalElements());
+            response.setPageNo(pages.getNumber());
+            response.setPageSize(pages.getSize());
+            response.setTotalPages(pages.getTotalPages());
+            response.setLast(pages.isLast());
+            return response;
+        }
     }
 
     @Override

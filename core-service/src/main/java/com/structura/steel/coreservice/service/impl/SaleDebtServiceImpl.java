@@ -1,9 +1,11 @@
 package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.ProductFeignClient;
+import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
+import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
 import com.structura.steel.coreservice.entity.SaleDebt;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.mapper.SaleDebtMapper;
@@ -85,25 +87,43 @@ public class SaleDebtServiceImpl implements SaleDebtService {
     }
 
     @Override
-    public PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(int pageNo, int pageSize, String sortBy, String sortDir, Long saleId) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<SaleDebt> pages = saleDebtRepository.findAllBySaleOrderId(saleId, pageable);
-        List<SaleDebt> saleDebts = pages.getContent();
-        List<GetAllSaleDebtResponseDto> content = saleDebts.stream()
-                .map(saleDebtMapper::toGetAllSaleDebtResponseDto)
-                .collect(Collectors.toList());
+    public PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(
+            int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId) {
+        if(all) {
+            List<SaleDebt> allDetails = saleDebtRepository.findAllBySaleOrderId(saleId);
+            List<GetAllSaleDebtResponseDto> content = allDetails.stream()
+                    .map(saleDebtMapper::toGetAllSaleDebtResponseDto)
+                    .collect(Collectors.toList());
 
-        PagingResponse<GetAllSaleDebtResponseDto> response = new PagingResponse<>();
-        response.setContent(content);
-        response.setTotalElements(pages.getTotalElements());
-        response.setPageNo(pages.getNumber());
-        response.setPageSize(pages.getSize());
-        response.setTotalPages(pages.getTotalPages());
-        response.setLast(pages.isLast());
-        return response;
+            // Tạo PagingResponse "giả" chứa tất cả
+            PagingResponse<GetAllSaleDebtResponseDto> response = new PagingResponse<>();
+            response.setContent(content);
+            response.setTotalElements((long) content.size());
+            response.setPageNo(0);
+            response.setPageSize(content.size()); // Page size = total
+            response.setTotalPages(1);
+            response.setLast(true);
+            return response;
+        } else {
+            Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+            Page<SaleDebt> pages = saleDebtRepository.findAllBySaleOrderId(saleId, pageable);
+            List<SaleDebt> saleDebts = pages.getContent();
+            List<GetAllSaleDebtResponseDto> content = saleDebts.stream()
+                    .map(saleDebtMapper::toGetAllSaleDebtResponseDto)
+                    .collect(Collectors.toList());
+
+            PagingResponse<GetAllSaleDebtResponseDto> response = new PagingResponse<>();
+            response.setContent(content);
+            response.setTotalElements(pages.getTotalElements());
+            response.setPageNo(pages.getNumber());
+            response.setPageSize(pages.getSize());
+            response.setTotalPages(pages.getTotalPages());
+            response.setLast(pages.isLast());
+            return response;
+        }
     }
 
     @Override

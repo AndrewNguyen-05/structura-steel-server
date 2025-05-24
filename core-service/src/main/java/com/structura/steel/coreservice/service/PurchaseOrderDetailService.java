@@ -16,7 +16,7 @@ public interface PurchaseOrderDetailService {
 
     void deletePurchaseOrderDetailById(Long id, Long purchaseId);
 
-    PagingResponse<PurchaseOrderDetailResponseDto> getAllPurchaseOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, Long purchaseId);
+    PagingResponse<PurchaseOrderDetailResponseDto> getAllPurchaseOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long purchaseId);
 
     List<PurchaseOrderDetailResponseDto> createPurchaseOrderDetailsBatch(List<PurchaseOrderDetailRequestDto> batchDto,
                                                                          Long purchaseId);
