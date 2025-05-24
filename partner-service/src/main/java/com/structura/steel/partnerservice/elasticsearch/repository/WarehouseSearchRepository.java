@@ -11,8 +11,8 @@ public interface WarehouseSearchRepository extends ElasticsearchRepository<Wareh
     @Query("""
           {
             "multi_match": {
-              "query":    "?0",
-              "productType":     "phrase_prefix",
+              "query": "?0",
+              "type": "bool_prefix",
               "analyzer": "folding",
               "fields": [
                 "warehouseName",
@@ -26,7 +26,20 @@ public interface WarehouseSearchRepository extends ElasticsearchRepository<Wareh
     Page<WarehouseDocument> searchByKeyword(String searchKeyword, Pageable pageable);
 
     // Suggestion query using the "suggestion" field (populated with partnerName)
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"productType\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
+    @Query("""
+          {
+            "multi_match": {
+              "query": "?0",
+              "type": "bool_prefix",
+              "analyzer": "folding",
+              "fields": [
+                "suggestion",
+                "suggestion._2gram",
+                "suggestion._3gram"
+              ]
+            }
+          }
+          """)
     Page<WarehouseDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
 
     Page<WarehouseDocument> getAllByPartnerId(Long partnerId, Pageable pageable);

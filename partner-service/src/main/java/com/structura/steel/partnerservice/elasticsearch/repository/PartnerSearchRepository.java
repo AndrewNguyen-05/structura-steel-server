@@ -16,8 +16,8 @@ public interface PartnerSearchRepository extends ElasticsearchRepository<Partner
     @Query("""
           {
             "multi_match": {
-              "query":    "?0",
-              "productType":     "phrase_prefix",
+              "query": "?0",
+              "type": "bool_prefix",
               "analyzer": "folding",
               "fields": [
                 "partnerName",
@@ -31,6 +31,19 @@ public interface PartnerSearchRepository extends ElasticsearchRepository<Partner
     Page<PartnerDocument> searchByKeyword(String searchKeyword, Pageable pageable);
 
     // Suggestion query using the "suggestion" field (populated with partnerName)
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"productType\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
+    @Query("""
+          {
+            "multi_match": {
+              "query": "?0",
+              "type": "bool_prefix",
+              "analyzer": "folding",
+              "fields": [
+                "suggestion",
+                "suggestion._2gram",
+                "suggestion._3gram"
+              ]
+            }
+          }
+          """)
     Page<PartnerDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
 }

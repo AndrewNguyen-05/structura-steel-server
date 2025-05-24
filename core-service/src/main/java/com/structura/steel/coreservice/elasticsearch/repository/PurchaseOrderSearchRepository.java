@@ -11,8 +11,8 @@ public interface PurchaseOrderSearchRepository extends ElasticsearchRepository<P
     @Query("""
           {
             "multi_match": {
-              "query":    "?0",
-              "productType":     "phrase_prefix",
+              "query": "?0",
+              "type": "bool_prefix",
               "analyzer": "folding",
               "fields": [
                 "importCode",
@@ -24,6 +24,19 @@ public interface PurchaseOrderSearchRepository extends ElasticsearchRepository<P
     Page<PurchaseOrderDocument> searchByKeyword(String searchKeyword, Pageable pageable);
 
     // Suggestion query using the "suggestion" field (populated with partnerName)
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"productType\": \"bool_prefix\", \"fields\": [\"suggestion\", \"suggestion._2gram\", \"suggestion._3gram\"]}}")
+    @Query("""
+          {
+            "multi_match": {
+              "query": "?0",
+              "type": "bool_prefix",
+              "analyzer": "folding",
+              "fields": [
+                "suggestion",
+                "suggestion._2gram",
+                "suggestion._3gram"
+              ]
+            }
+          }
+          """)
     Page<PurchaseOrderDocument> findBySuggestionPrefix(String prefix, Pageable pageable);
 }
