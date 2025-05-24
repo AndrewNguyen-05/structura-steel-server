@@ -129,6 +129,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productMapper.toProduct(productRequestDto);
         product.setCode(CodeGenerator.generateCode(EntityType.PRODUCT));
+        product.setDeleted(false);
 
         Product savedProduct = productRepository.save(product);
 

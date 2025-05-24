@@ -48,23 +48,42 @@ public class VehicleController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/soft-delete/{vehicleId}") // New: Soft delete endpoint
+    public ResponseEntity<Void> softDeleteVehicle(
+            @PathVariable Long partnerId,
+            @PathVariable Long vehicleId) {
+        vehicleService.softDeleteVehicle(partnerId, vehicleId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{vehicleId}") // New: Restore endpoint
+    public ResponseEntity<VehicleResponseDto> restoreVehicle(
+            @PathVariable Long partnerId,
+            @PathVariable Long vehicleId) {
+        return ResponseEntity.ok(vehicleService.restoreVehicle(partnerId, vehicleId));
+    }
+
+
     @GetMapping
     public ResponseEntity<PagingResponse<VehicleResponseDto>> getAllVehicles(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED, required = false) boolean deleted,
             @PathVariable Long partnerId,
             @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(vehicleService.getAllVehiclesByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId, searchKeyword));
+        return ResponseEntity.ok(vehicleService.getAllVehiclesByPartnerId(pageNo, pageSize, sortBy, sortDir, partnerId, searchKeyword, deleted));
     }
 
     @GetMapping("/suggest")
     public ResponseEntity<List<String>> suggest(
             @RequestParam("prefix") String prefix,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @PathVariable Long partnerId,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED, required = false) boolean deleted
     ) {
-        return ResponseEntity.ok(vehicleService.suggestVehicles(prefix, size));
+        return ResponseEntity.ok(vehicleService.suggestVehicles(prefix, size, deleted, partnerId));
     }
 }

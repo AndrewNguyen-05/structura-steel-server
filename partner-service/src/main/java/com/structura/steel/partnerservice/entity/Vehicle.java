@@ -45,5 +45,8 @@ public class Vehicle extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "partner_id")
     private Partner partner;
+
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 }
 

@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -42,8 +43,8 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public VehicleResponseDto createVehicle(Long partnerId, VehicleRequestDto dto) {
-        Partner partner = partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+        Partner partner = getValidPartner(partnerId);
+
         Vehicle vehicle = vehicleMapper.toVehicle(dto);
 
         if(vehicleRepository.existsByLicensePlate(vehicle.getLicensePlate())) {
@@ -52,6 +53,7 @@ public class VehicleServiceImpl implements VehicleService {
 
         vehicle.setPartner(partner);
         vehicle.setVehicleCode(CodeGenerator.generateCode(EntityType.VEHICLE));
+        vehicle.setDeleted(false);
         Vehicle saved = vehicleRepository.save(vehicle);
 
         VehicleDocument vehicleDocument = vehicleMapper.toDocument(saved);
@@ -70,14 +72,9 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public VehicleResponseDto updateVehicle(Long partnerId, Long vehicleId, VehicleRequestDto dto) {
-        // Xác thực Partner
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        Vehicle existing = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "id", vehicleId));
-        if (!existing.getPartner().getId().equals(partnerId)) {
-            throw new ResourceNotBelongToException("Vehicle", "id", vehicleId, "partner", "id", partnerId);
-        }
+        getValidPartner(partnerId);
+        Vehicle existing = getValidVehicle(partnerId, vehicleId, false);
+
         if (vehicleRepository.existsByLicensePlate(dto.licensePlate())) {
             throw new DuplicateKeyException("Vehicle", "license plate", existing.getLicensePlate());
         }
@@ -100,72 +97,82 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public VehicleResponseDto getVehicleById(Long partnerId, Long vehicleId) {
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "id", vehicleId));
-        if (!vehicle.getPartner().getId().equals(partnerId)) {
-            throw new ResourceNotBelongToException("Vehicle", "id", vehicleId, "partner", "id", partnerId);
-        }
+        getValidPartner(partnerId);
+
+        Vehicle vehicle = getValidVehicle(partnerId, vehicleId, false);
+
         return vehicleMapper.toVehicleResponseDto(vehicle);
     }
 
     @Override
     public void deleteVehicle(Long partnerId, Long vehicleId) {
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
-        Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "id", vehicleId));
-        if (!vehicle.getPartner().getId().equals(partnerId)) {
-            throw new ResourceNotBelongToException("Vehicle", "id", vehicleId, "partner", "id", partnerId);
-        }
-        vehicleSearchRepository.deleteById(vehicle.getId()); // luu vao Elastic Search
+        getValidPartner(partnerId);
+        Vehicle vehicle = getValidVehicle(partnerId, vehicleId, true);
+
+        vehicleSearchRepository.deleteById(vehicle.getId());
 
         vehicleRepository.delete(vehicle);
     }
 
     @Override
-    public PagingResponse<VehicleResponseDto> getAllVehiclesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword) {
-        partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+    public void softDeleteVehicle(Long partnerId, Long vehicleId) {
+        getValidPartner(partnerId);
+        Vehicle vehicle = getValidVehicle(partnerId, vehicleId, false); // Ensure it's not already deleted
+
+        vehicle.setDeleted(true);
+        vehicleRepository.save(vehicle);
+        saveToElasticsearch(vehicle);
+        log.info("Vehicle with ID {} soft-deleted.", vehicleId);
+    }
+
+    @Override
+    public VehicleResponseDto restoreVehicle(Long partnerId, Long vehicleId) {
+        getValidPartner(partnerId);
+        Vehicle vehicle = getValidVehicle(partnerId, vehicleId, true); // Find a deleted vehicle
+
+        vehicle.setDeleted(false);
+        Vehicle restored = vehicleRepository.save(vehicle);
+        saveToElasticsearch(restored);
+        log.info("Vehicle with ID {} restored.", vehicleId);
+
+        return vehicleMapper.toVehicleResponseDto(restored);
+    }
+
+    @Override
+    public PagingResponse<VehicleResponseDto> getAllVehiclesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword, boolean deleted) {
+        getValidPartner(partnerId); // Ensure partner exists
 
         String effectiveSortBy = sortBy;
         if ("vehicleCode".equalsIgnoreCase(sortBy)) {
             effectiveSortBy = "vehicleCode.keyword";
         } else if ("driverName".equalsIgnoreCase(sortBy)) {
             effectiveSortBy = "driverName.keyword";
+        } else if ("licensePlate".equalsIgnoreCase(sortBy)){
+            effectiveSortBy = "licensePlate.keyword";
         }
 
-        // Tao sort
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(effectiveSortBy).ascending()
                 : Sort.by(effectiveSortBy).descending();
 
-        // Tao 1 pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-
-        // Tao 1 mang cac trang product su dung find all voi tham so la pageable
         Page<VehicleDocument> pages;
 
         try {
             if (StringUtils.hasText(searchKeyword)) {
-                pages = vehicleSearchRepository.searchByKeyword(searchKeyword, pageable);
+                pages = vehicleSearchRepository.searchByKeywordAndPartnerId(searchKeyword, partnerId, deleted, pageable);
             } else {
-                pages = vehicleSearchRepository.getAllByPartnerId(partnerId, pageable);
+                pages = vehicleSearchRepository.getAllByPartnerIdAndDeleted(partnerId, deleted, pageable);
             }
         } catch (Exception ex) {
-            log.error("Exception: {}", ex.getMessage());
+            log.error("Elasticsearch query failed for vehicles (Partner ID: {}): {}", partnerId, ex.getMessage(), ex);
             pages = Page.empty(pageable);
         }
 
-        // Lay ra gia tri (content) cua page
-        List<VehicleDocument> vehicles = pages.getContent();
+        List<VehicleResponseDto> content = pages.getContent().stream()
+                .map(vehicleMapper::toResponseDtoFromDocument)
+                .collect(Collectors.toList()); // Use collect
 
-        // Ep kieu sang dto
-        List<VehicleResponseDto> content = vehicles.stream()
-                .map(vehicleMapper::toResponseDtoFromDocument).toList();
-
-        // Gan gia tri (content) cua page vao ProductResponse de tra ve
         PagingResponse<VehicleResponseDto> response = new PagingResponse<>();
         response.setContent(content);
         response.setTotalElements(pages.getTotalElements());
@@ -179,15 +186,55 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> suggestVehicles(String prefix, int size) {
+    public List<String> suggestVehicles(String prefix, int size, boolean deleted, Long partnerId) {
         if (!StringUtils.hasText(prefix)) {
             return Collections.emptyList();
         }
-        // Gọi thẳng repository, nó sẽ tìm prefix trên sub‐field _index_prefix
-        var page = vehicleSearchRepository.findBySuggestionPrefix(prefix, PageRequest.of(0, size));
+        Pageable pageable = PageRequest.of(0, size);
+        Page<VehicleDocument> page = vehicleSearchRepository.findBySuggestionPrefix(prefix, deleted, partnerId, pageable);
         return page.getContent().stream()
                 .map(VehicleDocument::getDriverName)
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    private Partner getValidPartner(Long partnerId) {
+        return partnerRepository.findByIdAndDeletedFalse(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId + " (or it might be deleted)"));
+    }
+
+    private Vehicle getValidVehicle(Long partnerId, Long vehicleId, boolean expectDeleted) {
+        // Fetch any vehicle first to give a more specific error
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "id", vehicleId));
+
+        // Check ownership
+        if (!vehicle.getPartner().getId().equals(partnerId)) {
+            throw new ResourceNotBelongToException("Vehicle", "id", vehicleId, "partner", "id", partnerId);
+        }
+
+        // Check deleted status based on expectation
+        if (vehicle.getDeleted() != expectDeleted) {
+            throw new ResourceNotFoundException("Vehicle", "id", vehicleId +
+                    (expectDeleted ? " (it is not deleted)" : " (it is deleted)"));
+        }
+
+        return vehicle;
+    }
+
+
+    private void saveToElasticsearch(Vehicle vehicle) {
+        try {
+            VehicleDocument vehicleDocument = vehicleMapper.toDocument(vehicle);
+            // Suggestion based on license plate and driver name
+            String suggestion = (vehicle.getLicensePlate() != null ? vehicle.getLicensePlate() : "") + " "
+                    + (vehicle.getDriverName() != null ? vehicle.getDriverName() : "");
+            vehicleDocument.setSuggestion(suggestion.trim());
+            vehicleDocument.setDeleted(vehicle.getDeleted());
+            vehicleSearchRepository.save(vehicleDocument);
+            log.info("Vehicle with ID {} saved to Elasticsearch.", vehicle.getId());
+        } catch (Exception e) {
+            log.error("Error saving vehicle with ID {} to Elasticsearch: {}", vehicle.getId(), e.getMessage(), e);
+        }
     }
 }

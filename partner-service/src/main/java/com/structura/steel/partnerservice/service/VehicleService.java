@@ -16,7 +16,11 @@ public interface VehicleService {
 
     void deleteVehicle(Long partnerId, Long vehicleId);
 
-    PagingResponse<VehicleResponseDto> getAllVehiclesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword);
+    void softDeleteVehicle(Long partnerId, Long vehicleId);
 
-    List<String> suggestVehicles(String prefix, int size);
+    VehicleResponseDto restoreVehicle(Long partnerId, Long vehicleId);
+
+    PagingResponse<VehicleResponseDto> getAllVehiclesByPartnerId(int pageNo, int pageSize, String sortBy, String sortDir, Long partnerId, String searchKeyword, boolean deleted);
+
+    List<String> suggestVehicles(String prefix, int size, boolean deleted, Long partnerId);
 }
