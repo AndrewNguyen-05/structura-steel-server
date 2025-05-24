@@ -18,7 +18,7 @@ public interface PartnerSearchRepository extends ElasticsearchRepository<Partner
                 {
                   "multi_match": {
                     "query": "?0",
-                    "type": "bool_prefix",
+                    "type": "phrase_prefix",
                     "analyzer": "folding",
                     "fields": [
                         "partnerName",

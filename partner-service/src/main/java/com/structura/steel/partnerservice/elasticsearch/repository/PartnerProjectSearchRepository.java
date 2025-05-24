@@ -17,9 +17,14 @@ public interface PartnerProjectSearchRepository extends ElasticsearchRepository<
           "must": [
             { "multi_match": {
                 "query": "?0", 
-                "type": "bool_prefix", 
+                "type": "phrase_prefix", 
                 "analyzer": "folding",
-                "fields":[ "projectName","projectName._2gram","projectCode","projectCode._2gram" ]
+                "fields":[ 
+                    "projectName",
+                    "projectName._2gram",
+                    "projectCode",
+                    "projectCode._2gram"
+                ]
             }},
             { "term": { "partnerId": ?1 }},
             { "term": { "deleted":   ?2 }}

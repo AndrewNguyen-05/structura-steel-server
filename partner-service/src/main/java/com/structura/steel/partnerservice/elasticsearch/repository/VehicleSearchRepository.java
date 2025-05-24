@@ -19,7 +19,7 @@ public interface VehicleSearchRepository extends ElasticsearchRepository<Vehicle
                  {
                    "multi_match": {
                      "query": "?0",
-                     "type": "bool_prefix",
+                     "type": "phrase_prefix",
                      "analyzer": "folding",
                      "fields": [
                        "driverName", "driverName._2gram",

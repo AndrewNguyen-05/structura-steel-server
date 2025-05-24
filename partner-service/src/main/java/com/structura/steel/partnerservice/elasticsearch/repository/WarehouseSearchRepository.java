@@ -17,11 +17,13 @@ public interface WarehouseSearchRepository extends ElasticsearchRepository<Wareh
             {
               "multi_match": {
                 "query": "?0",
-                "type": "bool_prefix",
+                "type": "phrase_prefix",
                 "analyzer": "folding",
                 "fields": [
-                  "warehouseName",        "warehouseName._2gram",
-                  "warehouseCode",        "warehouseCode._2gram"
+                  "warehouseName",
+                  "warehouseName._2gram",
+                  "warehouseCode",
+                  "warehouseCode._2gram"
                 ]
               }
             },

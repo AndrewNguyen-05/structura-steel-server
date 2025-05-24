@@ -18,7 +18,7 @@ public interface ProductSearchRepository extends ElasticsearchRepository<Product
                 {
                   "multi_match": {
                     "query": "?0",
-                    "type": "bool_prefix",
+                    "type": "phrase_prefix",
                     "analyzer": "folding",
                     "fields": [
                       "name",
