@@ -17,7 +17,7 @@ public interface SaleOrderDetailService {
 
     void deleteSaleOrderDetailById(Long id, Long saleId);
 
-    PagingResponse<GetAllSaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId);
+    PagingResponse<SaleOrderDetailResponseDto> getAllSaleOrderDetails(int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId);
 
     List<SaleOrderDetailResponseDto> createSaleOrderDetailsBatch(List<SaleOrderDetailRequestDto> batchDto, Long saleId);
 }

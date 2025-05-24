@@ -14,6 +14,7 @@ import java.time.Instant;
 public class SaleOrderDetailResponseDto {
     private Long id;
     private Long saleOrderId;
+    private Long productId;
     private ProductResponseDto product;
     private BigDecimal quantity;
     private BigDecimal weight;

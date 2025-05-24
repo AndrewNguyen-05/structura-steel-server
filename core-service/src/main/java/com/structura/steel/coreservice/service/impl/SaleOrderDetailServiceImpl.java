@@ -98,16 +98,16 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     }
 
     @Override
-    public PagingResponse<GetAllSaleOrderDetailResponseDto> getAllSaleOrderDetails(
+    public PagingResponse<SaleOrderDetailResponseDto> getAllSaleOrderDetails(
             int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId) {
         if(all) {
             List<SaleOrderDetail> allDetails = saleOrderDetailRepository.findAllBySaleOrderId(saleId);
-            List<GetAllSaleOrderDetailResponseDto> content = allDetails.stream()
-                    .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)
+            List<SaleOrderDetailResponseDto> content = allDetails.stream()
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
             // Tạo PagingResponse "giả" chứa tất cả
-            PagingResponse<GetAllSaleOrderDetailResponseDto> response = new PagingResponse<>();
+            PagingResponse<SaleOrderDetailResponseDto> response = new PagingResponse<>();
             response.setContent(content);
             response.setTotalElements((long) content.size());
             response.setPageNo(0);
@@ -122,10 +122,10 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
             Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
             Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAllBySaleOrderId(saleId, pageable);
             List<SaleOrderDetail> saleOrderDetails = pages.getContent();
-            List<GetAllSaleOrderDetailResponseDto> content = saleOrderDetails.stream()
-                    .map(saleOrderDetailMapper::toSaleOrderDetailGetAllDto)
+            List<SaleOrderDetailResponseDto> content = saleOrderDetails.stream()
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
-            PagingResponse<GetAllSaleOrderDetailResponseDto> response = new PagingResponse<>();
+            PagingResponse<SaleOrderDetailResponseDto> response = new PagingResponse<>();
             response.setContent(content);
             response.setTotalElements(pages.getTotalElements());
             response.setPageNo(pages.getNumber());
