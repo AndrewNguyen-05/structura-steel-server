@@ -2,11 +2,13 @@ package com.structura.steel.commons.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
+import com.structura.steel.commons.exception.StructuraSteelException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import feign.Util;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 
 @Configuration
 public class FeignConfig {
@@ -24,14 +26,14 @@ public class FeignConfig {
 
             @Override
             public Exception decode(String methodKey, Response response) {
-                String body = "";
                 try {
-                    body = Util.toString(response.body().asReader());
+                    String body = Util.toString(response.body().asReader());
                     // Assume partner‐service returns {"timeStamp":...,"message":...,"details":...}
+                    int httpStatus = response.status();
                     var node = mapper.readTree(body);
                     String message = node.get("message").asText();
                     // throw your custom exception so GlobalExceptionHandler catches it
-                    return new ResourceNotBelongToException(message);
+                    return new StructuraSteelException(HttpStatus.resolve(httpStatus), message);
                 } catch (Exception e) {
                     // fallback to default (e.g. for non‐JSON errors)
                     return defaultDecoder.decode(methodKey, response);

@@ -13,7 +13,6 @@ import java.util.List;
 @Mapper
 public interface VehicleMapper {
 
-    @Mapping(target = "partner.id", source = "partnerId")
     Vehicle toVehicle(VehicleRequestDto dto);
 
     @Mapping(target = "partnerId", source = "partner.id")
