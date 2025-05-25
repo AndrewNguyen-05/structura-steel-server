@@ -166,24 +166,10 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
         // Lay ra gia tri (content) cua page
         List<PartnerProjectDocument> projects = pages.getContent();
 
-
         // Ep kieu
         List<PartnerProjectResponseDto> content = projects.stream()
-                .map(partnerProjectMapper::toResponseDtoFromDocument)
+                .map(this::documentToResponseWithProduct)
                 .collect(Collectors.toList());
-
-        // Fetch product details
-        for(int i = 0; i < projects.size(); i++) {
-            List<Long> productIds = projects.get(i).getProductIds();
-            List<ProductResponseDto> products = new ArrayList<>();
-            if (productIds != null) {
-                for (Long productId : productIds) {
-                    ProductResponseDto product = productFeignClient.getProductById(productId);
-                    products.add(product);
-                }
-            }
-            content.get(i).setProducts(products);
-        }
 
         PagingResponse<PartnerProjectResponseDto> response = new PagingResponse<>();
         response.setContent(content);
@@ -270,97 +256,98 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     private PartnerProjectResponseDto entityToResponseWithProduct(PartnerProject project) {
         PartnerProjectResponseDto responseDto = partnerProjectMapper.toPartnerProjectResponseDto(project);
 
-        List<ProductResponseDto> products = fetchFilterAndUpdateProducts(project);
+        List<ProductResponseDto> products = fetchProductsAndHandleUpdates(project.getId(), project.getProductIds());
 
         responseDto.setProducts(products);
         return responseDto;
     }
 
-    private List<ProductResponseDto> fetchFilterAndUpdateProducts(PartnerProject project) {
-        List<Long> currentProductIds = project.getProductIds();
+    private PartnerProjectResponseDto documentToResponseWithProduct(PartnerProjectDocument document) {
+        PartnerProjectResponseDto responseDto = partnerProjectMapper.toResponseDtoFromDocument(document);
+
+        List<ProductResponseDto> products = fetchProductsAndHandleUpdates(document.getId(), document.getProductIds());
+
+        responseDto.setProducts(products);
+        return responseDto;
+    }
+
+    private List<ProductResponseDto> fetchProductsAndHandleUpdates(Long projectId, List<Long> currentProductIds) {
         List<Long> idsToRemove = new ArrayList<>();
         List<ProductResponseDto> validProducts = new ArrayList<>();
+        List<Long> foundIds = new ArrayList<>();
 
-        // Trả về list rỗng nếu không có ID
         if (currentProductIds == null || currentProductIds.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // Tạo một bản sao để lặp
-        List<Long> idsToFetch = new ArrayList<>(currentProductIds);
+        try {
+            // *** GỌI BATCH ĐỂ LẤY NHIỀU SẢN PHẨM CÙNG LÚC ***
+            log.debug("Fetching batch products for project {}: {}", projectId, currentProductIds);
+            List<ProductResponseDto> returnedProducts = productFeignClient.getProductsBatch(new ArrayList<>(currentProductIds));
+            log.debug("Received {} products from batch call for project {}.", returnedProducts.size(), projectId);
 
-        for (Long productId : idsToFetch) {
-            try {
-                ProductResponseDto product = productFeignClient.getProductById(productId);
+            // Xử lý kết quả trả về
+            for (ProductResponseDto product : returnedProducts) {
+                foundIds.add(product.id()); // Giả sử DTO có .id()
 
-                // Kiểm tra Soft Delete - Giả sử DTO của bạn có phương thức deleted()
-                // Nếu là getter thì dùng product.getDeleted()
-                if (product.deleted()) {
-                    log.warn("Product ID {} is soft-deleted, marking for removal from project {}.", productId, project.getId());
-//                    idsToRemove.add(productId);
+                if (product.deleted()) { // Giả sử DTO có .deleted()
+                    log.warn("Product ID {} is soft-deleted, skipping for project {}.", product.id(), projectId);
+                    // Nếu muốn xóa cả SP soft-deleted khỏi project, thêm dòng sau:
+                    // idsToRemove.add(product.id());
                 } else {
                     validProducts.add(product);
                 }
-            } catch (StructuraSteelException e) {
-                // Xử lý Hard Delete (404)
-                if(e.getStatus().equals(HttpStatus.NOT_FOUND)) {
-                    log.warn("Product ID {} not found (404), marking for removal from project {}.", productId, project.getId());
-                    idsToRemove.add(productId);
-                } else {
-                    // Xử lý các lỗi khác (mạng, server...)
-                    log.error("Failed to fetch product ID {} for project {}. Skipping. Error: {}", productId, project.getId(), e.getMessage());
-                    // Không xóa ID trong trường hợp lỗi tạm thời, chỉ bỏ qua lần này.
-                }
-
             }
+
+            // Xác định các ID bị Hard-Delete (yêu cầu nhưng không tìm thấy)
+            List<Long> hardDeletedIds = new ArrayList<>(currentProductIds);
+            hardDeletedIds.removeAll(foundIds);
+            idsToRemove.addAll(hardDeletedIds); // Thêm các ID 404 vào danh sách cần xóa
+
+            if (!hardDeletedIds.isEmpty()) {
+                log.warn("Product IDs {} not found (404/hard-deleted), marking for removal from project {}.", hardDeletedIds, projectId);
+            }
+
+        } catch (Exception e) {
+            // Xử lý nếu gọi batch bị lỗi hoàn toàn (vd: ProductService sập)
+            log.error("Failed to fetch batch products for project {}. Error: {}. Cannot determine 404s.", projectId, e.getMessage(), e);
+            // Trong trường hợp này, ta không thể biết cái nào 404, nên chỉ trả về rỗng và không update.
+            // Hoặc bạn có thể implement fallback gọi 1-1 ở đây nếu muốn.
+            return Collections.emptyList();
         }
 
-        // Nếu có ID cần xóa
+        // Nếu có ID cần xóa (chỉ hard-deleted theo logic hiện tại)
         if (!idsToRemove.isEmpty()) {
-            log.info("Project {} has IDs to remove: {}. Attempting DB update.", project.getId(), idsToRemove);
+            // Gọi hàm cập nhật riêng
+            updateProjectProductList(projectId, idsToRemove);
+        }
 
-            // **QUAN TRỌNG**: Lấy lại entity từ DB để đảm bảo nó được quản lý (managed)
-            PartnerProject projectToUpdate = partnerProjectRepository.findById(project.getId()).orElse(null);
+        return validProducts;
+    }
 
-            if (projectToUpdate != null && projectToUpdate.getProductIds() != null) {
+    private void updateProjectProductList(Long projectId, List<Long> idsToRemove) {
+        log.info("Project {} has IDs to remove: {}. Attempting DB update.", projectId, idsToRemove);
+        PartnerProject projectToUpdate = partnerProjectRepository.findById(projectId).orElse(null);
 
-                // **SỬA LỖI CHÍNH**: Tạo một list MỚI thay vì sửa list cũ
-                List<Long> newProductIds = new ArrayList<>(projectToUpdate.getProductIds());
+        if (projectToUpdate != null && projectToUpdate.getProductIds() != null) {
+            List<Long> newProductIds = new ArrayList<>(projectToUpdate.getProductIds());
+            boolean changed = newProductIds.removeAll(idsToRemove);
 
-                // Thực hiện xóa trên list mới
-                boolean changed = newProductIds.removeAll(idsToRemove);
-
-                if (changed) {
-                    log.info("Project {} - List changed. Old size: {}, New size: {}. Saving...",
-                            project.getId(), projectToUpdate.getProductIds().size(), newProductIds.size());
-
-                    // Gán list MỚI vào entity
-                    projectToUpdate.setProductIds(newProductIds);
-
-                    try {
-                        // Sử dụng saveAndFlush để ép ghi xuống DB ngay lập tức và bắt lỗi sớm
-                        PartnerProject updated = partnerProjectRepository.saveAndFlush(projectToUpdate);
-
-                        // Cập nhật Elasticsearch SAU KHI DB thành công
-                        saveToElasticsearch(updated);
-                        log.info("Successfully removed IDs {} from project {}. DB & ES updated.", idsToRemove, project.getId());
-
-                        // Cập nhật lại đối tượng 'project' gốc để caller có dữ liệu mới nhất
-                        project.setProductIds(updated.getProductIds());
-
-                    } catch (Exception e) {
-                        log.error("Failed to save/update project {} after removing product IDs: {}", project.getId(), e.getMessage(), e);
-                    }
-                } else {
-                    // Ghi log nếu vì lý do nào đó removeAll không thay đổi list
-                    log.warn("Project {} - IDs {} were marked for removal, but list did not change. Current IDs: {}",
-                            project.getId(), idsToRemove, projectToUpdate.getProductIds());
+            if (changed) {
+                log.info("Project {} - List changed. Saving...", projectId);
+                projectToUpdate.setProductIds(newProductIds);
+                try {
+                    PartnerProject updated = partnerProjectRepository.saveAndFlush(projectToUpdate);
+                    saveToElasticsearch(updated);
+                    log.info("Successfully removed IDs {} from project {}.", idsToRemove, projectId);
+                } catch (Exception e) {
+                    log.error("Failed to save/update project {} after removing IDs: {}", projectId, e.getMessage(), e);
                 }
             } else {
-                log.error("Could not find project {} in DB or it has no product IDs to update.", project.getId());
+                log.warn("Project {} - IDs {} marked, but list didn't change.", projectId, idsToRemove);
             }
+        } else {
+            log.error("Could not find project {} in DB to update.", projectId);
         }
-
-        return validProducts; // Trả về danh sách sản phẩm hợp lệ
     }
 }
