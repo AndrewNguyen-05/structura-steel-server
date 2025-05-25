@@ -2,6 +2,7 @@ package com.structura.steel.commons.dto.partner.response;
 
 import com.structura.steel.commons.enumeration.PartnerType;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public record PartnerResponseDto(
         String contactPersonPhone,
         String bankName,
         String bankAccountNumber,
+		BigDecimal debtAmount,
         List<PartnerProjectResponseDto> partnerProjects,
         List<VehicleResponseDto> vehicles,
         List<WarehouseResponseDto> warehouses,

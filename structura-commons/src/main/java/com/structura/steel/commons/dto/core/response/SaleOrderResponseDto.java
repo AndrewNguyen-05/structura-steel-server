@@ -18,9 +18,7 @@ public class SaleOrderResponseDto{
     private String exportCode;
     private PartnerResponseDto partner;
     private PartnerProjectResponseDto project;
-    private Instant orderDate;
     private String status;
-    private String orderType;
     private Long warehouseId;
     private BigDecimal totalAmount;
     private String saleOrdersNote;

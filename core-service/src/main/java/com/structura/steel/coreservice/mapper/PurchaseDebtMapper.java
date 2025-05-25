@@ -10,7 +10,6 @@ import java.util.List;
 @Mapper
 public interface PurchaseDebtMapper {
 
-    @Mapping(target = "purchaseOrder", ignore = true)
     PurchaseDebt toPurchaseDebt(PurchaseDebtRequestDto dto);
 
     @Mapping(source = "purchaseOrder.id", target = "purchaseOrderId")

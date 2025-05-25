@@ -1,9 +1,13 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.client.ProductFeignClient;
+import com.structura.steel.commons.dto.core.response.SaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
+import com.structura.steel.coreservice.entity.SaleOrderDetail;
 import com.structura.steel.coreservice.mapper.PurchaseOrderDetailMapper;
 import com.structura.steel.coreservice.repository.PurchaseOrderDetailRepository;
 import com.structura.steel.coreservice.repository.PurchaseOrderRepository;
@@ -29,6 +33,8 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
 
     private final PurchaseOrderDetailMapper purchaseOrderDetailMapper;
 
+    private final ProductFeignClient productFeignClient;
+
     @Override
     public PurchaseOrderDetailResponseDto createPurchaseOrderDetail(PurchaseOrderDetailRequestDto dto, Long purchaseId) {
         PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
@@ -42,7 +48,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
         purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(detail.getSubtotal()));
         purchaseOrderRepository.save(purchaseOrder);
 
-        return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(saved);
+        return entityToResponseWithProduct(saved);
     }
 
     @Override
@@ -60,14 +66,14 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
         purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(updated.getSubtotal()));
         purchaseOrderRepository.save(purchaseOrder);
 
-        return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(updated);
+        return entityToResponseWithProduct(updated);
     }
 
     @Override
     public PurchaseOrderDetailResponseDto getPurchaseOrderDetailById(Long id, Long purchaseId) {
         PurchaseOrderDetail detail = purchaseOrderDetailRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrderDetail", "id", id));
-        return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(detail);
+        return entityToResponseWithProduct(detail);
     }
 
     @Override
@@ -83,7 +89,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
         if(all) {
             List<PurchaseOrderDetail> allDetails = purchaseOrderDetailRepository.findAllByPurchaseOrderId(purchaseId);
             List<PurchaseOrderDetailResponseDto> content = allDetails.stream()
-                    .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
             // Tạo PagingResponse "giả" chứa tất cả
@@ -103,7 +109,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
 
             Page<PurchaseOrderDetail> pages = purchaseOrderDetailRepository.findAllByPurchaseOrderId(purchaseId, pageable);
             List<PurchaseOrderDetailResponseDto> content = pages.getContent().stream()
-                    .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
             PagingResponse<PurchaseOrderDetailResponseDto> response = new PagingResponse<>();
@@ -148,7 +154,17 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
 
         // 4. map to response DTOs
         return saved.stream()
-                .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                .map(this::entityToResponseWithProduct)
                 .toList();
+    }
+
+    private PurchaseOrderDetailResponseDto entityToResponseWithProduct(PurchaseOrderDetail detail) {
+        PurchaseOrderDetailResponseDto responseDto = purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(detail);
+
+        Long productId = detail.getProductId();
+        ProductResponseDto product = productFeignClient.getProductById(productId);
+        responseDto.setProduct(product);
+
+        return responseDto;
     }
 }

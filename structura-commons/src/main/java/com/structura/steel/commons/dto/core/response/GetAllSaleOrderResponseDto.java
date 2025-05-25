@@ -17,9 +17,7 @@ public class GetAllSaleOrderResponseDto {
 	private String partnerName;
     private Long projectId;
 	private String projectName;
-    private Instant orderDate;
     private String status;
-    private String orderType;
     private BigDecimal totalAmount;
     private String saleOrdersNote;
     private Set<SaleOrderDetailResponseDto>saleOrderDetails;

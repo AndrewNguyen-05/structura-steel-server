@@ -1,6 +1,8 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
@@ -30,14 +32,17 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PurchaseDebtMapper purchaseDebtMapper;
 
+    private final ProductFeignClient productFeignClient;
+
     @Override
     public PurchaseDebtResponseDto createPurchaseDebt(PurchaseDebtRequestDto dto, Long purchaseId) {
-        purchaseOrderRepository.findById(purchaseId)
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", purchaseId));
 
         PurchaseDebt debt = purchaseDebtMapper.toPurchaseDebt(dto);
+        debt.setPurchaseOrder(order);
         PurchaseDebt saved = purchaseDebtRepository.save(debt);
-        return purchaseDebtMapper.toPurchaseDebtResponseDto(saved);
+        return entityToResponseWithProduct(saved);
     }
 
     @Override
@@ -54,7 +59,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
         purchaseDebtMapper.updatePurchaseDebtFromDto(dto, existing);
         PurchaseDebt updated = purchaseDebtRepository.save(existing);
-        return purchaseDebtMapper.toPurchaseDebtResponseDto(updated);
+        return entityToResponseWithProduct(updated);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
             throw new ResourceNotBelongToException("Debt", "id", id, "purchase order", "id", purchaseId);
         }
 
-        return purchaseDebtMapper.toPurchaseDebtResponseDto(debt);
+        return entityToResponseWithProduct(debt);
     }
 
     @Override
@@ -93,7 +98,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         if(all) {
             List<PurchaseDebt> allDetails = purchaseDebtRepository.findAllByPurchaseOrderId(purchaseId);
             List<PurchaseDebtResponseDto> content = allDetails.stream()
-                    .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
             // Tạo PagingResponse "giả" chứa tất cả
@@ -113,7 +118,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
             Page<PurchaseDebt> pages = purchaseDebtRepository.findAllByPurchaseOrderId(purchaseId, pageable);
             List<PurchaseDebtResponseDto> content = pages.getContent().stream()
-                    .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
             PagingResponse<PurchaseDebtResponseDto> response = new PagingResponse<>();
@@ -132,28 +137,35 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
             List<PurchaseDebtRequestDto> batchDto,
             Long purchaseId) {
 
-        // 1. ensure parent exists
-        PurchaseOrder po = purchaseOrderRepository.findById(purchaseId)
+        // ensure parent exists
+        PurchaseOrder order = purchaseOrderRepository.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", purchaseId));
 
-        // 2. map DTOs → entities
+        // map DTOs → entities
         List<PurchaseDebt> entities = batchDto.stream()
                 .map(dto -> {
                     PurchaseDebt debt = purchaseDebtMapper.toPurchaseDebt(dto);
-                    debt.setPurchaseOrder(po);
+                    debt.setPurchaseOrder(order);
                     return debt;
                 })
                 .toList();
 
-        // 3. save all at once
+        // save all at once
         List<PurchaseDebt> saved = purchaseDebtRepository.saveAll(entities);
 
-        // 4. (optional) any side-effects on PurchaseOrder? e.g. update totals
-
-        // 5. map back to response DTOs
+        // map back to response DTOs
         return saved.stream()
-                .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
+                .map(this::entityToResponseWithProduct)
                 .toList();
     }
 
+    private PurchaseDebtResponseDto entityToResponseWithProduct(PurchaseDebt debt) {
+        PurchaseDebtResponseDto responseDto = purchaseDebtMapper.toPurchaseDebtResponseDto(debt);
+
+        Long productId = debt.getProductId();
+        ProductResponseDto product = productFeignClient.getProductById(productId);
+        responseDto.setProduct(product);
+
+        return responseDto;
+    }
 }

@@ -87,16 +87,16 @@ public class SaleDebtServiceImpl implements SaleDebtService {
     }
 
     @Override
-    public PagingResponse<GetAllSaleDebtResponseDto> getAllSaleDebts(
+    public PagingResponse<SaleDebtResponseDto> getAllSaleDebts(
             int pageNo, int pageSize, String sortBy, String sortDir, boolean all, Long saleId) {
         if(all) {
             List<SaleDebt> allDetails = saleDebtRepository.findAllBySaleOrderId(saleId);
-            List<GetAllSaleDebtResponseDto> content = allDetails.stream()
-                    .map(saleDebtMapper::toGetAllSaleDebtResponseDto)
+            List<SaleDebtResponseDto> content = allDetails.stream()
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
             // Tạo PagingResponse "giả" chứa tất cả
-            PagingResponse<GetAllSaleDebtResponseDto> response = new PagingResponse<>();
+            PagingResponse<SaleDebtResponseDto> response = new PagingResponse<>();
             response.setContent(content);
             response.setTotalElements((long) content.size());
             response.setPageNo(0);
@@ -111,11 +111,11 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
             Page<SaleDebt> pages = saleDebtRepository.findAllBySaleOrderId(saleId, pageable);
             List<SaleDebt> saleDebts = pages.getContent();
-            List<GetAllSaleDebtResponseDto> content = saleDebts.stream()
-                    .map(saleDebtMapper::toGetAllSaleDebtResponseDto)
+            List<SaleDebtResponseDto> content = saleDebts.stream()
+                    .map(this::entityToResponseWithProduct)
                     .collect(Collectors.toList());
 
-            PagingResponse<GetAllSaleDebtResponseDto> response = new PagingResponse<>();
+            PagingResponse<SaleDebtResponseDto> response = new PagingResponse<>();
             response.setContent(content);
             response.setTotalElements(pages.getTotalElements());
             response.setPageNo(pages.getNumber());

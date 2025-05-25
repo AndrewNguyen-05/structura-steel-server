@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -53,6 +54,9 @@ public class Partner extends BaseEntity {
 
     @Column(name = "bank_account_number")
     private String bankAccountNumber;
+
+    @Column(name = "debt_amount")
+    private BigDecimal debtAmount;
 
     @OneToMany(mappedBy = "partner")
     private List<PartnerProject> partnerProjects;

@@ -24,12 +24,6 @@ public class DeliveryDebt extends BaseEntity {
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @Column(name = "payment_date")
-    private Instant paymentDate;
-
-    @Column(name = "paid_date")
-    private Instant paidDate;
-
     @Column(name = "debt_note")
     private String debtNote;
 

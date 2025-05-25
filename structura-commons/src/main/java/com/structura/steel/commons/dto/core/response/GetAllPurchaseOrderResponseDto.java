@@ -16,7 +16,6 @@ public class GetAllPurchaseOrderResponseDto {
 	private String supplierName;
 	private Long projectId;
 	private String projectName;
-	private Instant orderDate;
 	private String status;
 	private BigDecimal totalAmount;
 	private Short version;

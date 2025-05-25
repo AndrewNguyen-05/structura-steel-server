@@ -1,18 +1,27 @@
 package com.structura.steel.commons.dto.core.response;
 
+import com.structura.steel.commons.dto.product.response.ProductResponseDto;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
-public record PurchaseOrderDetailResponseDto(
-        Long id,
-        Long purchaseOrderId,
-        Long productId,
-        BigDecimal quantity,
-        BigDecimal unitPrice,
-        BigDecimal subtotal,
-        Short version,
-        Instant createdAt,
-        Instant updatedAt,
-        String createdBy,
-        String updatedBy
-) {}
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class PurchaseOrderDetailResponseDto {
+        private Long id;
+        private Long purchaseOrderId;
+        private Long productId;
+        private ProductResponseDto product;
+        private BigDecimal quantity;
+        private BigDecimal unitPrice;
+        private BigDecimal subtotal;
+        private Short version;
+        private Instant createdAt;
+        private Instant updatedAt;
+        private String createdBy;
+        private String updatedBy;
+}

@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,17 +25,12 @@ public class SaleOrder extends BaseEntity {
     @Column(name = "project_id")
     private Long projectId;
 
-    @Column(name = "order_date")
-    private Instant orderDate;
-
     @Column(name = "warehouse_id")
     private Long warehouseId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status; // "Đã tạo", "Đã xác nhận", etc.
-
-    @Column(name = "order_type")
-    private String orderType; // Bán lẻ, Bán nguyên cuộn
+    private OrderStatus status;
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;

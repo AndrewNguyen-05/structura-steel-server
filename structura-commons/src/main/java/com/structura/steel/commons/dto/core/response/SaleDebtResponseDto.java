@@ -17,8 +17,6 @@ public class SaleDebtResponseDto {
     private Long productId;
     private ProductResponseDto product;
     private BigDecimal amount;
-    private Instant paymentDate;
-    private Instant paidDate;
     private String debtNote;
     private String status;
     private Short version;

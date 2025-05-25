@@ -6,7 +6,6 @@ import java.time.Instant;
 public record DeliveryOrderRequestDto(
         Long purchaseOrderId,
         Long saleOrderId,
-        Instant deliveryDate,
         Long vehicleId,
         String driverName,
         String deliveryAddress,

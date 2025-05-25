@@ -20,20 +20,11 @@ public class PurchaseDebt extends BaseEntity {
     private PurchaseOrder purchaseOrder;
 
     // Khóa ngoại đến partner_projects (Part Service)
-    @Column(name = "project_id")
-    private Long projectId;
-
-    @Column(name = "order_type")
-    private String orderType; // "SALE" hoặc "PURCHASE"
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "amount")
     private BigDecimal amount;
-
-    @Column(name = "payment_date")
-    private Instant paymentDate;
-
-    @Column(name = "paid_date")
-    private Instant paidDate;
 
     @Column(name = "debt_note")
     private String debtNote;

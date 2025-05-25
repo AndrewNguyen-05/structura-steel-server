@@ -1,18 +1,16 @@
-INSERT INTO delivery_debts
-(created_at, created_by, updated_at, updated_by, version, amount, debt_note, order_type, paid_date, payment_date, status, delivery_order_id)
-VALUES
-('2025-04-16 10:00:00+07:00', 'admin', '2025-04-16 10:00:00+07:00', 'admin', 1, 425000.00, 'Đã thanh toán cước VC DO 1', 'Vận chuyển', '2025-04-16 09:55:00+07:00', '2025-04-15 00:00:00+07:00', 'Paid', 1),
-('2025-04-10 09:00:00+07:00', 'admin', '2025-04-10 09:00:00+07:00', 'admin', 1, 10200000.00, 'Công nợ vận chuyển DO 2', 'Vận chuyển', NULL, '2025-04-25 00:00:00+07:00', 'Pending', 2),
-('2025-04-18 11:00:00+07:00', 'admin', '2025-04-18 11:00:00+07:00', 'admin', 1, 320000.00, 'Thanh toán cước giao hàng DO 3', 'Vận chuyển', '2025-04-18 10:58:00+07:00', '2025-04-18 00:00:00+07:00', 'Paid', 3),
-('2025-04-17 09:00:00+07:00', 'admin', '2025-04-17 09:00:00+07:00', 'admin', 1, 810000.00, 'Công nợ nhập hàng DO 4', 'Vận chuyển', NULL, '2025-04-30 00:00:00+07:00', 'Pending', 4),
-('2025-04-16 15:00:00+07:00', 'admin', '2025-04-16 15:00:00+07:00', 'admin', 1, 555000.00, 'Đã thanh toán cước VC DO 5', 'Vận chuyển', '2025-04-16 14:55:00+07:00', '2025-04-16 00:00:00+07:00', 'Paid', 5),
-('2025-04-21 10:30:00+07:00', 'admin', '2025-04-21 10:30:00+07:00', 'admin', 1, 584000.00, 'Công nợ nhập hàng DO 6', 'Vận chuyển', NULL, '2025-05-05 00:00:00+07:00', 'Pending', 6),
-('2025-04-19 14:00:00+07:00', 'admin', '2025-04-19 14:00:00+07:00', 'admin', 1, 200000.00, 'Thanh toán cước giao hàng DO 7', 'Vận chuyển', '2025-04-19 13:59:00+07:00', '2025-04-19 00:00:00+07:00', 'Paid', 7),
-('2025-04-15 10:00:00+07:00', 'admin', '2025-04-22 20:10:16+07:00', 'admin', 1, 770000.00, 'Công nợ nhập hàng DO 8 - Quá hạn', 'Vận chuyển', NULL, '2025-04-20 00:00:00+07:00', 'Overdue', 8), -- payment_date was 2 days ago
-('2025-04-20 11:00:00+07:00', 'admin', '2025-04-20 11:00:00+07:00', 'admin', 1, 1170000.00, 'Đã thanh toán cước VC DO 9', 'Vận chuyển', '2025-04-20 10:55:00+07:00', '2025-04-19 00:00:00+07:00', 'Paid', 9),
-('2025-04-16 14:30:00+07:00', 'admin', '2025-04-16 14:30:00+07:00', 'admin', 1, 512000.00, 'Công nợ nhập hàng DO 10', 'Vận chuyển', NULL, '2025-04-30 00:00:00+07:00', 'Pending', 10),
-('2025-04-22 09:00:00+07:00', 'admin', '2025-04-22 09:00:00+07:00', 'admin', 1, 1150000.00, 'Đã thanh toán cước giao hàng DO 11', 'Vận chuyển', '2025-04-22 08:58:00+07:00', '2025-04-22 00:00:00+07:00', 'Paid', 11),
-('2025-04-16 10:01:00+07:00', 'admin', '2025-04-16 10:01:00+07:00', 'admin', 1, 425000.00, 'Đã thanh toán cước VC DO 12 (chuyến 2 PO 1)', 'Vận chuyển', '2025-04-16 09:56:00+07:00', '2025-04-16 00:00:00+07:00', 'Paid', 12),
-('2025-04-17 15:00:00+07:00', 'admin', '2025-04-17 15:00:00+07:00', 'admin', 1, 300000.00, 'Công nợ giao hàng DO 13 (đợt 2 SO 2)', 'Vận chuyển', NULL, '2025-05-01 00:00:00+07:00', 'Pending', 13),
-('2025-04-18 09:00:00+07:00', 'admin', '2025-04-18 09:00:00+07:00', 'admin', 1, 810000.00, 'Công nợ nhập hàng DO 14 (đợt 2 PO 4)', 'Vận chuyển', NULL, '2025-05-02 00:00:00+07:00', 'Pending', 14),
-('2025-04-21 10:00:00+07:00', 'admin', '2025-04-21 10:00:00+07:00', 'admin', 1, 1140000.00, 'Thanh toán cước VC DO 15 (đợt 2 SO 7)', 'Vận chuyển', '2025-04-21 09:55:00+07:00', '2025-04-21 00:00:00+07:00', 'Paid', 15);
+INSERT INTO delivery_debts (created_at, created_by, updated_at, updated_by, version, amount, debt_note, order_type, status, delivery_order_id) VALUES
+(NOW(), 'System', NOW(), 'System', 1, 425000.00, 'Đã thanh toán cước VC DO 1', 'PURCHASE', 'Paid', 1),
+(NOW(), 'System', NOW(), 'System', 1, 10200000.00, 'Công nợ vận chuyển DO 2', 'PURCHASE', 'Pending', 2),
+(NOW(), 'System', NOW(), 'System', 1, 320000.00, 'Thanh toán cước giao hàng DO 3', 'SALE', 'Paid', 3),
+(NOW(), 'System', NOW(), 'System', 1, 810000.00, 'Công nợ nhập hàng DO 4', 'PURCHASE', 'Pending', 4),
+(NOW(), 'System', NOW(), 'System', 1, 555000.00, 'Đã thanh toán cước VC DO 5', 'SALE', 'Paid', 5),
+(NOW(), 'System', NOW(), 'System', 1, 584000.00, 'Công nợ nhập hàng DO 6', 'PURCHASE', 'Pending', 6),
+(NOW(), 'System', NOW(), 'System', 1, 200000.00, 'Thanh toán cước giao hàng DO 7', 'SALE', 'Paid', 7),
+(NOW(), 'System', NOW(), 'System', 1, 770000.00, 'Công nợ nhập hàng DO 8 - Quá hạn', 'PURCHASE', 'Overdue', 8),
+(NOW(), 'System', NOW(), 'System', 1, 1170000.00, 'Đã thanh toán cước VC DO 9', 'SALE', 'Paid', 9),
+(NOW(), 'System', NOW(), 'System', 1, 512000.00, 'Công nợ nhập hàng DO 10', 'PURCHASE', 'Pending', 10),
+(NOW(), 'System', NOW(), 'System', 1, 1150000.00, 'Đã thanh toán cước giao hàng DO 11', 'SALE', 'Paid', 11),
+(NOW(), 'System', NOW(), 'System', 1, 425000.00, 'Đã thanh toán cước VC DO 12 (chuyến 2 PO 1)', 'PURCHASE', 'Paid', 12),
+(NOW(), 'System', NOW(), 'System', 1, 300000.00, 'Công nợ giao hàng DO 13 (đợt 2 SO 2)', 'SALE', 'Pending', 13),
+(NOW(), 'System', NOW(), 'System', 1, 810000.00, 'Công nợ nhập hàng DO 14 (đợt 2 PO 4)', 'PURCHASE', 'Pending', 14),
+(NOW(), 'System', NOW(), 'System', 1, 1140000.00, 'Thanh toán cước VC DO 15 (đợt 2 SO 7)', 'SALE', 'Paid', 15);

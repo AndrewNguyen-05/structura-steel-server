@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,11 +27,9 @@ public class PurchaseOrder extends BaseEntity {
     @Column(name = "project_id")
     private Long projectId;
 
-    @Column(name = "order_date")
-    private Instant orderDate;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private OrderStatus status;
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;

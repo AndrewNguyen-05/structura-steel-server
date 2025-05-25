@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.enumeration.DeliveryType;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,8 +58,9 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "total_delivery_fee")
     private BigDecimal totalDeliveryFee;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "delivery_type")
-    private String deliveryType;
+    private DeliveryType deliveryType;
 
     @Column(name = "delivery_order_note")
     private String deliveryOrderNote;

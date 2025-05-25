@@ -19,7 +19,6 @@ public class PurchaseOrderResponseDto {
     private String importCode;
     private PartnerResponseDto supplier;           // Partner service
     private PartnerProjectResponseDto project;     // Partner‑project
-    private Instant orderDate;
     private String status;
     private BigDecimal totalAmount;
     private String purchaseOrdersNote;
