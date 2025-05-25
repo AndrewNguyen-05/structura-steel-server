@@ -1,140 +1,156 @@
 package com.structura.steel.productservice.helper;
 
 import com.structura.steel.commons.dto.product.request.ProductRequestDto;
+import com.structura.steel.commons.enumeration.ProductType;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class SteelCalculator {
 
-    private static final BigDecimal thousand = BigDecimal.valueOf(1000);
-    private static final BigDecimal density = BigDecimal.valueOf(7850.0);
-    private static final BigDecimal pi = BigDecimal.valueOf(Math.PI);
+    private static final BigDecimal THOUSAND = BigDecimal.valueOf(1000);
+    private static final BigDecimal DENSITY = BigDecimal.valueOf(7850.0); // kg/m^3
+    private static final BigDecimal PI = BigDecimal.valueOf(Math.PI);
 
     /**
-     * Tinh khoi luong thep (kg) dua vao ProductRequestDto.
-     * @param dto thong tin ve thep can tinh (name, diameter, thickness, etc.)
+     * Tính khối lượng thép (kg) dựa vào ProductRequestDto.
+     * Sử dụng ProductType để xác định công thức tính.
+     * @param dto Thông tin về thép cần tính (productType, dimensions, etc.)
      * @return weight (kg)
      */
     public static BigDecimal calculateSteelWeight(ProductRequestDto dto) {
-        if (dto == null || dto.name() == null) {
-            throw new IllegalArgumentException("Invalid product data. Name cannot be null.");
-        } else if(dto.length() == null) {
-            throw new IllegalArgumentException("Invalid product data. Length cannot be null.");
+        // --- 1. Kiểm tra đầu vào cơ bản ---
+        if (dto == null || dto.productType() == null) {
+            throw new IllegalArgumentException("Invalid product data. ProductType cannot be null.");
+        }
+        if (dto.length() == null || dto.length().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invalid product data. Length must be provided and greater than zero.");
         }
 
-        String lowerName = dto.name().toLowerCase();
+        // --- 2. Kiểm tra các thuộc tính bắt buộc theo ProductType ---
+        validateRequiredFields(dto);
 
-        // Xác định các loại thép theo tên
-        boolean isHinh = lowerName.contains("hinh");    // thép hình (I, H, U, ...)
-        boolean isHop = lowerName.contains("hop");        // thép hộp (box)
-        boolean isVan = lowerName.contains("van");        // thép vằn (rebar)
-        boolean isCay = lowerName.contains("cay");        // thép cây (rebar)
-        boolean isOng = lowerName.contains("ong");        // có thể là ống tròn hoặc ống hộp
-        boolean isCuon = lowerName.contains("cuon");      // thép cuộn
-        boolean isTam = lowerName.contains("tam");        // thép tấm
+        BigDecimal length = dto.length(); // m
+        ProductType type = dto.productType();
 
-        if(isHop) {
-            if(dto.width() == null || dto.height() == null) {
-                throw new IllegalArgumentException("Invalid product data. Width and height cannot be null.");
+        // --- 3. Tính toán dựa trên ProductType ---
+        switch (type) {
+            case SHAPED:
+                // Thép hình: dùng unitWeight
+                return dto.unitWeight().multiply(length);
+
+            case RIBBED_BAR:
+            case WIRE_COIL: {
+                // Thép vằn/cây/dây cuộn: dùng diameter
+                BigDecimal diameterMeter = dto.diameter().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+                BigDecimal volume = getCircleVolume(diameterMeter, length);
+                return volume.multiply(DENSITY);
             }
-            if(dto.thickness() == null) {
-                throw new IllegalArgumentException("thickness is required for structural steel products.");
+
+            case COIL: // Đây là cuộn tấm
+            case PLATE: {
+                // Thép cuộn tấm/tấm: dùng width & thickness
+                BigDecimal thicknessMeter = dto.thickness().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+                BigDecimal widthMeter = dto.width().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+                BigDecimal volume = getRectangularPrismVolume(widthMeter, thicknessMeter, length);
+                return volume.multiply(DENSITY);
             }
-        } else if(isHinh) {
-            if (dto.unitWeight() == null) {
-                throw new IllegalArgumentException("unitWeight (kg/m) is required for structural steel products.");
-            }
-        } else if(isVan || isCay || isOng) {
-            if(dto.diameter() == null) {
-                throw new IllegalArgumentException("diameter is required for structural steel products.");
-            }
-            if(dto.thickness() == null) {
-                throw new IllegalArgumentException("thickness is required for structural steel products.");
-            }
-        } else if(isCuon || isTam) {
-            if(dto.thickness() == null) {
-                throw new IllegalArgumentException("thickness is required for structural steel products.");
-            }
-        }
 
-        BigDecimal length = dto.length();    // m
-        BigDecimal unitWeight = dto.unitWeight();   // kg
+            case PIPE: {
+                // Thép ống tròn: dùng diameter & thickness
+                BigDecimal thicknessMeter = dto.thickness().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+                BigDecimal diameterMeter = dto.diameter().divide(THOUSAND, 10, RoundingMode.HALF_UP);
 
+                BigDecimal totalVolume = getCircleVolume(diameterMeter, length);
+                BigDecimal innerDiameter = diameterMeter.subtract(BigDecimal.valueOf(2).multiply(thicknessMeter));
 
-        // 1) Thep hinh (I, H, U, L, vv...)
-        if (lowerName.contains("hinh")) {
-            return dto.unitWeight().multiply(length);
-        }
-
-        // Neu co unit weight thi tra ve khoi luong luon
-        if(unitWeight != null) {
-            return unitWeight.multiply(length);
-        }
-
-        // 2) Thep thanh van / sat thep cay
-        if (lowerName.contains("van") || lowerName.contains("cay")) {
-            BigDecimal diameterMeter = dto.diameter().divide(thousand, 10, RoundingMode.HALF_UP);
-            BigDecimal volume = getCircleVolume(diameterMeter, length);
-            return volume.multiply(density);
-        }
-
-        // 3) Thep cuon / thep tam
-        else if (lowerName.contains("cuon") || lowerName.contains("tam")) {
-            BigDecimal thicknessMeter = dto.thickness().divide(thousand, 10, RoundingMode.HALF_UP);
-            BigDecimal width = dto.width().divide(thousand, 10, RoundingMode.HALF_UP);
-            BigDecimal volume = getRectangleVolume(thicknessMeter, width, length);
-            return volume.multiply(density);
-        }
-
-        // 4) Thep ong / thep hop
-        else if (lowerName.contains("ong") || lowerName.contains("hop")) {
-
-            BigDecimal thickness = dto.thickness().divide(thousand, 10, RoundingMode.HALF_UP);
-
-            if (lowerName.contains("ong")) {
-                BigDecimal diameter = dto.diameter().divide(thousand, 10, RoundingMode.HALF_UP);
-                BigDecimal totalVolume = getCircleVolume(diameter, length);
-
-                // Tinh canh trong: innerSide = (w - 2*t)
-                BigDecimal innerDiameter = diameter.subtract(BigDecimal.valueOf(2).multiply(thickness));
+                if (innerDiameter.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the diameter for PIPE.");
+                }
                 BigDecimal innerVolume = getCircleVolume(innerDiameter, length);
-
-                return totalVolume.subtract(innerVolume).multiply(density);
-
-            } else {
-                BigDecimal width = dto.width().divide(thousand, 10, RoundingMode.HALF_UP);
-                BigDecimal height = dto.height().divide(thousand, 10, RoundingMode.HALF_UP);
-                BigDecimal totalVolume = getRectangleVolume(width, height, length);
-
-                // Tinh canh trong: innerSide = (w - 2*t)
-                BigDecimal innerSide = width.subtract(BigDecimal.valueOf(2).multiply(thickness));
-                BigDecimal innerVolume = getRectangleVolume(innerSide, innerSide, length);
-
-                return totalVolume.subtract(innerVolume).multiply(density);
+                return totalVolume.subtract(innerVolume).multiply(DENSITY);
             }
-        }
 
-        throw new UnsupportedOperationException("Cannot determine steel productType from product name: " + dto.name());
+            case BOX: {
+                // Thép hộp: dùng width, height & thickness
+                BigDecimal thicknessMeter = dto.thickness().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+                BigDecimal widthMeter = dto.width().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+                BigDecimal heightMeter = dto.height().divide(THOUSAND, 10, RoundingMode.HALF_UP);
+
+                BigDecimal totalVolume = getRectangularPrismVolume(widthMeter, heightMeter, length);
+                BigDecimal innerWidth = widthMeter.subtract(BigDecimal.valueOf(2).multiply(thicknessMeter));
+                BigDecimal innerHeight = heightMeter.subtract(BigDecimal.valueOf(2).multiply(thicknessMeter));
+
+                if (innerWidth.compareTo(BigDecimal.ZERO) <= 0 || innerHeight.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the width/height for BOX.");
+                }
+                BigDecimal innerVolume = getRectangularPrismVolume(innerWidth, innerHeight, length);
+                return totalVolume.subtract(innerVolume).multiply(DENSITY);
+            }
+
+            default:
+                throw new UnsupportedOperationException("Weight calculation not implemented for product type: " + type);
+        }
     }
 
-    private static BigDecimal getRectangleVolume(BigDecimal thickness, BigDecimal width, BigDecimal length) {
-        if (thickness == null || width == null) {
-            throw new IllegalArgumentException("Thickness and width are required for coil/plate products.");
+    /**
+     * Kiểm tra các trường bắt buộc dựa trên ProductType.
+     */
+    private static void validateRequiredFields(ProductRequestDto dto) {
+        ProductType type = dto.productType();
+        switch (type) {
+            case RIBBED_BAR:
+            case WIRE_COIL:
+                require(dto.diameter(), "Diameter must not be null for RIBBED_BAR/WIRE_COIL.");
+                break;
+            case COIL: // Cuộn tấm
+            case PLATE:
+                require(dto.thickness(), "Thickness must not be null for COIL/PLATE.");
+                require(dto.width(), "Width must not be null for COIL/PLATE.");
+                break;
+            case PIPE:
+                require(dto.thickness(), "Thickness must not be null for PIPE.");
+                require(dto.diameter(), "Diameter must not be null for PIPE.");
+                break;
+            case BOX:
+                require(dto.thickness(), "Thickness must not be null for BOX.");
+                require(dto.width(), "Width must not be null for BOX.");
+                require(dto.height(), "Height must not be null for BOX.");
+                break;
+            case SHAPED:
+                require(dto.unitWeight(), "Unit weight must not be null for SHAPED steel.");
+                break;
+            default:
+                break;
         }
-
-        return thickness.multiply(width).multiply(length);
     }
 
+    /**
+     * Hàm hỗ trợ kiểm tra giá trị không được null.
+     */
+    private static void require(Object fieldValue, String message) {
+        if (fieldValue == null) {
+            throw new IllegalArgumentException(message);
+        }
+        if (fieldValue instanceof BigDecimal && ((BigDecimal) fieldValue).compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException(message.replace("must not be null", "must be positive"));
+        }
+    }
+
+    /**
+     * Tính thể tích hình hộp chữ nhật (hoặc tấm).
+     */
+    private static BigDecimal getRectangularPrismVolume(BigDecimal width, BigDecimal height, BigDecimal length) {
+        return width.multiply(height).multiply(length);
+    }
+
+    /**
+     * Tính thể tích hình trụ tròn (thép cây/ống/dây).
+     */
     private static BigDecimal getCircleVolume(BigDecimal diameter, BigDecimal length) {
-        if (diameter == null) {
-            throw new IllegalArgumentException("Diameter is required for rebar products.");
-        }
-
-        // Tinh dien tich: (PI * diameter^2) / 4
         BigDecimal diameterSquared = diameter.multiply(diameter);
-        BigDecimal crossSectionArea = pi.multiply(diameterSquared)
+        BigDecimal crossSectionArea = PI.multiply(diameterSquared)
                 .divide(BigDecimal.valueOf(4), 10, RoundingMode.HALF_UP);
-
         return crossSectionArea.multiply(length);
     }
 }
