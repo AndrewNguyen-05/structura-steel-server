@@ -10,9 +10,9 @@ public record DeliveryDebtRequestDto(
         Long deliveryOrderId,
         String orderType, // "SALE" | "PURCHASE"
 
-        @NotNull(message = "Amount cannot be null")
-        @Positive(message = "Amount must be positive")
-        BigDecimal amount,
+        @NotNull(message = "Original amount cannot be null")
+        @Positive(message = "Original amount must be positive")
+        BigDecimal originalAmount,
 
         String debtNote,
         String status

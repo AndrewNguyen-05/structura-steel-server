@@ -58,6 +58,12 @@ public class Partner extends BaseEntity {
     @Column(name = "debt_amount")
     private BigDecimal debtAmount;
 
+    @Column(name = "accounts_payable", columnDefinition = "DECIMAL(19,4) DEFAULT 0.00")
+    private BigDecimal accountsPayable = BigDecimal.ZERO;
+
+    @Column(name = "accounts_receivable", columnDefinition = "DECIMAL(19,4) DEFAULT 0.00")
+    private BigDecimal accountsReceivable = BigDecimal.ZERO;
+
     @OneToMany(mappedBy = "partner")
     private List<PartnerProject> partnerProjects;
 

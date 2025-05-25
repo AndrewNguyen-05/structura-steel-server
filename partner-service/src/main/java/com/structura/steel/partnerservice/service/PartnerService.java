@@ -1,5 +1,6 @@
 package com.structura.steel.partnerservice.service;
 
+import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.dto.partner.request.PartnerRequestDto;
 import com.structura.steel.commons.dto.partner.response.GetAllPartnerResponseDto;
@@ -26,4 +27,6 @@ public interface PartnerService {
     void softDeletePartnerById(Long id);
 
     PartnerResponseDto restorePartnerById(Long id);
+
+    void updatePartnerDebt(Long partnerId, UpdatePartnerDebtRequestDto dto);
 }

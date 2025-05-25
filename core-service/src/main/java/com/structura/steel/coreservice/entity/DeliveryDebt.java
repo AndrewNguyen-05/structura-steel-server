@@ -21,8 +21,8 @@ public class DeliveryDebt extends BaseEntity {
     @Column(name = "order_type")
     private String orderType; // "SALE" hoặc "PURCHASE"
 
-    @Column(name = "amount")
-    private BigDecimal amount;
+    private BigDecimal originalAmount;
+    private BigDecimal remainingAmount;
 
     @Column(name = "debt_note")
     private String debtNote;

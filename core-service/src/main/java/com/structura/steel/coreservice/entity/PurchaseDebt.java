@@ -23,8 +23,8 @@ public class PurchaseDebt extends BaseEntity {
     @Column(name = "product_id")
     private Long productId;
 
-    @Column(name = "amount")
-    private BigDecimal amount;
+    private BigDecimal originalAmount;
+    private BigDecimal remainingAmount;
 
     @Column(name = "debt_note")
     private String debtNote;

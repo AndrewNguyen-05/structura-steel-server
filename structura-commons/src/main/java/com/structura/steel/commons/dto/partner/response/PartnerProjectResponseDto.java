@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class PartnerProjectResponseDto{
     private String contactPerson;
     private String contactPersonPhone;
     private String address;
+    private BigDecimal accountsPayable;
+    private BigDecimal accountsReceivable;
     private List<ProductResponseDto> products;
     private Short version;
     private Instant createdAt;

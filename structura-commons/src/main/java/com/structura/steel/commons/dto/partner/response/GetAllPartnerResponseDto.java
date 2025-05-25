@@ -1,5 +1,6 @@
 package com.structura.steel.commons.dto.partner.response;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public record GetAllPartnerResponseDto (
@@ -14,6 +15,8 @@ public record GetAllPartnerResponseDto (
         String contactPersonPhone,
         String bankName,
         String bankAccountNumber,
+        BigDecimal accountsPayable,
+        BigDecimal accountsReceivable,
         Short version,
         Instant createdAt,
         Instant updatedAt,

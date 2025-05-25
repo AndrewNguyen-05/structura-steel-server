@@ -1,6 +1,7 @@
 package com.structura.steel.commons.dto.core.response;
 
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
+import com.structura.steel.commons.enumeration.DebtStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -16,9 +17,10 @@ public class SaleDebtResponseDto {
     private Long saleOrderId;
     private Long productId;
     private ProductResponseDto product;
-    private BigDecimal amount;
+    private BigDecimal originalAmount;
+    private BigDecimal remainingAmount;
     private String debtNote;
-    private String status;
+    private DebtStatus status;
     private Short version;
     private Instant createdAt;
     private Instant updatedAt;

@@ -9,9 +9,9 @@ import java.time.Instant;
 public record SaleDebtRequestDto(
         Long productId,
 
-        @NotNull(message = "Amount cannot be null")
-        @Positive(message = "Amount must be positive")
-        BigDecimal amount,
+        @NotNull(message = "Original amount cannot be null")
+        @Positive(message = "Original amount must be positive")
+        BigDecimal originalAmount,
 
         String debtNote,
         String status
