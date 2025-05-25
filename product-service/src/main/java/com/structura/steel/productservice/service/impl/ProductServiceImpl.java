@@ -225,36 +225,53 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void validateProductRequest(ProductRequestDto dto) {
-        if (dto.length() == null) {
-            throw new IllegalArgumentException("Length must not be null.");
-        }
+        ProductType type = dto.productType();
 
-        if (dto.productType() == null) {
+        // Kiểm tra các trường chung
+        if (type == null) {
             throw new IllegalArgumentException("ProductType must not be null.");
         }
+        require(dto.length(), "Length must not be null."); // Length bắt buộc cho tất cả
 
-        switch (dto.productType()) {
+        // Kiểm tra theo từng loại sản phẩm
+        switch (type) {
             case RIBBED_BAR, WIRE_COIL -> {
-                require(dto.diameter(), "Diameter must not be null for ribbed bar / wire coil.");
+                require(dto.diameter(), "Diameter must not be null for " + type);
+                shouldBeNull(dto.width(), "Width", type);
+                shouldBeNull(dto.height(), "Height", type);
+                shouldBeNull(dto.thickness(), "Thickness", type);
+                shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
             case COIL, PLATE -> {
-                require(dto.thickness(), "Thickness must not be null for coil/plate.");
-                require(dto.width(),     "Width must not be null for coil/plate.");
+                require(dto.width(), "Width must not be null for " + type);
+                require(dto.thickness(), "Thickness must not be null for " + type);
+                shouldBeNull(dto.height(), "Height", type);
+                shouldBeNull(dto.diameter(), "Diameter", type);
+                shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
             case PIPE -> {
-                require(dto.diameter(),  "Diameter must not be null for pipe.");
-                require(dto.thickness(), "Thickness must not be null for pipe.");
+                require(dto.diameter(), "Diameter must not be null for " + type);
+                require(dto.thickness(), "Thickness must not be null for " + type);
+                shouldBeNull(dto.width(), "Width", type);
+                shouldBeNull(dto.height(), "Height", type);
+                shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
             case BOX -> {
-                require(dto.width(),     "Width must not be null for box.");
-                require(dto.height(),    "Height must not be null for box.");
-                require(dto.thickness(), "Thickness must not be null for box.");
+                require(dto.width(), "Width must not be null for " + type);
+                require(dto.height(), "Height must not be null for " + type);
+                require(dto.thickness(), "Thickness must not be null for " + type);
+                shouldBeNull(dto.diameter(), "Diameter", type);
+                shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
             case SHAPED -> {
-                require(dto.unitWeight(), "Unit weight must not be null for shaped steel.");
+                require(dto.unitWeight(), "UnitWeight must not be null for " + type);
+                shouldBeNull(dto.width(), "Width", type);
+                shouldBeNull(dto.height(), "Height", type);
+                shouldBeNull(dto.thickness(), "Thickness", type);
+                shouldBeNull(dto.diameter(), "Diameter", type);
             }
             default -> throw new UnsupportedOperationException(
-                    "Validation not implemented for product type: " + dto.productType());
+                    "Validation not implemented for product type: " + type);
         }
     }
 
@@ -266,6 +283,12 @@ public class ProductServiceImpl implements ProductService {
         if (fieldValue instanceof BigDecimal && ((BigDecimal) fieldValue).compareTo(BigDecimal.ZERO) <= 0) {
             String positiveMessage = message.replace("must not be null", "must be positive");
             throw new IllegalArgumentException(positiveMessage);
+        }
+    }
+
+    private void shouldBeNull(Object fieldValue, String fieldName, ProductType type) {
+        if (fieldValue != null) {
+            throw new IllegalArgumentException(fieldName + " must be null for product type: " + type);
         }
     }
 
