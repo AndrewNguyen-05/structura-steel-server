@@ -297,7 +297,7 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
                 // Nếu là getter thì dùng product.getDeleted()
                 if (product.deleted()) {
                     log.warn("Product ID {} is soft-deleted, marking for removal from project {}.", productId, project.getId());
-                    idsToRemove.add(productId);
+//                    idsToRemove.add(productId);
                 } else {
                     validProducts.add(product);
                 }
