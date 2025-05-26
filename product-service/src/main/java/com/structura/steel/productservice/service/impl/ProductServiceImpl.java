@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -250,16 +251,26 @@ public class ProductServiceImpl implements ProductService {
                 shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
             case PIPE -> {
-                require(dto.diameter(), "Diameter must not be null for " + type);
-                require(dto.thickness(), "Thickness must not be null for " + type);
+                BigDecimal diameter = require(dto.diameter(), "Diameter must not be null for " + type);
+                BigDecimal thickness = require(dto.thickness(), "Thickness must not be null for " + type);
+                BigDecimal halfDiameter = diameter.divide(BigDecimal.valueOf(2), 10, RoundingMode.HALF_UP);
+                if (thickness.compareTo(halfDiameter) >= 0) {
+                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the diameter for PIPE.");
+                }
                 shouldBeNull(dto.width(), "Width", type);
                 shouldBeNull(dto.height(), "Height", type);
                 shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
             case BOX -> {
-                require(dto.width(), "Width must not be null for " + type);
-                require(dto.height(), "Height must not be null for " + type);
-                require(dto.thickness(), "Thickness must not be null for " + type);
+                BigDecimal width = require(dto.width(), "Width must not be null for " + type);
+                BigDecimal height = require(dto.height(), "Height must not be null for " + type);
+                BigDecimal thickness = require(dto.thickness(), "Thickness must not be null for " + type);
+
+                BigDecimal halfWidth = width.divide(BigDecimal.valueOf(2), 10, RoundingMode.HALF_UP);
+                BigDecimal halfHeight = height.divide(BigDecimal.valueOf(2), 10, RoundingMode.HALF_UP);
+                if (thickness.compareTo(halfWidth) >= 0 || thickness.compareTo(halfHeight) >= 0) {
+                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the width/height for BOX.");
+                }
                 shouldBeNull(dto.diameter(), "Diameter", type);
                 shouldBeNull(dto.unitWeight(), "UnitWeight", type);
             }
@@ -275,7 +286,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private void require(Object fieldValue, String message) {
+    private <T> T require(T fieldValue, String message) {
         if (fieldValue == null) {
             throw new IllegalArgumentException(message);
         }
@@ -284,6 +295,7 @@ public class ProductServiceImpl implements ProductService {
             String positiveMessage = message.replace("must not be null", "must be positive");
             throw new IllegalArgumentException(positiveMessage);
         }
+        return fieldValue;
     }
 
     private void shouldBeNull(Object fieldValue, String fieldName, ProductType type) {
