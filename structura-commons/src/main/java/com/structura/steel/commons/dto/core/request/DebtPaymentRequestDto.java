@@ -14,12 +14,13 @@ public record DebtPaymentRequestDto(
         @NotNull
         Long debtId, // ID of PurchaseDebt, SaleDebt, or DeliveryDebt
 
+
+        @NotNull(message = "Payment date cannot be null")
+        Instant paymentDate,
+
         @NotNull
         @Positive(message = "Payment amount must be positive")
         BigDecimal amountPaid,
-
-        @NotNull
-        Instant paymentDate,
 
         String paymentMethod,
         String notes

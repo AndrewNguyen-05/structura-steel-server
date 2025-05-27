@@ -3,6 +3,7 @@ package com.structura.steel.coreservice.entity;
 import com.structura.steel.commons.enumeration.DebtType;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,11 +29,11 @@ public class DebtPayment extends BaseEntity {
     @Column(name = "amount_paid", nullable = false)
     private BigDecimal amountPaid;
 
-    @Column(name = "payment_date", nullable = false)
-    private Instant paymentDate;
-
     @Column(name = "payment_method")
     private String paymentMethod;
+
+    @Column(name = "payment_date", nullable = false)
+    private Instant paymentDate;
 
     @Column(name = "notes")
     private String notes;

@@ -30,6 +30,9 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "delivery_date")
     private Instant deliveryDate;
 
+    @Column(name = "partner_id", nullable = false)
+    private Long partnerId;
+
     // Khóa ngoại đến vehicles (Partner Service)
     @Column(name = "vehicle_id")
     private Long vehicleId;

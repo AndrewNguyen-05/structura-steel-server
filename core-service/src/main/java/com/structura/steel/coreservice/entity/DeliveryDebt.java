@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.commons.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,12 +22,15 @@ public class DeliveryDebt extends BaseEntity {
     @Column(name = "order_type")
     private String orderType; // "SALE" hoặc "PURCHASE"
 
+    @Column(name = "original_amount", nullable = false)
     private BigDecimal originalAmount;
+
+    @Column(name = "remaining_amount", nullable = false)
     private BigDecimal remainingAmount;
 
     @Column(name = "debt_note")
     private String debtNote;
 
     @Column(name = "status")
-    private String status;
+    private DebtStatus status;
 }

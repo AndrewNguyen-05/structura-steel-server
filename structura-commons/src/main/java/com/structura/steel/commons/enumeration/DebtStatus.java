@@ -1,15 +1,28 @@
 package com.structura.steel.commons.enumeration;
 
-public enum DebtStatus {
+import lombok.RequiredArgsConstructor;
+
+public enum DebtStatus implements HasText {
     /** Chưa thanh toán */
-    UNPAID,
+    UNPAID("Unpaid"),
 
     /** Thanh toán một phần */
-    PARTIALLY_PAID,
+    PARTIALLY_PAID("Partially paid"),
 
     /** Đã thanh toán */
-    PAID,
+    PAID("Paid"),
 
     /** Đã hủy (nếu khoản nợ có thể bị hủy) */
-    CANCELLED
+    CANCELLED("Cancelled");
+
+    final String text;
+
+    DebtStatus(String text) {
+        this.text = text;
+    }
+
+    @Override
+    public String text() {
+        return text;
+    }
 }

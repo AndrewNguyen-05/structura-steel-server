@@ -65,9 +65,9 @@ public class PartnerDocument {
     @Field(type = FieldType.Keyword)
     private String bankAccountNumber;
 
-    private BigDecimal accountsPayable = BigDecimal.ZERO;
+    private BigDecimal debtPayable = BigDecimal.ZERO;
 
-    private BigDecimal accountsReceivable = BigDecimal.ZERO;
+    private BigDecimal debtReceivable = BigDecimal.ZERO;
 
     @Field(type = FieldType.Short)
     private Short version;

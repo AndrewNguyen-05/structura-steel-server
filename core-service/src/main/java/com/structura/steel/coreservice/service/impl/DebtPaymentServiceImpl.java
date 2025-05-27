@@ -29,10 +29,10 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
     private final SaleDebtRepository saleDebtRepository;
     private final DeliveryDebtRepository deliveryDebtRepository;
     private final DebtPaymentRepository debtPaymentRepository;
+
     private final DebtPaymentMapper debtPaymentMapper;
+
     private final PartnerFeignClient partnerFeignClient;
-    // Giả sử bạn có VehicleFeignClient hoặc cách khác để lấy Partner từ Vehicle
-    // private final VehicleFeignClient vehicleFeignClient;
 
     @Override
     public DebtPaymentResponseDto recordPayment(DebtPaymentRequestDto dto) {
@@ -62,7 +62,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 DeliveryDebt dDebt = deliveryDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("DeliveryDebt", "id", debtId));
                 validateAndProcessPayment(dDebt, amountPaid);
-                partnerId = getTransporterId(dDebt.getDeliveryOrder()); // **QUAN TRỌNG: Cần logic thực tế**
+                partnerId = dDebt.getDeliveryOrder().getPartnerId();
                 accountType = DebtAccountType.PAYABLE;
                 deliveryDebtRepository.save(dDebt);
                 break;
@@ -145,51 +145,5 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
         } else {
             debt.setStatus(DebtStatus.PARTIALLY_PAID);
         }
-    }
-
-
-    /**
-     * **QUAN TRỌNG:** Phương thức này cần được triển khai DỰA TRÊN THIẾT KẾ CỦA BẠN.
-     * Làm thế nào để từ DeliveryOrder lấy được PartnerId của nhà vận chuyển?
-     *
-     * Gợi ý:
-     * 1. **Thêm `transporterId` vào `DeliveryOrder`:** Đây là cách sạch sẽ nhất. Khi tạo DeliveryOrder, bạn phải biết ai là nhà vận chuyển và lưu ID của họ.
-     * 2. **Sử dụng `VehicleId`:** Nếu mỗi `Vehicle` chỉ thuộc về một `Partner` (Transporter), bạn cần:
-     * - Thêm `VehicleFeignClient` vào Core Service.
-     * - Gọi `VehicleFeignClient` để lấy thông tin `Vehicle` bằng `deliveryOrder.getVehicleId()`.
-     * - Lấy `partnerId` từ thông tin `Vehicle` trả về.
-     * 3. **Dựa vào `PurchaseOrder` hoặc `SaleOrder`:** Nếu việc vận chuyển luôn gắn liền với một đơn mua/bán và nhà vận chuyển được xác định ở đó.
-     *
-     * Vì tôi không có đủ thông tin, tôi sẽ tạm **ném ra lỗi**. Bạn BẮT BUỘC phải thay thế nó.
-     */
-    private Long getTransporterId(DeliveryOrder deliveryOrder) {
-        Long vehicleId = deliveryOrder.getVehicleId();
-        if (vehicleId == null) {
-            throw new ResourceNotFoundException("VehicleId", "deliveryOrderId", deliveryOrder.getId());
-        }
-
-        log.error("CRITICAL: 'getTransporterId' method needs a real implementation!");
-        log.error("Cannot determine Transporter Partner from DeliveryOrder ID {} (Vehicle ID: {}).",
-                deliveryOrder.getId(), vehicleId);
-        log.error("Please implement logic, e.g., by adding transporterId to DeliveryOrder or using a VehicleFeignClient.");
-
-        // **!!! THAY THẾ DÒNG DƯỚI BẰNG LOGIC CỦA BẠN !!!**
-        throw new UnsupportedOperationException(
-                "Cannot determine Transporter ID. Please implement 'getTransporterId' " +
-                        "in DebtPaymentServiceImpl based on your system design (e.g., add transporterId " +
-                        "to DeliveryOrder or implement VehicleFeignClient)."
-        );
-
-        // Ví dụ (nếu bạn có VehicleFeignClient):
-        // try {
-        //     VehicleResponseDto vehicle = vehicleFeignClient.getVehicleById(vehicleId);
-        //     if (vehicle == null || vehicle.getPartnerId() == null) {
-        //         throw new ResourceNotFoundException("Partner", "vehicleId", vehicleId);
-        //     }
-        //     return vehicle.getPartnerId();
-        // } catch (Exception e) {
-        //      log.error("Failed to get partner via VehicleFeignClient for vehicle {}", vehicleId, e);
-        //      throw new RuntimeException("Failed to get transporter info.", e);
-        // }
     }
 }

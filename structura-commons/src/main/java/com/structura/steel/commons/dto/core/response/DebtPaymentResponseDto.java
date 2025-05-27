@@ -13,6 +13,9 @@ public record DebtPaymentResponseDto(
         Instant paymentDate,
         String paymentMethod,
         String notes,
+        Short version,
         Instant createdAt,
-        String createdBy
+        Instant updatedAt,
+        String createdBy,
+        String updatedBy
 ) { }

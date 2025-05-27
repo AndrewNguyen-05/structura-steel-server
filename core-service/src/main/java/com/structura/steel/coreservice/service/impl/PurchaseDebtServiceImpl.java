@@ -1,9 +1,13 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
+import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
+import com.structura.steel.commons.enumeration.DebtAccountType;
 import com.structura.steel.commons.enumeration.DebtStatus;
+import com.structura.steel.commons.exception.BadRequestException;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
@@ -17,6 +21,7 @@ import com.structura.steel.coreservice.service.PurchaseDebtService;
 import com.structura.steel.commons.dto.core.request.PurchaseDebtRequestDto;
 import com.structura.steel.commons.dto.core.response.PurchaseDebtResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +33,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
     private final PurchaseDebtRepository purchaseDebtRepository;
@@ -35,6 +41,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
     private final PurchaseDebtMapper purchaseDebtMapper;
 
     private final ProductFeignClient productFeignClient;
+    private final PartnerFeignClient partnerFeignClient;
 
     @Override
     public PurchaseDebtResponseDto createPurchaseDebt(PurchaseDebtRequestDto dto, Long purchaseId) {
@@ -43,8 +50,8 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
         PurchaseDebt debt = purchaseDebtMapper.toPurchaseDebt(dto);
         debt.setPurchaseOrder(order);
-        debt.setRemainingAmount(dto.originalAmount()); // **Set remaining amount**
-        debt.setStatus(DebtStatus.UNPAID); // **Set status**
+        debt.setRemainingAmount(dto.originalAmount()); // set khoang no con lai
+        debt.setStatus(DebtStatus.UNPAID); // set chua thanh toan
 
         PurchaseDebt saved = purchaseDebtRepository.save(debt);
 
@@ -245,6 +252,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
     private PurchaseDebtResponseDto entityToResponseWithProduct(PurchaseDebt debt) {
         PurchaseDebtResponseDto responseDto = purchaseDebtMapper.toPurchaseDebtResponseDto(debt);
+        responseDto.setStatus(debt.getStatus().text());
 
         Long productId = debt.getProductId();
         ProductResponseDto product = productFeignClient.getProductById(productId);

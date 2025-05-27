@@ -246,17 +246,17 @@ public class PartnerServiceImpl implements PartnerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
 
         if (dto.accountType() == DebtAccountType.PAYABLE) {
-            partner.setAccountsPayable(partner.getAccountsPayable().add(dto.amount()));
-            doc.setAccountsPayable(doc.getAccountsPayable().add(dto.amount()));
+            partner.setDebtPayable(partner.getDebtPayable().add(dto.amount()));
+            doc.setDebtPayable(doc.getDebtPayable().add(dto.amount()));
         } else {
-            partner.setAccountsReceivable(partner.getAccountsReceivable().add(dto.amount()));
-            doc.setAccountsReceivable(doc.getAccountsReceivable().add(dto.amount()));
+            partner.setDebtReceivable(partner.getDebtReceivable().add(dto.amount()));
+            doc.setDebtReceivable(doc.getDebtReceivable().add(dto.amount()));
         }
 
         partnerRepository.save(partner);
         partnerSearchRepository.save(doc);
         log.info("Updated debt for partner {}. Payable: {}, Receivable: {}",
-                partnerId, partner.getAccountsPayable(), partner.getAccountsReceivable());
+                partnerId, partner.getDebtPayable(), partner.getDebtReceivable());
     }
 
     private PartnerResponseDto toPartnerResponseDtoWithProductInProject(Partner partner) {
