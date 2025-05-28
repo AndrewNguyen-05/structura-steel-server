@@ -11,6 +11,7 @@ import org.springframework.data.elasticsearch.annotations.InnerField;
 import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -63,6 +64,10 @@ public class PartnerDocument {
 
     @Field(type = FieldType.Keyword)
     private String bankAccountNumber;
+
+    private BigDecimal debtPayable = BigDecimal.ZERO;
+
+    private BigDecimal debtReceivable = BigDecimal.ZERO;
 
     @Field(type = FieldType.Short)
     private Short version;

@@ -1,5 +1,6 @@
 package com.structura.steel.partnerservice.controller;
 
+import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.commons.dto.partner.request.PartnerRequestDto;
@@ -77,5 +78,13 @@ public class PartnerController {
     public ResponseEntity<Void> deletePartner(@PathVariable Long id) {
         partnerService.deletePartnerById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/update-debt")
+    public ResponseEntity<Void> updatePartnerDebt(
+            @PathVariable Long id,
+            @RequestBody UpdatePartnerDebtRequestDto dto) {
+        partnerService.updatePartnerDebt(id, dto);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,10 +1,13 @@
 package com.structura.steel.commons.client;
 
+import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -34,4 +37,7 @@ public interface PartnerFeignClient {
             @PathVariable("partnerId") Long partnerId,
             @RequestParam("ids") List<Long> ids
     );
+
+    @PutMapping("/partners/{partnerId}/update-debt")
+    void updatePartnerDebt(@PathVariable Long partnerId, @RequestBody UpdatePartnerDebtRequestDto dto);
 }

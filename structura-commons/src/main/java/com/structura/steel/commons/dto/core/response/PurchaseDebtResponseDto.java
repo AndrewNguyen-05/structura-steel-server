@@ -16,7 +16,8 @@ public class PurchaseDebtResponseDto {
         private Long purchaseOrderId;
         private Long productId;
         private ProductResponseDto product;
-        private BigDecimal amount;
+        private BigDecimal originalAmount;
+        private BigDecimal remainingAmount;
         private String debtNote;
         private String status;
         private Short version;

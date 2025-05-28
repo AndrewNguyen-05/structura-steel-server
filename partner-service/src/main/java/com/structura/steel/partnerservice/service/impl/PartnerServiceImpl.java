@@ -1,5 +1,7 @@
 package com.structura.steel.partnerservice.service.impl;
 
+import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
+import com.structura.steel.commons.enumeration.DebtAccountType;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
@@ -234,6 +236,27 @@ public class PartnerServiceImpl implements PartnerService {
         partnerSearchRepository.save(doc);
 
         return partnerMapper.toPartnerResponseDto(partner);
+    }
+
+    @Override
+    public void updatePartnerDebt(Long partnerId, UpdatePartnerDebtRequestDto dto) {
+        Partner partner = partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+        PartnerDocument doc = partnerSearchRepository.findById(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner", "id", partnerId));
+
+        if (dto.accountType() == DebtAccountType.PAYABLE) {
+            partner.setDebtPayable(partner.getDebtPayable().add(dto.amount()));
+            doc.setDebtPayable(doc.getDebtPayable().add(dto.amount()));
+        } else {
+            partner.setDebtReceivable(partner.getDebtReceivable().add(dto.amount()));
+            doc.setDebtReceivable(doc.getDebtReceivable().add(dto.amount()));
+        }
+
+        partnerRepository.save(partner);
+        partnerSearchRepository.save(doc);
+        log.info("Updated debt for partner {}. Payable: {}, Receivable: {}",
+                partnerId, partner.getDebtPayable(), partner.getDebtReceivable());
     }
 
     private PartnerResponseDto toPartnerResponseDtoWithProductInProject(Partner partner) {
