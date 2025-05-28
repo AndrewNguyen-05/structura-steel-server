@@ -30,6 +30,7 @@ public class SaleDebt extends BaseEntity {
     @Column(name = "debt_note")
     private String debtNote;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private DebtStatus status;
 }
