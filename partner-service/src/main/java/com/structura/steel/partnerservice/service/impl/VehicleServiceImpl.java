@@ -73,13 +73,14 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleResponseDto updateVehicle(Long partnerId, Long vehicleId, VehicleRequestDto dto) {
         getValidPartner(partnerId);
-        Vehicle existing = getValidVehicle(partnerId, vehicleId, false);
+        Vehicle vehicle = getValidVehicle(partnerId, vehicleId, false);
 
-        if (vehicleRepository.existsByLicensePlate(dto.licensePlate())) {
-            throw new DuplicateKeyException("Vehicle", "license plate", existing.getLicensePlate());
+        if (!vehicle.getLicensePlate().equals(dto.licensePlate()) &&
+                vehicleRepository.existsByLicensePlate(dto.licensePlate())) {
+            throw new DuplicateKeyException("Vehicle", "license plate", vehicle.getLicensePlate());
         }
-        vehicleMapper.updateVehicleFromDto(dto, existing);
-        Vehicle updated = vehicleRepository.save(existing);
+        vehicleMapper.updateVehicleFromDto(dto, vehicle);
+        Vehicle updated = vehicleRepository.save(vehicle);
 
         VehicleDocument vehicleDocument = vehicleMapper.toDocument(updated);
 
