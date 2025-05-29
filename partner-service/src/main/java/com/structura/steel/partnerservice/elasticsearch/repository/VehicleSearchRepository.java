@@ -22,9 +22,12 @@ public interface VehicleSearchRepository extends ElasticsearchRepository<Vehicle
                      "type": "phrase_prefix",
                      "analyzer": "folding",
                      "fields": [
-                       "driverName", "driverName._2gram",
-                       "vehicleCode", "vehicleCode._2gram",
-                       "licensePlate"
+                       "driverName",
+                       "driverName._2gram",
+                       "vehicleCode",
+                       "vehicleCode._2gram",
+                       "licensePlate",
+                       "licensePlate._2gram"
                      ]
                    }
                  },

@@ -42,7 +42,12 @@ public class VehicleDocument {
     @Field(type = FieldType.Long)
     private Long partnerId;
 
-    @Field(type = FieldType.Keyword)
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "folding"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String licensePlate;
 
     private Double capacity;

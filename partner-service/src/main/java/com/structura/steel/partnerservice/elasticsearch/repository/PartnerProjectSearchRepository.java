@@ -16,10 +16,10 @@ public interface PartnerProjectSearchRepository extends ElasticsearchRepository<
         "bool": {
           "must": [
             { "multi_match": {
-                "query": "?0", 
-                "type": "phrase_prefix", 
+                "query": "?0",
+                "type": "phrase_prefix",
                 "analyzer": "folding",
-                "fields":[ 
+                "fields":[
                     "projectName",
                     "projectName._2gram",
                     "projectCode",
