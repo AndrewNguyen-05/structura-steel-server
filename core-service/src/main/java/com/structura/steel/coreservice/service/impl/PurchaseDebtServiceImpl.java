@@ -2,7 +2,7 @@ package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.client.ProductFeignClient;
-import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseDebtRequestDto;
 import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.commons.enumeration.DebtAccountType;
@@ -13,13 +13,13 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.PurchaseDebt;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
-import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
+import com.structura.steel.coreservice.mapper.ProductMapper;
 import com.structura.steel.coreservice.mapper.PurchaseDebtMapper;
 import com.structura.steel.coreservice.repository.PurchaseDebtRepository;
 import com.structura.steel.coreservice.repository.PurchaseOrderRepository;
 import com.structura.steel.coreservice.service.PurchaseDebtService;
-import com.structura.steel.commons.dto.core.request.PurchaseDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.PurchaseDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.purchase.PurchaseDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseDebtResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -38,7 +38,9 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
     private final PurchaseDebtRepository purchaseDebtRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
+
     private final PurchaseDebtMapper purchaseDebtMapper;
+    private final ProductMapper productMapper;
 
     private final ProductFeignClient productFeignClient;
     private final PartnerFeignClient partnerFeignClient;
@@ -56,7 +58,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         PurchaseDebt saved = purchaseDebtRepository.save(debt);
 
         // **Update Partner Debt (Increase Payable)**
-        Long partnerId = order.getSupplierId();
+        Long partnerId = order.getSupplier().id();
         try {
             partnerFeignClient.updatePartnerDebt(partnerId,
                     new UpdatePartnerDebtRequestDto(dto.originalAmount(), DebtAccountType.PAYABLE));
@@ -67,11 +69,11 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
             throw new RuntimeException("Failed to update partner debt. Purchase debt creation failed.", e);
         }
 
-        return entityToResponseWithProduct(saved);
+        return entityToResponseWithProduct(saved, dto.productId());
     }
 
     @Override
-    public PurchaseDebtResponseDto updatePurchaseDebt(Long id, PurchaseDebtRequestDto dto, Long purchaseId) {
+    public PurchaseDebtResponseDto updatePurchaseDebt(Long id, UpdatePurchaseDebtRequestDto dto, Long purchaseId) {
         PurchaseDebt existing = purchaseDebtRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseDebt", "id", id));
         PurchaseOrder po = purchaseOrderRepository.findById(purchaseId)
@@ -105,7 +107,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
         // **Update Partner Debt if difference is not zero**
         if (difference.compareTo(BigDecimal.ZERO) != 0) {
-            Long partnerId = po.getSupplierId();
+            Long partnerId = po.getSupplier().id();
             try {
                 partnerFeignClient.updatePartnerDebt(partnerId,
                         new UpdatePartnerDebtRequestDto(difference, DebtAccountType.PAYABLE));
@@ -117,7 +119,13 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
             }
         }
 
-        return entityToResponseWithProduct(updated);
+        PurchaseDebtResponseDto result = purchaseDebtMapper.toPurchaseDebtResponseDto(updated);
+
+        ProductResponseDto product = productMapper.toProductResponseDto(updated.getProduct());
+
+        result.setProduct(product);
+
+        return result;
     }
 
 
@@ -138,7 +146,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         }
 
         BigDecimal amountToReverse = debt.getOriginalAmount();
-        Long partnerId = debt.getPurchaseOrder().getSupplierId();
+        Long partnerId = debt.getPurchaseOrder().getSupplier().id();
 
         purchaseDebtRepository.delete(debt);
 
@@ -179,7 +187,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         List<PurchaseDebt> saved = purchaseDebtRepository.saveAll(entities);
 
         // **Update Partner Debt Once for the whole batch**
-        Long partnerId = order.getSupplierId();
+        Long partnerId = order.getSupplier().id();
         try {
             partnerFeignClient.updatePartnerDebt(partnerId,
                     new UpdatePartnerDebtRequestDto(totalBatchAmount[0], DebtAccountType.PAYABLE));
@@ -191,7 +199,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         }
 
         return saved.stream()
-                .map(this::entityToResponseWithProduct)
+                .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
                 .toList();
     }
 
@@ -207,7 +215,13 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
             throw new ResourceNotBelongToException("Debt", "id", id, "purchase order", "id", purchaseId);
         }
 
-        return entityToResponseWithProduct(debt);
+        PurchaseDebtResponseDto result = purchaseDebtMapper.toPurchaseDebtResponseDto(debt);
+
+        ProductResponseDto product = productMapper.toProductResponseDto(debt.getProduct());
+
+        result.setProduct(product);
+
+        return result;
     }
 
     @Override
@@ -216,7 +230,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         if(all) {
             List<PurchaseDebt> allDetails = purchaseDebtRepository.findAllByPurchaseOrderId(purchaseId);
             List<PurchaseDebtResponseDto> content = allDetails.stream()
-                    .map(this::entityToResponseWithProduct)
+                    .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
                     .collect(Collectors.toList());
 
             // Tạo PagingResponse "giả" chứa tất cả
@@ -236,7 +250,7 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
 
             Page<PurchaseDebt> pages = purchaseDebtRepository.findAllByPurchaseOrderId(purchaseId, pageable);
             List<PurchaseDebtResponseDto> content = pages.getContent().stream()
-                    .map(this::entityToResponseWithProduct)
+                    .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
                     .collect(Collectors.toList());
 
             PagingResponse<PurchaseDebtResponseDto> response = new PagingResponse<>();
@@ -250,11 +264,10 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         }
     }
 
-    private PurchaseDebtResponseDto entityToResponseWithProduct(PurchaseDebt debt) {
+    private PurchaseDebtResponseDto entityToResponseWithProduct(PurchaseDebt debt, Long productId) {
         PurchaseDebtResponseDto responseDto = purchaseDebtMapper.toPurchaseDebtResponseDto(debt);
         responseDto.setStatus(debt.getStatus().text());
 
-        Long productId = debt.getProductId();
         ProductResponseDto product = productFeignClient.getProductById(productId);
         responseDto.setProduct(product);
 

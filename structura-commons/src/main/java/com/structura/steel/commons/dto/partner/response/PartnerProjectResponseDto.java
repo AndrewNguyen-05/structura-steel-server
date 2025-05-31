@@ -23,8 +23,6 @@ public class PartnerProjectResponseDto{
     private String contactPerson;
     private String contactPersonPhone;
     private String address;
-    private BigDecimal accountsPayable;
-    private BigDecimal accountsReceivable;
     private List<ProductResponseDto> products;
     private Short version;
     private Instant createdAt;

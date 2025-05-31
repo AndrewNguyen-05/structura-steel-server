@@ -1,8 +1,9 @@
 package com.structura.steel.coreservice.mapper;
 
+import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseDebtRequestDto;
 import com.structura.steel.coreservice.entity.PurchaseDebt;
-import com.structura.steel.commons.dto.core.request.PurchaseDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.PurchaseDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.purchase.PurchaseDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseDebtResponseDto;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface PurchaseDebtMapper {
     PurchaseDebtResponseDto toPurchaseDebtResponseDto(PurchaseDebt debt);
 
     @Mapping(target = "purchaseOrder", ignore = true)
-    void updatePurchaseDebtFromDto(PurchaseDebtRequestDto dto, @MappingTarget PurchaseDebt debt);
+    void updatePurchaseDebtFromDto(UpdatePurchaseDebtRequestDto dto, @MappingTarget PurchaseDebt debt);
 
     List<PurchaseDebtResponseDto> toPurchaseDebtResponseDtoList(List<PurchaseDebt> debts);
 }

@@ -1,11 +1,12 @@
 // PurchaseDebtController.java
 package com.structura.steel.coreservice.controller;
 
+import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseDebtRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.PurchaseDebtService;
-import com.structura.steel.commons.dto.core.request.PurchaseDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.PurchaseDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.purchase.PurchaseDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseDebtResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class PurchaseDebtController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PurchaseDebtResponseDto> updatePurchaseDebt(
-            @PathVariable Long id, @RequestBody PurchaseDebtRequestDto dto,
+            @PathVariable Long id, @RequestBody UpdatePurchaseDebtRequestDto dto,
             @PathVariable Long purchaseId) {
         return ResponseEntity.ok(purchaseDebtService.updatePurchaseDebt(id, dto, purchaseId));
     }

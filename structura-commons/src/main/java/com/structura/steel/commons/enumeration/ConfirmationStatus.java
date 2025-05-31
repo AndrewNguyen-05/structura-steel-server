@@ -3,13 +3,10 @@ package com.structura.steel.commons.enumeration;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum OrderStatus implements HasText{
-    NEW("New"),
-    PROCESSING("Processing"),
-    IN_TRANSIT("In transit"),
-    DELIVERED("Delivered"),
-    CANCELLED("Cancelled"),
-    DONE("Done");
+public enum ConfirmationStatus implements HasText{
+    YES("Yes"),
+    PENDING("Pending"),
+    NO("No");
 
     final String text;
 

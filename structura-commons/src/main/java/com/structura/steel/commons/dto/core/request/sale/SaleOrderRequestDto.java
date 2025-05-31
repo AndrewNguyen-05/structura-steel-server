@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.request;
+package com.structura.steel.commons.dto.core.request.sale;
 
 
 public record SaleOrderRequestDto(

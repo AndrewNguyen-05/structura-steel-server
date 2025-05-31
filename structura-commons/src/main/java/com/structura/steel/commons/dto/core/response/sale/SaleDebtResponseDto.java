@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.sale;
 
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import lombok.Getter;
@@ -13,13 +13,13 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class SaleDebtResponseDto {
     private Long id;
+    private String status;
     private Long saleOrderId;
     private Long productId;
     private ProductResponseDto product;
     private BigDecimal originalAmount;
     private BigDecimal remainingAmount;
     private String debtNote;
-    private String status;
     private Short version;
     private Instant createdAt;
     private Instant updatedAt;

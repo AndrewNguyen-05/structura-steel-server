@@ -1,6 +1,7 @@
 package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.enumeration.EntityType;
+import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
@@ -13,11 +14,11 @@ import com.structura.steel.coreservice.mapper.SaleOrderMapper;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
 import com.structura.steel.coreservice.repository.UserRepository;
 import com.structura.steel.coreservice.service.SaleOrderService;
-import com.structura.steel.commons.dto.core.request.SaleOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllSaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.GetAllSaleOrderResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
-import com.structura.steel.commons.dto.core.response.SaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleOrderResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,20 +53,21 @@ public class SaleOrderServiceImpl implements SaleOrderService {
     public SaleOrderResponseDto createSaleOrder(SaleOrderRequestDto dto) {
         SaleOrder saleOrder = saleOrderMapper.toSaleOrder(dto);
 
-        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartnerId());
+        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartner().id());
 
-        if (!saleOrder.getPartnerId().equals(partnerResponse.id())) {
+        if (!saleOrder.getPartner().id().equals(partnerResponse.id())) {
             throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
         }
 
         saleOrder.setTotalAmount(new BigDecimal(0));
         saleOrder.setExportCode(CodeGenerator.generateCode(EntityType.EXPORT));
+        saleOrder.setStatus(OrderStatus.NEW);
 
         SaleOrder savedSaleOrder = saleOrderRepository.save(saleOrder);
 
         PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(
-                saleOrder.getPartnerId(),
-                saleOrder.getProjectId()
+                saleOrder.getPartner().id(),
+                saleOrder.getPartner().id()
         );
 
         SaleOrderResponseDto responseDto = saleOrderMapper.toSaleOrderResponseDto(savedSaleOrder);
@@ -80,9 +82,9 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         SaleOrder saleOrder = saleOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
 
-        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartnerId());
+        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartner().id());
 
-        if (!saleOrder.getPartnerId().equals(partnerResponse.id())) {
+        if (!saleOrder.getPartner().id().equals(partnerResponse.id())) {
             throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
         }
 
@@ -91,8 +93,8 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         SaleOrder updated = saleOrderRepository.save(saleOrder);
 
         PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(
-                saleOrder.getPartnerId(),
-                saleOrder.getProjectId()
+                saleOrder.getPartner().id(),
+                saleOrder.getPartner().id()
         );
 
         SaleOrderResponseDto responseDto = saleOrderMapper.toSaleOrderResponseDto(updated);
@@ -107,19 +109,19 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         SaleOrder saleOrder = saleOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
 
-        if(saleOrder.getPartnerId() == null || saleOrder.getProjectId() == null) {
+        if(saleOrder.getPartner().id() == null || saleOrder.getProject().id() == null) {
             throw new RuntimeException("SaleOrder does not have a partner or project");
         }
 
-        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartnerId());
+        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartner().id());
 
-        if (!saleOrder.getPartnerId().equals(partnerResponse.id())) {
+        if (!saleOrder.getPartner().id().equals(partnerResponse.id())) {
             throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
         }
 
         PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(
-                saleOrder.getPartnerId(),
-                saleOrder.getProjectId()
+                saleOrder.getPartner().id(),
+                saleOrder.getProject().id()
         );
 //        UserResponse userResponse = userRepository.getUsersById(saleOrder.getUser());
 
@@ -225,4 +227,23 @@ public class SaleOrderServiceImpl implements SaleOrderService {
                 .distinct()
                 .toList();
     }
+
+//    public void cancelSaleOrder(Long saleOrderId, String reason, String canceledBy) {
+//        SaleOrder order = saleOrderRepository.findById(saleOrderId).orElseThrow();
+//        if (order.getStatus() == OrderStatus.DONE) {
+//            throw new IllegalStateException("Cannot cancel completed order");
+//        }
+//        order.setStatus(OrderStatus.CANCELED);
+//        order.setSaleOrdersNote(order.getSaleOrdersNote() + "; Canceled: " + reason);
+//        saleOrderRepository.save(order);
+//    }
+//
+//    @EventListener
+//    public void handlePurchaseOrderCreated(PurchaseOrderCreatedEvent event) {
+//        List<SaleOrder> saleOrders = saleOrderRepository.findByProjectIdAndStatus(event.getProjectId(), OrderStatus.NEW);
+//        for (SaleOrder saleOrder : saleOrders) {
+//            saleOrder.setStatus(OrderStatus.PROCESSING);
+//            saleOrderRepository.save(saleOrder);
+//        }
+//    }
 }

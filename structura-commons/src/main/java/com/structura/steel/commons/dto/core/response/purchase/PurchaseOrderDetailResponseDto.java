@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.purchase;
 
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import lombok.Getter;
@@ -11,15 +11,14 @@ import java.time.Instant;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class PurchaseDebtResponseDto {
+public class PurchaseOrderDetailResponseDto {
         private Long id;
         private Long purchaseOrderId;
         private Long productId;
         private ProductResponseDto product;
-        private BigDecimal originalAmount;
-        private BigDecimal remainingAmount;
-        private String debtNote;
-        private String status;
+        private BigDecimal quantity;
+        private BigDecimal unitPrice;
+        private BigDecimal subtotal;
         private Short version;
         private Instant createdAt;
         private Instant updatedAt;

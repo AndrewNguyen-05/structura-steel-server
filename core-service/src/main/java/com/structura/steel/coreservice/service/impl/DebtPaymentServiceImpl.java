@@ -46,7 +46,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 PurchaseDebt pDebt = purchaseDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("PurchaseDebt", "id", debtId));
                 validateAndProcessPayment(pDebt, amountPaid);
-                partnerId = pDebt.getPurchaseOrder().getSupplierId();
+                partnerId = pDebt.getPurchaseOrder().getSupplier().id();
                 accountType = DebtAccountType.PAYABLE;
                 purchaseDebtRepository.save(pDebt);
                 break;
@@ -54,7 +54,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 SaleDebt sDebt = saleDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("SaleDebt", "id", debtId));
                 validateAndProcessPayment(sDebt, amountPaid);
-                partnerId = sDebt.getSaleOrder().getPartnerId();
+                partnerId = sDebt.getSaleOrder().getPartner().id();
                 accountType = DebtAccountType.RECEIVABLE;
                 saleDebtRepository.save(sDebt);
                 break;
@@ -62,7 +62,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 DeliveryDebt dDebt = deliveryDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("DeliveryDebt", "id", debtId));
                 validateAndProcessPayment(dDebt, amountPaid);
-                partnerId = dDebt.getDeliveryOrder().getPartnerId();
+                partnerId = dDebt.getDeliveryOrder().getPartner().id();
                 accountType = DebtAccountType.PAYABLE;
                 deliveryDebtRepository.save(dDebt);
                 break;

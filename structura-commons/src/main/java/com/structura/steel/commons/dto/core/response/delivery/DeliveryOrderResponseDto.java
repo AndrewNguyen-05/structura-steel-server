@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.delivery;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,7 @@ import java.util.Set;
 public class DeliveryOrderResponseDto {
 
     private Long id;
+    private String status;
     private String deliveryCode;
     private Long purchaseOrderId;
     private Long saleOrderId;

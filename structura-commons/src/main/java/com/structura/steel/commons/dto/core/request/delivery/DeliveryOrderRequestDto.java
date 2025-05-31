@@ -1,7 +1,6 @@
-package com.structura.steel.commons.dto.core.request;
+package com.structura.steel.commons.dto.core.request.delivery;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 public record DeliveryOrderRequestDto(
         Long purchaseOrderId,

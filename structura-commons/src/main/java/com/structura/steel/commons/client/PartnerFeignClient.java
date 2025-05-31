@@ -3,7 +3,9 @@ package com.structura.steel.commons.client;
 import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.partner.response.WarehouseResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,4 +42,10 @@ public interface PartnerFeignClient {
 
     @PutMapping("/partners/{partnerId}/update-debt")
     void updatePartnerDebt(@PathVariable Long partnerId, @RequestBody UpdatePartnerDebtRequestDto dto);
+
+    @GetMapping("/partners/{partnerId}/warehouses/{warehouseId}")
+    ResponseEntity<WarehouseResponseDto> getWarehouse(
+            @PathVariable Long partnerId,
+            @PathVariable Long warehouseId);
+
 }

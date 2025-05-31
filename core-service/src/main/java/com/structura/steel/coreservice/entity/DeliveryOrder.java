@@ -1,9 +1,15 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.enumeration.ConfirmationStatus;
 import com.structura.steel.commons.enumeration.DeliveryType;
 import com.structura.steel.commons.persistence.BaseEntity;
+import com.structura.steel.coreservice.entity.embedded.Partner;
+import com.structura.steel.coreservice.entity.embedded.Vehicle;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 import java.math.BigDecimal;
 import java.util.Set;
@@ -30,12 +36,13 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "delivery_date")
     private Instant deliveryDate;
 
-    @Column(name = "partner_id", nullable = false)
-    private Long partnerId;
+    @Column(name = "partner", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Partner partner;
 
-    // Khóa ngoại đến vehicles (Partner Service)
-    @Column(name = "vehicle_id")
-    private Long vehicleId;
+    @Column(name = "vehicle", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Vehicle vehicle;
 
     @Column(name = "driver_name")
     private String driverName;
@@ -43,11 +50,13 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "delivery_address")
     private String deliveryAddress;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "confirmation_from_partner")
-    private String confirmationFromPartner;
+    private ConfirmationStatus confirmationFromPartner;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "confirmation_from_factory")
-    private String confirmationFromFactory;
+    private ConfirmationStatus confirmationFromFactory;
 
     @Column(name = "distance")
     private BigDecimal distance;

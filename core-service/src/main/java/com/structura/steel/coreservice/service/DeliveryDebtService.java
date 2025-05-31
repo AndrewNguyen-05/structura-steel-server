@@ -1,8 +1,8 @@
 package com.structura.steel.coreservice.service;
 
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.commons.dto.core.request.DeliveryDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.DeliveryDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.delivery.DeliveryDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.delivery.DeliveryDebtResponseDto;
 
 public interface DeliveryDebtService {
 

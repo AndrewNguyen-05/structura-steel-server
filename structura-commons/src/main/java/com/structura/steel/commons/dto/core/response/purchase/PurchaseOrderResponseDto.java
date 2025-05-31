@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.purchase;
 
 import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
@@ -16,10 +16,11 @@ import java.util.Set;
 public class PurchaseOrderResponseDto {
 
     private Long id;
-    private String importCode;
-    private PartnerResponseDto supplier;           // Partner service
-    private PartnerProjectResponseDto project;     // Partner‑project
     private String status;
+    private String importCode;
+    private String confirmationFromSupplier;
+    private PartnerResponseDto supplier;
+    private PartnerProjectResponseDto project;
     private BigDecimal totalAmount;
     private String purchaseOrdersNote;
 

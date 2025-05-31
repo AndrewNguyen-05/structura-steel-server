@@ -1,7 +1,4 @@
-package com.structura.steel.commons.dto.core.request;
-
-import java.math.BigDecimal;
-import java.time.Instant;
+package com.structura.steel.commons.dto.core.request.purchase;
 
 public record PurchaseOrderRequestDto(
         Long supplierId,

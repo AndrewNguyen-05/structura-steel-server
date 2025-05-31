@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.purchase;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +13,12 @@ import java.time.Instant;
 public class GetAllPurchaseOrderResponseDto {
 	private Long id;
 	private Long supplierId;
+	private String confirmationFromSupplier;
 	private String supplierName;
+	private String supplierCode;
 	private Long projectId;
 	private String projectName;
+	private String projectCode;
 	private String status;
 	private BigDecimal totalAmount;
 	private Short version;

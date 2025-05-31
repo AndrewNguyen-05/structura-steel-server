@@ -1,11 +1,11 @@
-package com.structura.steel.commons.dto.core.request;
+package com.structura.steel.commons.dto.core.request.sale;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
-public record PurchaseOrderDetailRequestDto(
+public record SaleOrderDetailRequestDto(
         Long productId,
 
         @NotNull(message = "Quantity cannot be null")

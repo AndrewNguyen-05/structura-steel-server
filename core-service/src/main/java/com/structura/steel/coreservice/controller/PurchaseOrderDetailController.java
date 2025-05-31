@@ -1,10 +1,11 @@
 package com.structura.steel.coreservice.controller;
 
+import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseOrderDetailRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.PurchaseOrderDetailService;
-import com.structura.steel.commons.dto.core.request.PurchaseOrderDetailRequestDto;
-import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.purchase.PurchaseOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderDetailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class PurchaseOrderDetailController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PurchaseOrderDetailResponseDto> updatePurchaseOrderDetail(
-            @PathVariable Long id, @RequestBody PurchaseOrderDetailRequestDto dto,
+            @PathVariable Long id, @RequestBody UpdatePurchaseOrderDetailRequestDto dto,
             @PathVariable Long purchaseId) {
         return ResponseEntity.ok(purchaseOrderDetailService.updatePurchaseOrderDetail(id, dto, purchaseId));
     }

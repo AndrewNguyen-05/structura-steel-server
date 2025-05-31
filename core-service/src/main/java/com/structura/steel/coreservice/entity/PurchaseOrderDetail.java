@@ -1,8 +1,12 @@
 package com.structura.steel.coreservice.entity;
 
 import com.structura.steel.commons.persistence.BaseEntity;
+import com.structura.steel.coreservice.entity.embedded.Product;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -17,9 +21,9 @@ public class PurchaseOrderDetail extends BaseEntity {
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
-    // Khóa ngoại đến products (Product Service)
-    @Column(name = "product_id")
-    private Long productId;
+    @Column(name = "product", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Product product;
 
     @Column(name = "quantity")
     private BigDecimal quantity;

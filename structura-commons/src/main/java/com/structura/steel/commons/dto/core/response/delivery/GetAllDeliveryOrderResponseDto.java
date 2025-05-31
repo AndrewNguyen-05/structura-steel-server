@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.delivery;
 
 import java.math.BigDecimal;
 import java.time.Instant;
