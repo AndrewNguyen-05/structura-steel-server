@@ -1,21 +1,18 @@
 package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.ProductFeignClient;
-import com.structura.steel.commons.dto.core.response.PurchaseOrderDetailResponseDto;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.SaleOrderDetail;
 import com.structura.steel.coreservice.mapper.SaleOrderDetailMapper;
 import com.structura.steel.coreservice.repository.SaleOrderDetailRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
 import com.structura.steel.coreservice.service.SaleOrderDetailService;
-import com.structura.steel.commons.dto.core.request.SaleOrderDetailRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllSaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleOrderDetailRequestDto;
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
-import com.structura.steel.commons.dto.core.response.SaleOrderDetailResponseDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleOrderDetailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -188,7 +185,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         return saved.stream()
                 .map(d -> {
                     SaleOrderDetailResponseDto dto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(d);
-                    dto.setProduct(productMap.get(d.getProductId()));
+                    dto.setProduct(productMap.get(d.getProduct().id()));
                     return dto;
                 })
                 .toList();
@@ -197,7 +194,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     private SaleOrderDetailResponseDto entityToResponseWithProduct(SaleOrderDetail detail) {
         SaleOrderDetailResponseDto responseDto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(detail);
 
-        Long productId = detail.getProductId();
+        Long productId = detail.getProduct().id();
         ProductResponseDto product = productFeignClient.getProductById(productId);
         responseDto.setProduct(product);
 

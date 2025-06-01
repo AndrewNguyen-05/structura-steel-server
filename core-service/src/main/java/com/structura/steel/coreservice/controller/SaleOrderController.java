@@ -1,10 +1,12 @@
 package com.structura.steel.coreservice.controller;
 
+import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.delivery.DeliveryOrderResponseDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
-import com.structura.steel.commons.dto.core.request.SaleOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllSaleOrderResponseDto;
-import com.structura.steel.commons.dto.core.response.SaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.GetAllSaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleOrderResponseDto;
 import com.structura.steel.coreservice.service.SaleOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +50,7 @@ public class SaleOrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SaleOrderResponseDto> updateSaleOrder(@PathVariable Long id,
-                                                                @RequestBody SaleOrderRequestDto saleOrderRequestDto) {
+                                                                @RequestBody UpdateSaleOrderRequestDto saleOrderRequestDto) {
         return ResponseEntity.ok(saleOrderService.updateSaleOrder(id, saleOrderRequestDto));
     }
 
@@ -56,5 +58,12 @@ public class SaleOrderController {
     public ResponseEntity<Void> deleteSaleOrder(@PathVariable Long id) {
         saleOrderService.deleteSaleOrderById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<SaleOrderResponseDto> cancelSaleOrder(
+            @PathVariable Long id,
+            @RequestParam(value = "reason", defaultValue = "Cancelled by user") String reason) {
+        return ResponseEntity.ok(saleOrderService.cancelSaleOrder(id, reason));
     }
 }

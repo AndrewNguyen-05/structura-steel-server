@@ -1,9 +1,11 @@
 package com.structura.steel.coreservice.service;
 
+import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
-import com.structura.steel.commons.dto.core.request.SaleOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllSaleOrderResponseDto;
-import com.structura.steel.commons.dto.core.response.SaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.GetAllSaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleOrderResponseDto;
+import com.structura.steel.coreservice.entity.SaleOrder;
 
 import java.util.List;
 
@@ -11,7 +13,7 @@ public interface SaleOrderService {
 
     SaleOrderResponseDto createSaleOrder(SaleOrderRequestDto dto);
 
-    SaleOrderResponseDto updateSaleOrder(Long id, SaleOrderRequestDto dto);
+    SaleOrderResponseDto updateSaleOrder(Long id, UpdateSaleOrderRequestDto dto);
 
     SaleOrderResponseDto getSaleOrderById(Long id);
 
@@ -20,4 +22,8 @@ public interface SaleOrderService {
     PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir);
 
     List<String> suggestSales(String prefix, int size);
+
+    SaleOrderResponseDto cancelSaleOrder(Long id, String cancellationReason);
+
+    void checkAndUpdateDoneStatus(SaleOrder so);
 }

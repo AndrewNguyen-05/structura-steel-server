@@ -2,8 +2,8 @@ package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.client.ProductFeignClient;
-import com.structura.steel.commons.dto.core.request.SaleDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.SaleDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleDebtResponseDto;
 import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.commons.enumeration.DebtAccountType;
@@ -53,7 +53,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         SaleDebt savedSaleDebt = saleDebtRepository.save(saleDebt);
 
         // Update Partner Debt (Increase Receivable)
-        Long partnerId = saleOrder.getPartnerId(); // Partner is the customer
+        Long partnerId = saleOrder.getPartner().id(); // Partner is the customer
         try {
             partnerFeignClient.updatePartnerDebt(partnerId,
                     new UpdatePartnerDebtRequestDto(dto.originalAmount(), DebtAccountType.RECEIVABLE));
@@ -103,7 +103,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         SaleDebt updated = saleDebtRepository.save(existing);
 
         if (difference.compareTo(BigDecimal.ZERO) != 0) {
-            Long partnerId = saleOrder.getPartnerId();
+            Long partnerId = saleOrder.getPartner().id();
             try {
                 partnerFeignClient.updatePartnerDebt(partnerId,
                         new UpdatePartnerDebtRequestDto(difference, DebtAccountType.RECEIVABLE));
@@ -134,7 +134,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         }
 
         BigDecimal amountToReverse = saleDebt.getOriginalAmount();
-        Long partnerId = saleOrder.getPartnerId();
+        Long partnerId = saleOrder.getPartner().id();
 
         saleDebtRepository.delete(saleDebt);
 
@@ -172,7 +172,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
 
         List<SaleDebt> saved = saleDebtRepository.saveAll(entities);
 
-        Long partnerId = saleOrder.getPartnerId();
+        Long partnerId = saleOrder.getPartner().id();
         if (totalBatchAmount[0].compareTo(BigDecimal.ZERO) != 0) {
             try {
                 partnerFeignClient.updatePartnerDebt(partnerId,
@@ -249,12 +249,12 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         }
 
         // Lấy thông tin sản phẩm nếu productId có và ProductFeignClient được inject
-        if (debt.getProductId() != null && productFeignClient != null) {
+        if (debt.getProduct().id() != null && productFeignClient != null) {
             try {
-                ProductResponseDto product = productFeignClient.getProductById(debt.getProductId());
+                ProductResponseDto product = productFeignClient.getProductById(debt.getProduct().id());
                 responseDto.setProduct(product);
             } catch (Exception e) {
-                log.error("Failed to fetch product info for product ID {}: {}", debt.getProductId(), e.getMessage());
+                log.error("Failed to fetch product info for product ID {}: {}", debt.getProduct().id(), e.getMessage());
                 // Optionally set product to null or a default error representation
                 responseDto.setProduct(null);
             }

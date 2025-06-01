@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.sale;
 
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import lombok.Getter;

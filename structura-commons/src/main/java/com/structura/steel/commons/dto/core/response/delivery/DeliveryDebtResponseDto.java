@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.delivery;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,12 +15,12 @@ import java.time.Instant;
 public class DeliveryDebtResponseDto {
 
     private Long id;
+    private String status;
     private Long deliveryOrderId;
     private String orderType;
     private BigDecimal originalAmount;
     private BigDecimal remainingAmount;
     private String debtNote;
-    private String status;
     private Short version;
     private Instant createdAt;
     private Instant updatedAt;

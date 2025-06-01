@@ -1,11 +1,18 @@
 package com.structura.steel.coreservice.entity;
 
+import com.structura.steel.commons.enumeration.ConfirmationStatus;
 import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.persistence.BaseEntity;
+import com.structura.steel.coreservice.entity.embedded.Partner;
+import com.structura.steel.coreservice.entity.embedded.PartnerProject;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -19,13 +26,17 @@ public class PurchaseOrder extends BaseEntity {
     @Column(name = "import_code")
     private String importCode;
 
-    // Khóa ngoại đến partners (Partner Service)
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Partner supplier;
 
-    // Khóa ngoại đến partner_projects (Partner Service)
-    @Column(name = "project_id")
-    private Long projectId;
+    @Column(name = "project", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private PartnerProject project;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "confirmation_from_supplier")
+    private ConfirmationStatus confirmationFromSupplier;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -42,4 +53,9 @@ public class PurchaseOrder extends BaseEntity {
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private Set<PurchaseDebt> purchaseDebts;
+
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<DeliveryOrder> deliveryOrders = new HashSet<>();
+
+    private boolean deleted = false;
 }

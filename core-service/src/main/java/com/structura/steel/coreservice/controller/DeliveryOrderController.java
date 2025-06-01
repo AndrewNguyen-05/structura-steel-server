@@ -1,11 +1,13 @@
 package com.structura.steel.coreservice.controller;
 
+import com.structura.steel.commons.dto.core.request.delivery.UpdateDeliveryOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.DeliveryOrderService;
-import com.structura.steel.commons.dto.core.request.DeliveryOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.DeliveryOrderResponseDto;
-import com.structura.steel.commons.dto.core.response.GetAllDeliveryOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.delivery.DeliveryOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.delivery.DeliveryOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.delivery.GetAllDeliveryOrderResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +50,7 @@ public class DeliveryOrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryOrderResponseDto> updateDeliveryOrder(
-            @PathVariable Long id, @RequestBody DeliveryOrderRequestDto dto) {
+            @PathVariable Long id, @RequestBody UpdateDeliveryOrderRequestDto dto) {
         return ResponseEntity.ok(deliveryOrderService.updateDeliveryOrder(id, dto));
     }
 
@@ -56,5 +58,12 @@ public class DeliveryOrderController {
     public ResponseEntity<Void> deleteDeliveryOrder(@PathVariable Long id) {
         deliveryOrderService.deleteDeliveryOrderById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<DeliveryOrderResponseDto> cancelDeliveryOrder(
+            @PathVariable Long id,
+            @RequestParam(value = "reason", defaultValue = "Cancelled by user") String reason) {
+        return ResponseEntity.ok(deliveryOrderService.cancelDeliveryOrder(id, reason));
     }
 }

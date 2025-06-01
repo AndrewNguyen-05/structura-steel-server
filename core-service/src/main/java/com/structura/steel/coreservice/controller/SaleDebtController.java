@@ -2,9 +2,8 @@ package com.structura.steel.coreservice.controller;
 
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
-import com.structura.steel.commons.dto.core.request.SaleDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllSaleDebtResponseDto;
-import com.structura.steel.commons.dto.core.response.SaleDebtResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleDebtResponseDto;
 import com.structura.steel.coreservice.service.SaleDebtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

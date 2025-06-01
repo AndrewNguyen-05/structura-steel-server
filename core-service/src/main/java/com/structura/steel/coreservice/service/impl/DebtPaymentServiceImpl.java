@@ -12,6 +12,9 @@ import com.structura.steel.coreservice.entity.*;
 import com.structura.steel.coreservice.mapper.DebtPaymentMapper;
 import com.structura.steel.coreservice.repository.*;
 import com.structura.steel.coreservice.service.DebtPaymentService;
+import com.structura.steel.coreservice.service.DeliveryOrderService;
+import com.structura.steel.coreservice.service.PurchaseOrderService;
+import com.structura.steel.coreservice.service.SaleOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,14 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
     private final DeliveryDebtRepository deliveryDebtRepository;
     private final DebtPaymentRepository debtPaymentRepository;
 
+    private final PurchaseOrderRepository purchaseOrderRepository;
+    private final SaleOrderRepository saleOrderRepository;
+    private final DeliveryOrderRepository deliveryOrderRepository;
+
+    private final PurchaseOrderService purchaseOrderService;
+    private final SaleOrderService saleOrderService;
+    private final DeliveryOrderService deliveryOrderService;
+
     private final DebtPaymentMapper debtPaymentMapper;
 
     private final PartnerFeignClient partnerFeignClient;
@@ -46,7 +57,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 PurchaseDebt pDebt = purchaseDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("PurchaseDebt", "id", debtId));
                 validateAndProcessPayment(pDebt, amountPaid);
-                partnerId = pDebt.getPurchaseOrder().getSupplierId();
+                partnerId = pDebt.getPurchaseOrder().getSupplier().id();
                 accountType = DebtAccountType.PAYABLE;
                 purchaseDebtRepository.save(pDebt);
                 break;
@@ -54,7 +65,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 SaleDebt sDebt = saleDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("SaleDebt", "id", debtId));
                 validateAndProcessPayment(sDebt, amountPaid);
-                partnerId = sDebt.getSaleOrder().getPartnerId();
+                partnerId = sDebt.getSaleOrder().getPartner().id();
                 accountType = DebtAccountType.RECEIVABLE;
                 saleDebtRepository.save(sDebt);
                 break;
@@ -62,7 +73,7 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
                 DeliveryDebt dDebt = deliveryDebtRepository.findById(debtId)
                         .orElseThrow(() -> new ResourceNotFoundException("DeliveryDebt", "id", debtId));
                 validateAndProcessPayment(dDebt, amountPaid);
-                partnerId = dDebt.getDeliveryOrder().getPartnerId();
+                partnerId = dDebt.getDeliveryOrder().getPartner().id();
                 accountType = DebtAccountType.PAYABLE;
                 deliveryDebtRepository.save(dDebt);
                 break;
@@ -126,6 +137,8 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
     private void updateStatus(PurchaseDebt debt) {
         if (debt.getRemainingAmount().compareTo(BigDecimal.ZERO) == 0) {
             debt.setStatus(DebtStatus.PAID);
+            PurchaseOrder po = purchaseOrderRepository.findById(debt.getPurchaseOrder().getId()).orElse(null);
+            purchaseOrderService.checkAndUpdateDoneStatus(po);
         } else {
             debt.setStatus(DebtStatus.PARTIALLY_PAID);
         }
@@ -134,6 +147,8 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
     private void updateStatus(SaleDebt debt) {
         if (debt.getRemainingAmount().compareTo(BigDecimal.ZERO) == 0) {
             debt.setStatus(DebtStatus.PAID);
+            SaleOrder so = saleOrderRepository.findById(debt.getSaleOrder().getId()).orElse(null);
+            saleOrderService.checkAndUpdateDoneStatus(so);
         } else {
             debt.setStatus(DebtStatus.PARTIALLY_PAID);
         }
@@ -142,6 +157,8 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
     private void updateStatus(DeliveryDebt debt) {
         if (debt.getRemainingAmount().compareTo(BigDecimal.ZERO) == 0) {
             debt.setStatus(DebtStatus.PAID);
+            DeliveryOrder order = deliveryOrderRepository.findById(debt.getDeliveryOrder().getId()).orElse(null);
+            deliveryOrderService.checkAndUpdateDoneStatus(order);
         } else {
             debt.setStatus(DebtStatus.PARTIALLY_PAID);
         }

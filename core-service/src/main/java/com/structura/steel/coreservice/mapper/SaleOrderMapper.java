@@ -1,10 +1,11 @@
 package com.structura.steel.coreservice.mapper;
 
+import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestDto;
 import com.structura.steel.coreservice.elasticsearch.document.SaleOrderDocument;
 import com.structura.steel.coreservice.entity.SaleOrder;
-import com.structura.steel.commons.dto.core.request.SaleOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllSaleOrderResponseDto;
-import com.structura.steel.commons.dto.core.response.SaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.GetAllSaleOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleOrderResponseDto;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -14,11 +15,13 @@ public interface SaleOrderMapper {
 
     SaleOrder toSaleOrder(SaleOrderRequestDto dto);
 
-    SaleOrderResponseDto toSaleOrderResponseDto(SaleOrder saleOrder);
+    @Mapping(target = "status", expression = "java(order.getStatus().text())")
+    SaleOrderResponseDto toSaleOrderResponseDto(SaleOrder order);
 
-    void updateSaleOrderFromDto(SaleOrderRequestDto dto, @MappingTarget SaleOrder saleOrder);
+    void updateSaleOrderFromDto(UpdateSaleOrderRequestDto dto, @MappingTarget SaleOrder saleOrder);
 
-    GetAllSaleOrderResponseDto toGetAllSaleOrderResponseDto(SaleOrder saleOrder);
+    @Mapping(target = "status", expression = "java(order.getStatus().text())")
+    GetAllSaleOrderResponseDto toGetAllSaleOrderResponseDto(SaleOrder order);
 
     List<SaleOrderResponseDto> toSaleOrderResponseDtoList(List<SaleOrder> saleOrders);
 

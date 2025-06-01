@@ -1,8 +1,8 @@
 package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.PartnerFeignClient;
-import com.structura.steel.commons.dto.core.request.DeliveryDebtRequestDto;
-import com.structura.steel.commons.dto.core.response.DeliveryDebtResponseDto; // Class DTO
+import com.structura.steel.commons.dto.core.request.delivery.DeliveryDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.delivery.DeliveryDebtResponseDto; // Class DTO
 import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.enumeration.DebtAccountType;
 import com.structura.steel.commons.enumeration.DebtStatus;
@@ -49,7 +49,7 @@ public class DeliveryDebtServiceImpl implements DeliveryDebtService {
 
         DeliveryDebt savedDebt = deliveryDebtRepository.save(debt);
 
-        Long partnerId = deliveryOrder.getPartnerId();
+        Long partnerId = deliveryOrder.getPartner().id();
         if (partnerId == null) {
             log.error("Cannot update partner debt for DeliveryDebt ID {} as DeliveryOrder ID {} is missing partnerId (transporterId).",
                     savedDebt.getId(), deliveryId);
@@ -103,7 +103,7 @@ public class DeliveryDebtServiceImpl implements DeliveryDebtService {
         DeliveryDebt updated = deliveryDebtRepository.save(existing);
 
         if (difference.compareTo(BigDecimal.ZERO) != 0) {
-            Long partnerId = order.getPartnerId();
+            Long partnerId = order.getPartner().id();
             if (partnerId == null) {
                 log.error("Cannot update partner debt for DeliveryDebt ID {} as DeliveryOrder ID {} is missing partnerId (transporterId).",
                         updated.getId(), deliveryId);
@@ -148,7 +148,7 @@ public class DeliveryDebtServiceImpl implements DeliveryDebtService {
         }
 
         BigDecimal amountToReverse = debt.getOriginalAmount();
-        Long partnerId = order.getPartnerId();
+        Long partnerId = order.getPartner().id();
         if (partnerId == null) {
             log.error("Cannot reverse partner debt for DeliveryDebt ID {} as DeliveryOrder ID {} is missing partnerId (transporterId).",
                     id, deliveryId);

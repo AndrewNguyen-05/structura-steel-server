@@ -1,11 +1,12 @@
 package com.structura.steel.coreservice.controller;
 
+import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseOrderRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.PurchaseOrderService;
-import com.structura.steel.commons.dto.core.request.PurchaseOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.GetAllPurchaseOrderResponseDto;
-import com.structura.steel.commons.dto.core.response.PurchaseOrderResponseDto;
+import com.structura.steel.commons.dto.core.request.purchase.PurchaseOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.GetAllPurchaseOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +49,7 @@ public class PurchaseOrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PurchaseOrderResponseDto> updatePurchaseOrder(
-            @PathVariable Long id, @RequestBody PurchaseOrderRequestDto dto) {
+            @PathVariable Long id, @RequestBody UpdatePurchaseOrderRequestDto dto) {
         return ResponseEntity.ok(purchaseOrderService.updatePurchaseOrder(id, dto));
     }
 
@@ -56,5 +57,12 @@ public class PurchaseOrderController {
     public ResponseEntity<Void> deletePurchaseOrder(@PathVariable Long id) {
         purchaseOrderService.deletePurchaseOrderById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<PurchaseOrderResponseDto> cancelPurchaseOrder(
+            @PathVariable Long id,
+            @RequestParam(value = "reason", defaultValue = "Cancelled by user") String reason) {
+        return ResponseEntity.ok(purchaseOrderService.cancelPurchaseOrder(id, reason));
     }
 }

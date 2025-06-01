@@ -58,6 +58,9 @@ public class DeliveryOrderDocument {
     )
     private String deliveryAddress;
 
+    @Field(type = FieldType.Keyword)
+    private String status;
+
     @Field(type = FieldType.Double)
     private BigDecimal distance;
 

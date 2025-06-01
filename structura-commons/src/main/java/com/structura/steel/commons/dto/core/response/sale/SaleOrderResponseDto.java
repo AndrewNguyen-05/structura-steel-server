@@ -1,4 +1,4 @@
-package com.structura.steel.commons.dto.core.response;
+package com.structura.steel.commons.dto.core.response.sale;
 
 import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
@@ -15,10 +15,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SaleOrderResponseDto{
     private Long id;
+    private String status;
     private String exportCode;
     private PartnerResponseDto partner;
     private PartnerProjectResponseDto project;
-    private String status;
     private Long warehouseId;
     private BigDecimal totalAmount;
     private String saleOrdersNote;
