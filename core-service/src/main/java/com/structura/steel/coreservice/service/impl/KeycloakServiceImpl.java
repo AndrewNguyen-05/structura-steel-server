@@ -161,7 +161,8 @@ public class KeycloakServiceImpl implements KeycloakService {
         UserResource userResource = realmResource.users().get(id);
         UserRepresentation userRepresentation = userResource.toRepresentation();
 
-        if(isEmailExist(request.email())) {
+        if(!request.email().equals(userRepresentation.getEmail()) &&
+                isEmailExist(request.email())) {
             throw new DuplicateKeyException("Email already exists");
         }
 
