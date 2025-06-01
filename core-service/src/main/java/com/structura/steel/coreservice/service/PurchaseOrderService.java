@@ -5,6 +5,7 @@ import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.dto.core.request.purchase.PurchaseOrderRequestDto;
 import com.structura.steel.commons.dto.core.response.purchase.GetAllPurchaseOrderResponseDto;
 import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
+import com.structura.steel.coreservice.entity.PurchaseOrder;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface PurchaseOrderService {
     List<String> suggestPurchases(String prefix, int size);
 
     PurchaseOrderResponseDto cancelPurchaseOrder(Long id, String cancellationReason);
+
+    void checkAndUpdateDoneStatus(PurchaseOrder po);
 }

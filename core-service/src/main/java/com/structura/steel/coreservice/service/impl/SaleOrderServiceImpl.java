@@ -1,5 +1,10 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestDto;
+import com.structura.steel.commons.dto.core.response.delivery.DeliveryOrderResponseDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
+import com.structura.steel.commons.enumeration.ConfirmationStatus;
+import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.exception.ResourceNotBelongToException;
@@ -9,10 +14,16 @@ import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.coreservice.elasticsearch.document.SaleOrderDocument;
 import com.structura.steel.coreservice.elasticsearch.repository.SaleOrderSearchRepository;
+import com.structura.steel.coreservice.entity.DeliveryOrder;
+import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.SaleOrder;
+import com.structura.steel.coreservice.entity.embedded.Partner;
+import com.structura.steel.coreservice.entity.embedded.PartnerProject;
+import com.structura.steel.coreservice.event.PurchaseOrderCreatedEvent;
+import com.structura.steel.coreservice.mapper.PartnerMapper;
 import com.structura.steel.coreservice.mapper.SaleOrderMapper;
+import com.structura.steel.coreservice.repository.SaleDebtRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
-import com.structura.steel.coreservice.repository.UserRepository;
 import com.structura.steel.coreservice.service.SaleOrderService;
 import com.structura.steel.commons.dto.core.request.sale.SaleOrderRequestDto;
 import com.structura.steel.commons.dto.core.response.sale.GetAllSaleOrderResponseDto;
@@ -20,6 +31,7 @@ import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDt
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import com.structura.steel.commons.dto.core.response.sale.SaleOrderResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +42,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,66 +55,58 @@ import java.util.stream.Collectors;
 public class SaleOrderServiceImpl implements SaleOrderService {
 
     private final SaleOrderRepository saleOrderRepository;
-    private final UserRepository userRepository;
+    private final SaleDebtRepository saleDebtRepository;
 
     private final SaleOrderMapper saleOrderMapper;
+    private final PartnerMapper partnerMapper;
 
     private final PartnerFeignClient partnerFeignClient;
     private final SaleOrderSearchRepository saleOrderSearchRepository;
+
+    @EventListener
+    public void handlePurchaseOrderCreated(PurchaseOrderCreatedEvent event) {
+        List<SaleOrder> saleOrders = saleOrderRepository.findByProjectIdAndStatus(event.getProjectId(), OrderStatus.NEW.name());
+        for (SaleOrder saleOrder : saleOrders) {
+            saleOrder.setStatus(OrderStatus.PROCESSING);
+            saleOrderRepository.save(saleOrder);
+        }
+    }
 
     @Override
     public SaleOrderResponseDto createSaleOrder(SaleOrderRequestDto dto) {
         SaleOrder saleOrder = saleOrderMapper.toSaleOrder(dto);
 
-        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartner().id());
+        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(dto.partnerId());
+        PartnerProjectResponseDto projectResponse = partnerFeignClient.getPartnerProject(
+                dto.partnerId(), dto.projectId());
 
-        if (!saleOrder.getPartner().id().equals(partnerResponse.id())) {
-            throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
-        }
+        Partner partnerSnapshot = partnerMapper.toPartnerSnapshot(partnerResponse);
+        PartnerProject projectSnapshot = partnerMapper.toProjectSnapshot(projectResponse);
 
         saleOrder.setTotalAmount(new BigDecimal(0));
         saleOrder.setExportCode(CodeGenerator.generateCode(EntityType.EXPORT));
         saleOrder.setStatus(OrderStatus.NEW);
+        saleOrder.setPartner(partnerSnapshot);
+        saleOrder.setProject(projectSnapshot);
 
         SaleOrder savedSaleOrder = saleOrderRepository.save(saleOrder);
 
-        PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(
-                saleOrder.getPartner().id(),
-                saleOrder.getPartner().id()
-        );
-
-        SaleOrderResponseDto responseDto = saleOrderMapper.toSaleOrderResponseDto(savedSaleOrder);
-        responseDto.setPartner(partnerResponse);
-        responseDto.setProject(partnerProjectResponse);
-
-        return responseDto;
+        return mapToResponseDtoWithSnapshots(savedSaleOrder);
     }
 
     @Override
-    public SaleOrderResponseDto updateSaleOrder(Long id, SaleOrderRequestDto dto) {
+    public SaleOrderResponseDto updateSaleOrder(Long id, UpdateSaleOrderRequestDto dto) {
         SaleOrder saleOrder = saleOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
 
-        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartner().id());
-
-        if (!saleOrder.getPartner().id().equals(partnerResponse.id())) {
-            throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
+        if (saleOrder.getStatus() == OrderStatus.DONE || saleOrder.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("PurchaseOrder with status " + saleOrder.getStatus() + " cannot be updated.");
         }
 
         saleOrderMapper.updateSaleOrderFromDto(dto, saleOrder);
-
         SaleOrder updated = saleOrderRepository.save(saleOrder);
 
-        PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(
-                saleOrder.getPartner().id(),
-                saleOrder.getPartner().id()
-        );
-
-        SaleOrderResponseDto responseDto = saleOrderMapper.toSaleOrderResponseDto(updated);
-        responseDto.setPartner(partnerResponse);
-        responseDto.setProject(partnerProjectResponse);
-
-        return responseDto;
+        return mapToResponseDtoWithSnapshots(updated);
     }
 
     @Override
@@ -109,34 +114,19 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         SaleOrder saleOrder = saleOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
 
-        if(saleOrder.getPartner().id() == null || saleOrder.getProject().id() == null) {
-            throw new RuntimeException("SaleOrder does not have a partner or project");
-        }
-
-        PartnerResponseDto partnerResponse = partnerFeignClient.getPartnerById(saleOrder.getPartner().id());
-
-        if (!saleOrder.getPartner().id().equals(partnerResponse.id())) {
-            throw new ResourceNotBelongToException("Partner's project", "id", partnerResponse.id(), "partner", "id", partnerResponse.id());
-        }
-
-        PartnerProjectResponseDto partnerProjectResponse = partnerFeignClient.getPartnerProject(
-                saleOrder.getPartner().id(),
-                saleOrder.getProject().id()
-        );
-//        UserResponse userResponse = userRepository.getUsersById(saleOrder.getUser());
-
-        SaleOrderResponseDto responseDto = saleOrderMapper.toSaleOrderResponseDto(saleOrder);
-        responseDto.setPartner(partnerResponse);
-        responseDto.setProject(partnerProjectResponse);
-
-        return responseDto;
+        return mapToResponseDtoWithSnapshots(saleOrder);
     }
 
     @Override
     public void deleteSaleOrderById(Long id) {
         SaleOrder saleOrder = saleOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
+
+        SaleOrderDocument saleOrderDocument = saleOrderSearchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
+
         saleOrderRepository.delete(saleOrder);
+        saleOrderSearchRepository.delete(saleOrderDocument);
     }
 
     @Override
@@ -228,15 +218,110 @@ public class SaleOrderServiceImpl implements SaleOrderService {
                 .toList();
     }
 
-//    public void cancelSaleOrder(Long saleOrderId, String reason, String canceledBy) {
-//        SaleOrder order = saleOrderRepository.findById(saleOrderId).orElseThrow();
-//        if (order.getStatus() == OrderStatus.DONE) {
-//            throw new IllegalStateException("Cannot cancel completed order");
-//        }
-//        order.setStatus(OrderStatus.CANCELED);
-//        order.setSaleOrdersNote(order.getSaleOrdersNote() + "; Canceled: " + reason);
-//        saleOrderRepository.save(order);
-//    }
+    @Override
+    public SaleOrderResponseDto cancelSaleOrder(Long id, String cancellationReason) {
+        SaleOrder order = saleOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery Order", "id", id));
+
+        return executeCancelOrder(order, StringUtils.hasText(cancellationReason) ? cancellationReason : "Cancelled by user request.");
+    }
+
+    @Override
+    public void checkAndUpdateDoneStatus(SaleOrder so) {
+        SaleOrder order = saleOrderRepository.findById(so.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", so.getId()));
+
+        if (order.getStatus() == OrderStatus.DONE || order.getStatus() == OrderStatus.CANCELLED) {
+            return;
+        }
+
+        boolean allDelivered = order.getDeliveryOrders() != null &&
+                !order.getDeliveryOrders().isEmpty() &&
+                order.getDeliveryOrders().stream()
+                        .allMatch(deliveryOrder ->
+                                deliveryOrder.getStatus().equals(OrderStatus.DELIVERED) ||
+                                deliveryOrder.getStatus().equals(OrderStatus.DONE));
+
+        boolean noDebtsOrAllPaid = saleDebtRepository.countNonPaidNonCancelledDebtsBySaleOrderId(order.getId()) == 0;
+
+        if (allDelivered && noDebtsOrAllPaid && order.getStatus() == OrderStatus.DELIVERED) {
+            order.setStatus(OrderStatus.DONE);
+            order.setSaleOrdersNote((StringUtils.hasText(order.getSaleOrdersNote()) ?
+                    order.getSaleOrdersNote() + " | " : "") + "Completed on " + Instant.now());
+            saleOrderRepository.save(order);
+            saleOrderSearchRepository.findById(order.getId()).ifPresent(doc -> {
+                doc.setStatus(order.getStatus().name());
+                doc.setSaleOrdersNote(order.getSaleOrdersNote());
+                saleOrderSearchRepository.save(doc);
+            });
+        }
+    }
+
+    // --- Hàm private helper để cancel order ---
+    private SaleOrderResponseDto executeCancelOrder(SaleOrder order, String reason) {
+        // 1. Kiểm tra xem đơn hàng có thể hủy được không
+        if (!canBeCancelled(order)) {
+            throw new IllegalStateException("Sale Order with status " + order.getStatus() +
+                    " cannot be cancelled.");
+        }
+
+        // 2. Cập nhật trạng thái đơn hàng
+        order.setStatus(OrderStatus.CANCELLED);
+        // thêm lý do hủy vào purchaseOrdersNote hoặc một trường mới
+        String existingNote = order.getSaleOrdersNote();
+        String cancellationNote = "Cancelled: " + reason;
+        order.setSaleOrdersNote(StringUtils.hasText(existingNote) ? existingNote + " | " + cancellationNote : cancellationNote);
+
+        // 3. Xử lý các logic nghiệp vụ liên quan đến hủy đơn
+        if (order.getSaleDebts() != null) {
+            order.getSaleDebts().forEach(debt -> {
+                // nếu nợ chưa trả thì hủy, nếu đã trả một phần thì xem xét hoàn tiền
+
+                if (debt.getStatus() == DebtStatus.UNPAID) {
+                    debt.setStatus(DebtStatus.CANCELLED);
+                    debt.setDebtNote((StringUtils.hasText(debt.getDebtNote()) ? debt.getDebtNote() + " | " : "") + "Order Cancelled");
+                }
+            });
+        }
+        // - Thông báo cho nhà cung cấp (nếu PO đã được gửi)
+        // - Hoàn lại hàng vào kho (nếu đã xuất kho cho PO này - ít xảy ra với PO)
+        // - Cập nhật Elasticsearch
+
+        SaleOrder cancelledOrder = saleOrderRepository.save(order);
+
+        // Cập nhật document trong Elasticsearch
+        saleOrderSearchRepository.findById(cancelledOrder.getId()).ifPresent(doc -> {
+            doc.setStatus(cancelledOrder.getStatus().name());
+            saleOrderSearchRepository.save(doc);
+        });
+
+        SaleOrderResponseDto res = saleOrderMapper.toSaleOrderResponseDto(cancelledOrder);
+        // Đảm bảo response DTO cũng phản ánh đúng thông tin snapshot
+        if (cancelledOrder.getPartner() != null) {
+            res.setPartner(partnerMapper.toPartnerResponseDto(cancelledOrder.getPartner()));
+        }
+        if (cancelledOrder.getProject() != null) {
+            res.setProject(partnerMapper.toProjectResponseDto(cancelledOrder.getProject()));
+        }
+        return res;
+    }
+
+    // --- Hàm private helper để kiểm tra điều kiện hủy ---
+    private boolean canBeCancelled(SaleOrder order) {
+
+        return order.getStatus().equals(OrderStatus.NEW); // Luôn có thể hủy khi đang là NEW
+    }
+
+    private SaleOrderResponseDto mapToResponseDtoWithSnapshots(SaleOrder so) {
+        SaleOrderResponseDto res = saleOrderMapper.toSaleOrderResponseDto(so);
+        PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponseDto(so.getPartner());
+        PartnerProjectResponseDto partnerProjectResponseDto = partnerMapper.toProjectResponseDto(so.getProject());
+
+        res.setPartner(partnerResponseDto);
+        res.setProject(partnerProjectResponseDto);
+
+        return res;
+    }
 //
 //    @EventListener
 //    public void handlePurchaseOrderCreated(PurchaseOrderCreatedEvent event) {

@@ -2,6 +2,7 @@ package com.structura.steel.coreservice.entity;
 
 import com.structura.steel.commons.enumeration.ConfirmationStatus;
 import com.structura.steel.commons.enumeration.DeliveryType;
+import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.persistence.BaseEntity;
 import com.structura.steel.coreservice.entity.embedded.Partner;
 import com.structura.steel.coreservice.entity.embedded.Vehicle;
@@ -36,6 +37,10 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "delivery_date")
     private Instant deliveryDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private OrderStatus status;
+
     @Column(name = "partner", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private Partner partner;
@@ -58,6 +63,10 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "confirmation_from_factory")
     private ConfirmationStatus confirmationFromFactory;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "confirmation_from_receiver")
+    private ConfirmationStatus confirmationFromReceiver;
+
     @Column(name = "distance")
     private BigDecimal distance;
 
@@ -79,4 +88,6 @@ public class DeliveryOrder extends BaseEntity {
 
     @OneToMany(mappedBy = "deliveryOrder", cascade = CascadeType.ALL)
     private Set<DeliveryDebt> deliveryDebts;
+
+    private boolean deleted = false;
 }

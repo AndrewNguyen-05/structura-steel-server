@@ -1,5 +1,7 @@
 package com.structura.steel.commons.dto.core.response.delivery;
 
+import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
+import com.structura.steel.commons.dto.partner.response.VehicleResponseDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,11 +21,13 @@ public class DeliveryOrderResponseDto {
     private Long purchaseOrderId;
     private Long saleOrderId;
     private Instant deliveryDate;
-    private Long vehicleId;
+    private VehicleResponseDto vehicle;
+    private PartnerResponseDto partner;
     private String driverName;
     private String deliveryAddress;
     private String confirmationFromPartner;
     private String confirmationFromFactory;
+    private String confirmationFromReceiver;
     private BigDecimal distance;
     private BigDecimal deliveryUnitPrice;
     private BigDecimal additionalFees;

@@ -5,11 +5,15 @@ import java.time.Instant;
 
 public record GetAllDeliveryOrderResponseDto(
         Long id,
+        String status,
+        String deliveryType,
+        String confirmationFromPartner,
+        String confirmationFromFactory,
+        String confirmationFromReceiver,
         Long purchaseOrderId,
         Long saleOrderId,
         Instant deliveryDate,
         BigDecimal totalDeliveryFee,
-        String deliveryType,
         Short version,
         Instant createdAt,
         Instant updatedAt,

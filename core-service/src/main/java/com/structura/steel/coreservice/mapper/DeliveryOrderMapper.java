@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.mapper;
 
+import com.structura.steel.commons.dto.core.request.delivery.UpdateDeliveryOrderRequestDto;
 import com.structura.steel.coreservice.elasticsearch.document.DeliveryOrderDocument;
 import com.structura.steel.coreservice.entity.DeliveryOrder;
 import com.structura.steel.commons.dto.core.request.delivery.DeliveryOrderRequestDto;
@@ -16,13 +17,21 @@ public interface DeliveryOrderMapper {
 
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
     @Mapping(target = "saleOrderId", source = "saleOrder.id")
+    @Mapping(target = "status", expression = "java(order.getStatus().text())")
+    @Mapping(target = "deliveryType", expression = "java(order.getDeliveryType().text())")
+    @Mapping(target = "confirmationFromFactory", expression = "java(order.getConfirmationFromFactory() == null ? null : order.getConfirmationFromFactory().text())")
+    @Mapping(target = "confirmationFromPartner", expression = "java(order.getConfirmationFromPartner() == null ? null : order.getConfirmationFromPartner().text())")
     DeliveryOrderResponseDto toDeliveryOrderResponseDto(DeliveryOrder order);
 
-    void updateDeliveryOrderFromDto(DeliveryOrderRequestDto dto,
+    void updateDeliveryOrderFromDto(UpdateDeliveryOrderRequestDto dto,
                                     @MappingTarget DeliveryOrder order);
 
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
     @Mapping(target = "saleOrderId", source = "saleOrder.id")
+    @Mapping(target = "status", expression = "java(order.getStatus().text())")
+    @Mapping(target = "deliveryType", expression = "java(order.getDeliveryType().text())")
+    @Mapping(target = "confirmationFromFactory", expression = "java(order.getConfirmationFromFactory() == null ? null : order.getConfirmationFromFactory().text())")
+    @Mapping(target = "confirmationFromPartner", expression = "java(order.getConfirmationFromPartner() == null ? null : order.getConfirmationFromPartner().text())")
     GetAllDeliveryOrderResponseDto toGetAllDeliveryOrderResponseDto(DeliveryOrder order);
 
     List<DeliveryOrderResponseDto> toDeliveryOrderResponseDtoList(List<DeliveryOrder> orders);

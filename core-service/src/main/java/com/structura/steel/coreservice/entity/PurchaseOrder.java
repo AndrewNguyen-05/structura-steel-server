@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -52,6 +53,9 @@ public class PurchaseOrder extends BaseEntity {
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private Set<PurchaseDebt> purchaseDebts;
+
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<DeliveryOrder> deliveryOrders = new HashSet<>();
 
     private boolean deleted = false;
 }

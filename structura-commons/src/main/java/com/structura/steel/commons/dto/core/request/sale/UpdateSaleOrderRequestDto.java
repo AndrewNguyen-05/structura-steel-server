@@ -1,9 +1,8 @@
 package com.structura.steel.commons.dto.core.request.sale;
 
 
-public record SaleOrderRequestDto(
-        Long partnerId,
-        Long projectId,
+public record UpdateSaleOrderRequestDto(
+
         String saleOrdersNote
 ) {}
 
