@@ -84,11 +84,23 @@ services:
     depends_on:
       - elasticsearch
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - structura-network
+
 volumes:
   consul:
     driver: local
   elasticsearch_data:
   postgres_data:
+  redis_data:
 
 networks:
   structura-network:

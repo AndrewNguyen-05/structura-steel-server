@@ -2,11 +2,15 @@ package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.request.sale.SaleOrderDetailRequestDto;
+import com.structura.steel.commons.dto.core.response.sale.SaleOrderDetailResponseDto;
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.PurchaseOrderDetail;
+import com.structura.steel.coreservice.entity.SaleOrderDetail;
+import com.structura.steel.coreservice.entity.embedded.Product;
 import com.structura.steel.coreservice.mapper.ProductMapper;
 import com.structura.steel.coreservice.mapper.PurchaseOrderDetailMapper;
 import com.structura.steel.coreservice.repository.PurchaseOrderDetailRepository;
@@ -20,7 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -145,30 +153,68 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
         PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", purchaseId));
 
-        // 1. build all entities
-        List<PurchaseOrderDetail> entities = batchDto.stream()
-                .map(dto -> {
-                    PurchaseOrderDetail detail = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
-                    detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
-                    detail.setPurchaseOrder(purchaseOrder);
-                    return detail;
-                })
+        // 1. Lay tat ca product theo detail
+        List<Long> productIds = batchDto.stream()
+                .map(PurchaseOrderDetailRequestDto::productId)
+                .distinct()
                 .toList();
 
-        // 2. save in one go
+        // lấy product và chuyển sang map để get ở vòng lặp dưới
+        Map<Long, ProductResponseDto> productResponseMap = Collections.emptyMap();
+
+        if (!productIds.isEmpty()) {
+            List<ProductResponseDto> productResponses = productFeignClient.getProductsBatch(productIds); // Gọi batch
+            productResponseMap = productResponses.stream()
+                    .collect(Collectors.toMap(ProductResponseDto::id, Function.identity())); // Tạo Map
+        }
+
+        // tinh toan khluong
+        Map<Long, BigDecimal> weightMap = productIds.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        productFeignClient::getProductWeight
+                ));
+        // Convert sang entities
+        List<PurchaseOrderDetail> entities = new ArrayList<>(batchDto.size());
+
+        for (PurchaseOrderDetailRequestDto dto : batchDto) {
+
+            ProductResponseDto productInfo = productResponseMap.get(dto.productId()); // Lấy từ Map
+            if (productInfo == null) {
+                throw new ResourceNotFoundException("Product", "id", dto.productId());
+            }
+
+            // Create the embedded Product snapshot
+            Product productSnapshot = productMapper.toProductSnapShot(productInfo); // Convert sang Product embedded
+
+            PurchaseOrderDetail e = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
+            e.setProduct(productSnapshot);
+
+            BigDecimal unitWeight = weightMap.get(dto.productId());
+            e.setWeight(unitWeight.multiply(dto.quantity()));
+            e.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+            e.setPurchaseOrder(purchaseOrder);
+
+            entities.add(e);
+        }
+
+        // 3. Luu tat ca
         List<PurchaseOrderDetail> saved = purchaseOrderDetailRepository.saveAll(entities);
 
-        // 3. update purchase total once
-        BigDecimal batchTotal = saved.stream()
+        // 4. update tat ca
+        BigDecimal newTotal = saved.stream()
                 .map(PurchaseOrderDetail::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(batchTotal));
-        purchaseOrderRepository.save(purchaseOrder);
+        purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(newTotal));
 
-        // 4. map to response DTOs
+        // 5.  Map to response
         return saved.stream()
-                .map(purchaseOrderDetailMapper::toPurchaseOrderDetailResponseDto)
+                .map(d -> {
+                    PurchaseOrderDetailResponseDto dto = purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(d);
+                    dto.setProduct(productMapper.toProductResponseDto(d.getProduct()));
+                    return dto;
+                })
                 .toList();
     }
 

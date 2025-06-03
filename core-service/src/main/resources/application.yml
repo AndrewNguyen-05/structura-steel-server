@@ -43,6 +43,20 @@ spring:
   elasticsearch:
     rest:
       uris: http://elasticsearch:9200
+  redis:
+    port: 6379
+    host: localhost
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: anhvhnguyen.052003@gmail.com
+    password: lnurhejndpnocdrb
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 management:
   endpoints:

@@ -22,4 +22,7 @@ public class AppConstants {
     public static final String DEV_PROFILE = "dev";
     public static final String PROD_PROFILE = "prod";
 
+    public static final int MAX_EMAIL_ATTEMPTS = 5;
+    public static final int MAX_OTP_ATTEMPTS = 3;
+    public static final long LOCKOUT_DURATION_MINUTES = 5;
 }

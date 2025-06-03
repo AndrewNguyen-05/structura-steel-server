@@ -13,8 +13,9 @@ public interface SaleOrderDetailMapper {
 
     SaleOrderDetail toSaleOrderDetail(SaleOrderDetailRequestDto dto);
 
+    @Mapping(source = "detail.product.id", target = "productId")
     @Mapping(source = "saleOrder.id", target = "saleOrderId")
-    SaleOrderDetailResponseDto toSaleOrderDetailResponseDto(SaleOrderDetail saleOrderDetail);
+    SaleOrderDetailResponseDto toSaleOrderDetailResponseDto(SaleOrderDetail detail);
 
     void updateSaleOrderDetailFromDto(SaleOrderDetailRequestDto dto, @MappingTarget SaleOrderDetail saleOrderDetail);
 

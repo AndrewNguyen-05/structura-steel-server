@@ -1,29 +1,39 @@
 package com.structura.steel.coreservice.service.impl;
 
+import com.structura.steel.commons.dto.core.request.authentication.FirstTimePasswordChangeRequest;
+import com.structura.steel.commons.dto.core.request.authentication.ForgotPasswordRequest;
+import com.structura.steel.commons.dto.core.request.authentication.ResetPasswordRequest;
+import com.structura.steel.commons.dto.core.request.authentication.VerifyOtpRequest;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.response.RestResponse;
-import com.structura.steel.commons.dto.core.request.CreateUserRequest;
-import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.UpdateUserRequest;
 import com.structura.steel.commons.dto.core.response.UserResponse;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.UserMapper;
 import com.structura.steel.coreservice.repository.UserRepository;
 import com.structura.steel.coreservice.service.KeycloakService;
 import com.structura.steel.coreservice.service.UserService;
+import com.structura.steel.coreservice.utils.OtpUtils;
+import com.structura.steel.coreservice.utils.RateLimiter;
 import lombok.RequiredArgsConstructor;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +44,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+
     private final KeycloakService keycloakService;
+
+    private final OtpUtils otpUtil;
+    private final RateLimiter rateLimiter;
+
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     @Transactional
@@ -192,6 +208,71 @@ public class UserServiceImpl implements UserService {
             // Khôi phục lại Authentication ban đầu sau khi đồng bộ
             SecurityContextHolder.getContext().setAuthentication(originalAuth);
         }
+    }
+
+    @Override
+    @Transactional
+    public RestResponse<String> firstTimePasswordChange(FirstTimePasswordChangeRequest request) {
+        // Verify user exists
+        if (!keycloakService.isEmailExist(request.email())) {
+            throw new ResourceNotFoundException("User", "email", request.email());
+        }
+
+        // Update password in Keycloak
+        keycloakService.firstTimePasswordChange(request.email(), request.temporaryPassword(), request.newPassword());
+
+        return RestResponse.ok("Password changed successfully. Please log in with your new password.");
+    }
+
+    @Override
+    public RestResponse<String> initiateForgotPassword(ForgotPasswordRequest request) {
+        if (rateLimiter.isEmailLockedOut(request.email())) {
+            throw new RuntimeException("Too many attempts. Please wait 5 minutes before trying again.");
+        }
+
+        if (!keycloakService.isEmailExist(request.email())) {
+            rateLimiter.incrementEmailAttempts(request.email());
+            throw new ResourceNotFoundException("User", "email", request.email());
+        }
+
+        String otp = otpUtil.generateOtp();
+        redisTemplate.opsForValue().set("otp:" + request.email(), otp, Duration.ofMinutes(5));
+        otpUtil.sendOtpEmail(request.email(), otp);
+        rateLimiter.resetEmailAttempts(request.email());
+
+        return RestResponse.ok("OTP sent to your email.");
+    }
+
+    @Override
+    public RestResponse<String> verifyOtp(VerifyOtpRequest request) {
+        if (rateLimiter.isOtpLockedOut(request.email())) {
+            throw new RuntimeException("Too many OTP attempts. Please wait 5 minutes before trying again.");
+        }
+
+        String storedOtp = redisTemplate.opsForValue().get("otp:" + request.email());
+        if (storedOtp == null || !storedOtp.equals(request.otp())) {
+            rateLimiter.incrementOtpAttempts(request.email());
+            throw new RuntimeException("Invalid OTP.");
+        }
+
+        return RestResponse.ok("OTP verified successfully.");
+    }
+
+    @Override
+    public RestResponse<String> resetPassword(ResetPasswordRequest request) {
+
+        // Reset password in Keycloak
+        try {
+            keycloakService.resetPassword(request.email(), request.newPassword());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to reset password: " + e.getMessage(), e);
+        }
+
+        // Clean up
+        redisTemplate.delete("otp:" + request.email());
+        rateLimiter.resetOtpAttempts(request.email());
+
+        return RestResponse.ok("Password reset successfully.");
     }
 }
 

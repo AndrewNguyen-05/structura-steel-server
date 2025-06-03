@@ -13,6 +13,7 @@ public interface PurchaseOrderDetailMapper {
 
     PurchaseOrderDetail toPurchaseOrderDetail(PurchaseOrderDetailRequestDto dto);
 
+    @Mapping(source = "detail.product.id", target = "productId")
     @Mapping(source = "purchaseOrder.id", target = "purchaseOrderId")
     PurchaseOrderDetailResponseDto toPurchaseOrderDetailResponseDto(PurchaseOrderDetail detail);
 

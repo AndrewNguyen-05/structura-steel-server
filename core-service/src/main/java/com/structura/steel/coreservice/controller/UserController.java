@@ -1,11 +1,15 @@
 package com.structura.steel.coreservice.controller;
 
-import com.structura.steel.commons.dto.core.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.FirstTimePasswordChangeRequest;
+import com.structura.steel.commons.dto.core.request.authentication.ForgotPasswordRequest;
+import com.structura.steel.commons.dto.core.request.authentication.ResetPasswordRequest;
+import com.structura.steel.commons.dto.core.request.authentication.VerifyOtpRequest;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.response.RestResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.commons.utils.SecurityUtils;
-import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.UpdateUserRequest;
 import com.structura.steel.commons.dto.core.response.UserResponse;
 import com.structura.steel.coreservice.service.UserService;
 import jakarta.validation.Valid;
@@ -26,7 +30,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class    UserController {
+public class UserController {
 
     private final UserService userService;
 
@@ -81,6 +85,29 @@ public class    UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/first-time-password-change")
+    public ResponseEntity<RestResponse<String>> firstTimePasswordChange(
+            @RequestBody @Valid FirstTimePasswordChangeRequest request) {
+
+        RestResponse<String> response = userService.firstTimePasswordChange(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<RestResponse<String>> initiateForgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+        return ResponseEntity.ok(userService.initiateForgotPassword(request));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<RestResponse<String>> verifyOtp(@RequestBody @Valid VerifyOtpRequest request) {
+        return ResponseEntity.ok(userService.verifyOtp(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        return ResponseEntity.ok(userService.resetPassword(request));
     }
 }
 

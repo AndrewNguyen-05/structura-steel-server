@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
+import com.structura.steel.coreservice.utils.EmailUtils;
+import com.structura.steel.commons.utils.PasswordGenerator;
 import com.structura.steel.coreservice.config.property.KeycloakProperty;
-import com.structura.steel.commons.dto.core.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.CreateUserRequest;
 import com.structura.steel.coreservice.service.KeycloakService;
-import com.structura.steel.commons.dto.core.request.UpdateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.UpdateUserRequest;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +33,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class KeycloakServiceImpl implements KeycloakService {
+
     private final KeycloakProperty keycloak;
     private final RealmResource realmResource;
+    private final EmailUtils emailUtils;
 
     @Override
     public String createUser(CreateUserRequest request) {
@@ -57,15 +61,21 @@ public class KeycloakServiceImpl implements KeycloakService {
             userId = CreatedResponseUtil.getCreatedId(response);
             UserResource userResource = realmResource.users().get(userId);
 
+            // Generate random password
+            String randomPassword = PasswordGenerator.generateRandomPassword();
+
             // Đặt mật khẩu
             CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
             credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-            credentialRepresentation.setValue(request.password());
-            credentialRepresentation.setTemporary(false);
+            credentialRepresentation.setValue(randomPassword);
+            credentialRepresentation.setTemporary(true);
             userResource.resetPassword(credentialRepresentation);
 
             // Gán Realm Roles
             assignRealmRoleToUser(userResource, request.realmRole());
+
+            // Gửi mail cho user có tk mk để login
+            emailUtils.sendWelcomeEmail(request.email(), request.username(), randomPassword);
 
             return userId;
         } catch (Exception e) {
@@ -161,7 +171,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         UserResource userResource = realmResource.users().get(id);
         UserRepresentation userRepresentation = userResource.toRepresentation();
 
-        if(!request.email().equals(userRepresentation.getEmail()) &&
+        if (!request.email().equals(userRepresentation.getEmail()) &&
                 isEmailExist(request.email())) {
             throw new DuplicateKeyException("Email already exists");
         }
@@ -186,6 +196,54 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         // Cập nhật Realm Roles
         updateUserRealmRole(userResource, request.realmRole());
+    }
+
+    @Override
+    public void firstTimePasswordChange(String email, String temporaryPassword, String newPassword) {
+        UserRepresentation user = getUserByEmail(email);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "email", email);
+        }
+
+        UserResource userResource = realmResource.users().get(user.getId());
+
+        // Update password
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(newPassword);
+        credential.setTemporary(false); // Mark as non-temporary to remove the Update Password action
+        try {
+            userResource.resetPassword(credential);
+        } catch (Exception e) {
+            log.error("Error updating password for email {}: {}", email, e.getMessage());
+            throw new RuntimeException("Failed to update password in Keycloak: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void resetPassword(String email, String newPassword) {
+        UserRepresentation user = getUserByEmail(email);
+        if (user == null) {
+            throw new ResourceNotFoundException("User", "email", email);
+        }
+
+        UserResource userResource = realmResource.users().get(user.getId());
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(newPassword);
+        credential.setTemporary(false);
+
+        try {
+            userResource.resetPassword(credential);
+        } catch (Exception e) {
+            log.error("Error resetting password for email {}: {}", email, e.getMessage());
+            throw new RuntimeException("Failed to reset password in Keycloak: " + e.getMessage(), e);
+        }
+    }
+
+    private UserRepresentation getUserByEmail(String email) {
+        List<UserRepresentation> users = realmResource.users().searchByEmail(email, true);
+        return users.isEmpty() ? null : users.get(0);
     }
 
     private String parseErrorMessage(String json) {

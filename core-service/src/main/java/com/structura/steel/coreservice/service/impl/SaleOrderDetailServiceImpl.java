@@ -6,6 +6,8 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.SaleOrderDetail;
+import com.structura.steel.coreservice.entity.embedded.Product;
+import com.structura.steel.coreservice.mapper.ProductMapper;
 import com.structura.steel.coreservice.mapper.SaleOrderDetailMapper;
 import com.structura.steel.coreservice.repository.SaleOrderDetailRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,6 +39,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     private final SaleOrderDetailMapper saleOrderDetailMapper;
 
     private final ProductFeignClient productFeignClient;
+    private final ProductMapper productMapper;
 
     @Override
     public SaleOrderDetailResponseDto createSaleOrderDetail(SaleOrderDetailRequestDto dto, Long saleId) {
@@ -145,10 +149,14 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
                 .distinct()
                 .toList();
 
-        List<ProductResponseDto> products = productFeignClient.getProductsBatch(productIds);
+        // lấy product và chuyển sang map để get ở vòng lặp dưới
+        Map<Long, ProductResponseDto> productResponseMap = Collections.emptyMap();
 
-        Map<Long, ProductResponseDto> productMap = products.stream()
-                .collect(Collectors.toMap(ProductResponseDto::id, Function.identity()));
+        if (!productIds.isEmpty()) {
+            List<ProductResponseDto> productResponses = productFeignClient.getProductsBatch(productIds); // Gọi batch
+            productResponseMap = productResponses.stream()
+                    .collect(Collectors.toMap(ProductResponseDto::id, Function.identity())); // Tạo Map
+        }
 
         // tinh toan khluong
         Map<Long, BigDecimal> weightMap = productIds.stream()
@@ -161,7 +169,17 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         List<SaleOrderDetail> entities = new ArrayList<>(batchDto.size());
 
         for (SaleOrderDetailRequestDto dto : batchDto) {
+
+            ProductResponseDto productInfo = productResponseMap.get(dto.productId()); // Lấy từ Map
+            if (productInfo == null) {
+                throw new ResourceNotFoundException("Product", "id", dto.productId());
+            }
+
+            // Create the embedded Product snapshot
+            Product productSnapshot = productMapper.toProductSnapShot(productInfo); // Convert sang Product embedded
+
             SaleOrderDetail e = saleOrderDetailMapper.toSaleOrderDetail(dto);
+            e.setProduct(productSnapshot);
 
             BigDecimal unitWeight = weightMap.get(dto.productId());
             e.setWeight(unitWeight.multiply(dto.quantity()));
@@ -185,7 +203,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         return saved.stream()
                 .map(d -> {
                     SaleOrderDetailResponseDto dto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(d);
-                    dto.setProduct(productMap.get(d.getProduct().id()));
+                    dto.setProduct(productMapper.toProductResponseDto(d.getProduct()));
                     return dto;
                 })
                 .toList();

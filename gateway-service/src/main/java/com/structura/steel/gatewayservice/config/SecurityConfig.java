@@ -4,6 +4,7 @@ import com.structura.steel.gatewayservice.exception.AccessDeniedExceptionHandler
 import com.structura.steel.gatewayservice.exception.AuthenticationExceptionHandler;
 import com.structura.steel.gatewayservice.filter.JwtClaimsConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -68,6 +69,13 @@ public class SecurityConfig {
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/auth/**").permitAll()
+
+                        .pathMatchers("/api/v1/core/users/first-time-password-change/**").permitAll()
+                        .pathMatchers("/api/v1/core/users/forgot-password").permitAll()
+                        .pathMatchers("/api/v1/core/users/verify-otp").permitAll()
+                        .pathMatchers("/api/v1/core/users/reset-password").permitAll()
+                        .pathMatchers("/api/v1/core/users/check-email").permitAll()
+
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

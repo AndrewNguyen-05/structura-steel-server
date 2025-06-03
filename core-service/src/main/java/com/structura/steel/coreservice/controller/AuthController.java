@@ -1,7 +1,7 @@
 package com.structura.steel.coreservice.controller;
 
 import com.structura.steel.commons.response.RestResponse;
-import com.structura.steel.commons.dto.core.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.CreateUserRequest;
 import com.structura.steel.commons.dto.core.response.UserResponse;
 import com.structura.steel.coreservice.service.UserService;
 import jakarta.validation.Valid;

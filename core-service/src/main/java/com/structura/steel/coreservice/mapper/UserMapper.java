@@ -1,7 +1,7 @@
 package com.structura.steel.coreservice.mapper;
 
 import com.structura.steel.coreservice.entity.User;
-import com.structura.steel.commons.dto.core.request.CreateUserRequest;
+import com.structura.steel.commons.dto.core.request.authentication.CreateUserRequest;
 import com.structura.steel.commons.dto.core.response.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
