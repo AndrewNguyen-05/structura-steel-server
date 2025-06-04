@@ -12,7 +12,6 @@
     import com.structura.steel.coreservice.elasticsearch.document.PurchaseOrderDocument;
     import com.structura.steel.coreservice.elasticsearch.repository.PurchaseOrderSearchRepository;
     import com.structura.steel.coreservice.entity.PurchaseOrder;
-    import com.structura.steel.coreservice.entity.SaleOrder;
     import com.structura.steel.coreservice.entity.embedded.Partner;
     import com.structura.steel.coreservice.entity.embedded.PartnerProject;
     import com.structura.steel.coreservice.event.PurchaseOrderCreatedEvent;
@@ -63,8 +62,7 @@
             PurchaseOrder purchaseOrder = purchaseOrderMapper.toPurchaseOrder(dto);
 
             PartnerResponseDto supplierResponse = partnerFeignClient.getPartnerById(dto.supplierId());
-            PartnerProjectResponseDto projectResponse = partnerFeignClient.getPartnerProject(
-                    dto.supplierId(), dto.projectId());
+            PartnerProjectResponseDto projectResponse = partnerFeignClient.getProjectById(dto.projectId());
 
             Partner supplierSnapshot = partnerMapper.toPartnerSnapshot(supplierResponse);
             PartnerProject projectSnapshot = partnerMapper.toProjectSnapshot(projectResponse);

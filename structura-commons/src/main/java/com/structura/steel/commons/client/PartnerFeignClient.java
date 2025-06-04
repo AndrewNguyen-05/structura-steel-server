@@ -26,6 +26,9 @@ public interface PartnerFeignClient {
             @PathVariable Long partnerId,
             @PathVariable Long projectId);
 
+    @GetMapping("/{projectId}")
+    PartnerProjectResponseDto getProjectById(@PathVariable("projectId") Long projectId);
+
     @GetMapping("/partners/batch")
     List<PartnerResponseDto> getPartnersByIds(@RequestParam("ids") List<Long> ids);
 

@@ -14,6 +14,8 @@ public interface PartnerProjectService {
 
     PartnerProjectResponseDto getPartnerProject(Long partnerId, Long projectId);
 
+    PartnerProjectResponseDto getProjectById(Long projectId);
+
     void deletePartnerProject(Long partnerId, Long projectId);
 
     PagingResponse<PartnerProjectResponseDto> getAllPartnerProjectsByPartnerId(

@@ -101,6 +101,16 @@ public class PartnerProjectServiceImpl implements PartnerProjectService {
     }
 
     @Override
+    public PartnerProjectResponseDto getProjectById(Long projectId) {
+        PartnerProject project = partnerProjectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        if (project.getDeleted()) {
+            throw new ResourceNotFoundException("Project", "id", projectId + " (is deleted)");
+        }
+        return entityToResponseWithProduct(project);
+    }
+
+    @Override
     public void deletePartnerProject(Long partnerId, Long projectId) {
         getValidPartner(partnerId);
         PartnerProject project = getValidProject(partnerId, projectId, true);
