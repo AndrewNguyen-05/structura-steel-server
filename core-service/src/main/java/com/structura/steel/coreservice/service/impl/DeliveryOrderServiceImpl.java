@@ -2,8 +2,6 @@ package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.dto.core.request.delivery.UpdateDeliveryOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
-import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import com.structura.steel.commons.dto.partner.response.VehicleResponseDto;
 import com.structura.steel.commons.enumeration.ConfirmationStatus;
@@ -77,7 +75,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
         DeliveryOrder order = deliveryOrderMapper.toDeliveryOrder(dto);
 
-        VehicleResponseDto vehicleDto = partnerFeignClient.getVehicleById(dto.partnerId(), dto.vehicleId());
+        VehicleResponseDto vehicleDto = partnerFeignClient.getVehicleByPartnerId(dto.partnerId(), dto.vehicleId());
         PartnerResponseDto partnerResponseDto = partnerFeignClient.getPartnerById(dto.partnerId());
 
         Vehicle vehicle = partnerMapper.toVehicleSnapshot(vehicleDto);

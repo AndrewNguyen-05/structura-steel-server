@@ -49,15 +49,19 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
         PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", purchaseId));
 
+        ProductResponseDto productDto = productFeignClient.getProductById(dto.productId());
+        Product product = productMapper.toProductSnapShot(productDto);
+
         PurchaseOrderDetail detail = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
         detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
         detail.setPurchaseOrder(purchaseOrder);
+        detail.setProduct(product);
 
         PurchaseOrderDetail saved = purchaseOrderDetailRepository.save(detail);
         purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(detail.getSubtotal()));
         purchaseOrderRepository.save(purchaseOrder);
 
-        return entityToResponseWithProduct(saved, dto.productId());
+        return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(detail);
     }
 
     @Override
@@ -216,14 +220,5 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
                     return dto;
                 })
                 .toList();
-    }
-
-    private PurchaseOrderDetailResponseDto entityToResponseWithProduct(PurchaseOrderDetail detail, Long productId) {
-        PurchaseOrderDetailResponseDto responseDto = purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(detail);
-
-        ProductResponseDto product = productFeignClient.getProductById(productId);
-        responseDto.setProduct(product);
-
-        return responseDto;
     }
 }

@@ -12,7 +12,9 @@ public interface VehicleService {
 
     VehicleResponseDto updateVehicle(Long partnerId, Long vehicleId, VehicleRequestDto dto);
 
-    VehicleResponseDto getVehicleById(Long partnerId, Long vehicleId);
+    VehicleResponseDto getVehicleByPartnerId(Long partnerId, Long vehicleId);
+
+    VehicleResponseDto getVehicleById(Long vehicleId);
 
     void deleteVehicle(Long partnerId, Long vehicleId);
 

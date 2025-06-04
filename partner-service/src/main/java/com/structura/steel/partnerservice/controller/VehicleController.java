@@ -37,7 +37,7 @@ public class VehicleController {
     public ResponseEntity<VehicleResponseDto> getVehicleById(
             @PathVariable Long partnerId,
             @PathVariable Long vehicleId) {
-        return ResponseEntity.ok(vehicleService.getVehicleById(partnerId, vehicleId));
+        return ResponseEntity.ok(vehicleService.getVehicleByPartnerId(partnerId, vehicleId));
     }
 
     @DeleteMapping("/{vehicleId}")

@@ -11,6 +11,7 @@ import com.structura.steel.commons.dto.partner.response.VehicleResponseDto;
 import com.structura.steel.partnerservice.elasticsearch.document.VehicleDocument;
 import com.structura.steel.partnerservice.elasticsearch.repository.VehicleSearchRepository;
 import com.structura.steel.partnerservice.entity.Partner;
+import com.structura.steel.partnerservice.entity.PartnerProject;
 import com.structura.steel.partnerservice.entity.Vehicle;
 import com.structura.steel.partnerservice.mapper.VehicleMapper;
 import com.structura.steel.partnerservice.repository.PartnerRepository;
@@ -97,13 +98,24 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public VehicleResponseDto getVehicleById(Long partnerId, Long vehicleId) {
+    public VehicleResponseDto getVehicleByPartnerId(Long partnerId, Long vehicleId) {
         getValidPartner(partnerId);
 
         Vehicle vehicle = getValidVehicle(partnerId, vehicleId, false);
 
         return vehicleMapper.toVehicleResponseDto(vehicle);
     }
+
+    @Override
+    public VehicleResponseDto getVehicleById(Long vehicleId) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "id", vehicleId));
+        if (vehicle.getDeleted()) {
+            throw new ResourceNotFoundException("Vehicle", "id", vehicleId + " (is deleted)");
+        }
+        return vehicleMapper.toVehicleResponseDto(vehicle);
+    }
+
 
     @Override
     public void deleteVehicle(Long partnerId, Long vehicleId) {

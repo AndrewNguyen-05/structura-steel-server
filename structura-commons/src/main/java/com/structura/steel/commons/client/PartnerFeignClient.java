@@ -53,7 +53,10 @@ public interface PartnerFeignClient {
             @PathVariable Long warehouseId);
 
     @GetMapping("/partners/{partnerId}/vehicles/{vehicleId}")
-    VehicleResponseDto getVehicleById(
+    VehicleResponseDto getVehicleByPartnerId(
             @PathVariable Long partnerId,
             @PathVariable Long vehicleId);
+
+    @GetMapping("/vehicles/{vehicleId}")
+    VehicleResponseDto getVehicleById(@PathVariable("vehicleId") Long vehicleId);
 }
