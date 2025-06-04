@@ -44,19 +44,27 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
     @Override
     public SaleOrderDetailResponseDto createSaleOrderDetail(SaleOrderDetailRequestDto dto, Long saleId) {
         SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
-        SaleOrderDetail saleOrderDetail = saleOrderDetailMapper.toSaleOrderDetail(dto);
+        SaleOrderDetail detail = saleOrderDetailMapper.toSaleOrderDetail(dto);
+
+        ProductResponseDto productResponse = productFeignClient.getProductById(dto.productId());
+        Product product = productMapper.toProductSnapShot(productResponse);
 
         BigDecimal productWeight = productFeignClient.getProductWeight(dto.productId());
         if (productWeight == null) {
             throw new RuntimeException("Could not fetch weight for product id: " + dto.productId());
         }
-        saleOrderDetail.setWeight(dto.quantity().multiply(productWeight));
-        saleOrderDetail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
-        saleOrderDetail.setSaleOrder(saleOrder);
+        detail.setWeight(dto.quantity().multiply(productWeight));
+        detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+        detail.setSaleOrder(saleOrder);
+        detail.setProduct(product);
 
-        SaleOrderDetail savedSaleOrderDetail = saleOrderDetailRepository.save(saleOrderDetail);
-        saleOrder.setTotalAmount(saleOrder.getTotalAmount().add(saleOrderDetail.getSubtotal()));
-        return entityToResponseWithProduct(savedSaleOrderDetail);
+        SaleOrderDetail saved = saleOrderDetailRepository.save(detail);
+        saleOrder.setTotalAmount(saleOrder.getTotalAmount().add(detail.getSubtotal()));
+
+        SaleOrderDetailResponseDto result = saleOrderDetailMapper.toSaleOrderDetailResponseDto(saved);
+        result.setProduct(productResponse);
+
+        return result;
     }
 
     @Override
@@ -71,19 +79,29 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
 
         saleOrderDetailMapper.updateSaleOrderDetailFromDto(dto, existing);
         SaleOrderDetail updated = saleOrderDetailRepository.save(existing);
-        return entityToResponseWithProduct(updated);
+
+        ProductResponseDto responseDto = productMapper.toProductResponseDto(updated.getProduct());
+        SaleOrderDetailResponseDto result = saleOrderDetailMapper.toSaleOrderDetailResponseDto(updated);
+        result.setProduct(responseDto);
+
+        return result;
     }
 
     @Override
     public SaleOrderDetailResponseDto getSaleOrderDetailById(Long id, Long saleId) {
-        SaleOrderDetail saleOrderDetail = saleOrderDetailRepository.findById(id)
+        SaleOrderDetail detail = saleOrderDetailRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrderDetail", "id", id));
 
         SaleOrder saleOrder = saleOrderRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
-        if(!saleOrder.getSaleOrderDetails().contains(saleOrderDetail)) {
+        if(!saleOrder.getSaleOrderDetails().contains(detail)) {
             throw new ResourceNotBelongToException("Sale detail", "id", id, "sale order", "id", saleId);
         }
-        return entityToResponseWithProduct(saleOrderDetail);
+
+        ProductResponseDto responseDto = productMapper.toProductResponseDto(detail.getProduct());
+        SaleOrderDetailResponseDto result = saleOrderDetailMapper.toSaleOrderDetailResponseDto(detail);
+        result.setProduct(responseDto);
+
+        return result;
     }
 
     @Override
@@ -104,7 +122,12 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         if(all) {
             List<SaleOrderDetail> allDetails = saleOrderDetailRepository.findAllBySaleOrderId(saleId);
             List<SaleOrderDetailResponseDto> content = allDetails.stream()
-                    .map(this::entityToResponseWithProduct)
+                    .map(detail -> {
+                        SaleOrderDetailResponseDto dto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(detail);
+                        ProductResponseDto responseDto = productMapper.toProductResponseDto(detail.getProduct());
+                        dto.setProduct(responseDto);
+                        return dto;
+                    })
                     .collect(Collectors.toList());
 
             // Tạo PagingResponse "giả" chứa tất cả
@@ -124,7 +147,12 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
             Page<SaleOrderDetail> pages = saleOrderDetailRepository.findAllBySaleOrderId(saleId, pageable);
             List<SaleOrderDetail> saleOrderDetails = pages.getContent();
             List<SaleOrderDetailResponseDto> content = saleOrderDetails.stream()
-                    .map(this::entityToResponseWithProduct)
+                    .map(detail -> {
+                        SaleOrderDetailResponseDto dto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(detail);
+                        ProductResponseDto responseDto = productMapper.toProductResponseDto(detail.getProduct());
+                        dto.setProduct(responseDto);
+                        return dto;
+                    })
                     .collect(Collectors.toList());
             PagingResponse<SaleOrderDetailResponseDto> response = new PagingResponse<>();
             response.setContent(content);
@@ -207,15 +235,5 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
                     return dto;
                 })
                 .toList();
-    }
-
-    private SaleOrderDetailResponseDto entityToResponseWithProduct(SaleOrderDetail detail) {
-        SaleOrderDetailResponseDto responseDto = saleOrderDetailMapper.toSaleOrderDetailResponseDto(detail);
-
-        Long productId = detail.getProduct().id();
-        ProductResponseDto product = productFeignClient.getProductById(productId);
-        responseDto.setProduct(product);
-
-        return responseDto;
     }
 }
