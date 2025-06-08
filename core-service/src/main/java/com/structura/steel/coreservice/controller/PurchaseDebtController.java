@@ -1,4 +1,3 @@
-// PurchaseDebtController.java
 package com.structura.steel.coreservice.controller;
 
 import com.structura.steel.commons.dto.core.request.purchase.UpdatePurchaseDebtRequestDto;
