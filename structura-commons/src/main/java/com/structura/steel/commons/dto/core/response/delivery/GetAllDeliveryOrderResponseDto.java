@@ -6,6 +6,7 @@ import java.time.Instant;
 public record GetAllDeliveryOrderResponseDto(
         Long id,
         String status,
+		String deliveryCode,
         String deliveryType,
         String confirmationFromPartner,
         String confirmationFromFactory,

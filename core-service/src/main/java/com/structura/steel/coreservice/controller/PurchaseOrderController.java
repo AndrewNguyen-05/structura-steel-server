@@ -25,8 +25,10 @@ public class PurchaseOrderController {
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir) {
-        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders(pageNo, pageSize, sortBy, sortDir));
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir,
+            @RequestParam(value = "search", required = false) String searchKeyword
+    ) {
+        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders(pageNo, pageSize, sortBy, sortDir, searchKeyword));
     }
 
     @GetMapping("/suggest")

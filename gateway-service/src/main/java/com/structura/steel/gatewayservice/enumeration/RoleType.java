@@ -1,11 +1,11 @@
-package com.structura.steel.commons.enumeration;
+package com.structura.steel.gatewayservice.enumeration;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum RoleType implements HasText{
+public enum RoleType implements HasText {
     ADMIN("ROLE_ADMIN"),
     IMPORTER("ROLE_IMPORTER"),
     SALER("ROLE_SALER"),

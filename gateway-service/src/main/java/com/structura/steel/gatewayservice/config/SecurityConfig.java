@@ -1,11 +1,10 @@
 package com.structura.steel.gatewayservice.config;
 
-import com.structura.steel.commons.enumeration.RoleType;
+import com.structura.steel.gatewayservice.enumeration.RoleType;
 import com.structura.steel.gatewayservice.exception.AccessDeniedExceptionHandler;
 import com.structura.steel.gatewayservice.exception.AuthenticationExceptionHandler;
 import com.structura.steel.gatewayservice.filter.JwtClaimsConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

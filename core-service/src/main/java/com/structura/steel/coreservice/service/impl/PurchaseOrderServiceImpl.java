@@ -134,13 +134,21 @@
         }
 
         @Override
-        public PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir) {
+        public PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
             Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                     ? Sort.by(sortBy).ascending()
                     : Sort.by(sortBy).descending();
 
             Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-            Page<PurchaseOrder> pages = purchaseOrderRepository.findAll(pageable);
+
+            Page<PurchaseOrder> pages;
+
+            if (StringUtils.hasText(searchKeyword)) {
+                pages = purchaseOrderRepository.findByImportCodeContainingIgnoreCase(searchKeyword, pageable);
+            } else {
+                pages = purchaseOrderRepository.findAll(pageable);
+            }
+
             List<PurchaseOrder> purchaseOrders = pages.getContent();
 
             if (CollectionUtils.isEmpty(purchaseOrders)) {

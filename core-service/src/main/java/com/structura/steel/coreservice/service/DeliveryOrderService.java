@@ -20,7 +20,7 @@ public interface DeliveryOrderService {
 
     void deleteDeliveryOrderById(Long id);
 
-    PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+    PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
 
     List<String> suggestDeliveries(String prefix, int size);
 

@@ -193,13 +193,20 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     }
 
     @Override
-    public PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
-        Page<DeliveryOrder> pages = deliveryOrderRepository.findAll(pageable);
+        Page<DeliveryOrder> pages;
+
+        if (StringUtils.hasText(searchKeyword)) {
+            pages = deliveryOrderRepository.findByDeliveryCodeContainingIgnoreCase(searchKeyword, pageable);
+        } else {
+            pages = deliveryOrderRepository.findAll(pageable);
+        }
+
         List<GetAllDeliveryOrderResponseDto> content = pages.getContent().stream()
                 .map(deliveryOrderMapper::toGetAllDeliveryOrderResponseDto)
                 .collect(Collectors.toList());

@@ -19,7 +19,7 @@ public interface PurchaseOrderService {
 
     void deletePurchaseOrderById(Long id);
 
-    PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+    PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
 
     List<String> suggestPurchases(String prefix, int size);
 

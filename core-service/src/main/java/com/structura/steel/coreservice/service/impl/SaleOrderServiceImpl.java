@@ -130,13 +130,21 @@ public class SaleOrderServiceImpl implements SaleOrderService {
     }
 
     @Override
-    public PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<SaleOrder> pages = saleOrderRepository.findAll(pageable);
+
+        Page<SaleOrder> pages;
+
+        if (StringUtils.hasText(searchKeyword)) {
+            pages = saleOrderRepository.findByExportCodeContainingIgnoreCase(searchKeyword, pageable);
+        } else {
+            pages = saleOrderRepository.findAll(pageable);
+        }
+
         List<SaleOrder> saleOrders = pages.getContent();
 
         if (CollectionUtils.isEmpty(saleOrders)) {

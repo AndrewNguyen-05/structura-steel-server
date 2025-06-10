@@ -12,6 +12,8 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class GetAllPurchaseOrderResponseDto {
 	private Long id;
+	private String status;
+	private String importCode;
 	private Long supplierId;
 	private String confirmationFromSupplier;
 	private String supplierName;
@@ -19,7 +21,6 @@ public class GetAllPurchaseOrderResponseDto {
 	private Long projectId;
 	private String projectName;
 	private String projectCode;
-	private String status;
 	private BigDecimal totalAmount;
 	private Short version;
 	private Instant createdAt;

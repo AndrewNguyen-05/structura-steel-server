@@ -19,7 +19,7 @@ public interface SaleOrderService {
 
     void deleteSaleOrderById(Long id);
 
-    PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+    PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
 
     List<String> suggestSales(String prefix, int size);
 

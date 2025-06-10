@@ -13,13 +13,14 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class GetAllSaleOrderResponseDto {
     private Long id;
+    private String status;
+    private String exportCode;
     private Long partnerId;
 	private String partnerName;
     private String partnerCode;
     private Long projectId;
 	private String projectName;
     private String projectCode;
-    private String status;
     private BigDecimal totalAmount;
     private String saleOrdersNote;
     private Set<SaleOrderDetailResponseDto>saleOrderDetails;
