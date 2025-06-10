@@ -1,7 +1,6 @@
 package com.structura.steel.coreservice.controller;
 
 import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.delivery.DeliveryOrderResponseDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.commons.dto.core.request.sale.SaleOrderRequestDto;
@@ -27,9 +26,10 @@ public class SaleOrderController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED, required = false) boolean deleted,
             @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(saleOrderService.getAllSaleOrders(pageNo, pageSize, sortBy, sortDir, searchKeyword));
+        return ResponseEntity.ok(saleOrderService.getAllSaleOrders(pageNo, pageSize, sortBy, sortDir, deleted, searchKeyword));
     }
 
     @GetMapping("/suggest")
@@ -67,5 +67,16 @@ public class SaleOrderController {
             @PathVariable Long id,
             @RequestParam(value = "reason", defaultValue = "Cancelled by user") String reason) {
         return ResponseEntity.ok(saleOrderService.cancelSaleOrder(id, reason));
+    }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDeleteSaleOrder(@PathVariable Long id) {
+        saleOrderService.softDeleteSaleOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{id}")
+    public ResponseEntity<SaleOrderResponseDto> restoreSaleOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(saleOrderService.restoreSaleOrder(id));
     }
 }

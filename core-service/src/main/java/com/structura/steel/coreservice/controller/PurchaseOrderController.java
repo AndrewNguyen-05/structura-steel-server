@@ -26,9 +26,10 @@ public class PurchaseOrderController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED, required = false) boolean deleted,
             @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders(pageNo, pageSize, sortBy, sortDir, searchKeyword));
+        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders(pageNo, pageSize, sortBy, sortDir, deleted, searchKeyword));
     }
 
     @GetMapping("/suggest")
@@ -66,5 +67,16 @@ public class PurchaseOrderController {
             @PathVariable Long id,
             @RequestParam(value = "reason", defaultValue = "Cancelled by user") String reason) {
         return ResponseEntity.ok(purchaseOrderService.cancelPurchaseOrder(id, reason));
+    }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDeletePurchaseOrder(@PathVariable Long id) {
+        purchaseOrderService.softDeletePurchaseOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{id}")
+    public ResponseEntity<PurchaseOrderResponseDto> restorePurchaseOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(purchaseOrderService.restorePurchaseOrder(id));
     }
 }

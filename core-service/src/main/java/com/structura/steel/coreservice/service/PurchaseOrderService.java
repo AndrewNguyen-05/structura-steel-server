@@ -19,11 +19,15 @@ public interface PurchaseOrderService {
 
     void deletePurchaseOrderById(Long id);
 
-    PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
+    PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted,  String searchKeyword);
 
     List<String> suggestPurchases(String prefix, int size);
 
     PurchaseOrderResponseDto cancelPurchaseOrder(Long id, String cancellationReason);
 
     void checkAndUpdateDoneStatus(PurchaseOrder po);
+
+    void softDeletePurchaseOrder(Long id);
+
+    PurchaseOrderResponseDto restorePurchaseOrder(Long id);
 }

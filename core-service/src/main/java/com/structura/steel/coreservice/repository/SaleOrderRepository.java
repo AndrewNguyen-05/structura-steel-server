@@ -1,6 +1,5 @@
 package com.structura.steel.coreservice.repository;
 
-import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,5 +17,7 @@ public interface SaleOrderRepository extends JpaRepository<SaleOrder, Long> {
             "AND deleted = false", nativeQuery = true)
     List<SaleOrder> findByProjectIdAndStatus(Long projectId, String status);
 
-    Page<SaleOrder> findByExportCodeContainingIgnoreCase(String exportCode, Pageable pageable);
+    Page<SaleOrder> findByDeletedAndExportCodeContainingIgnoreCase(boolean deleted, String exportCode, Pageable pageable);
+
+    Page<SaleOrder> findAllByDeleted(boolean deleted, Pageable pageable);
 }

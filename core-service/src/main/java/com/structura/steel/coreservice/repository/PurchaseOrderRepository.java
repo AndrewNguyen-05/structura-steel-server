@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Long> {
 
-	Page<PurchaseOrder> findByImportCodeContainingIgnoreCase(String importCode, Pageable pageable);
+	Page<PurchaseOrder> findByDeletedAndImportCodeContainingIgnoreCase(boolean deleted, String importCode, Pageable pageable);
 
+	Page<PurchaseOrder> findAllByDeleted(boolean deleted, Pageable pageable);
 }

@@ -193,7 +193,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     }
 
     @Override
-    public PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+    public PagingResponse<GetAllDeliveryOrderResponseDto> getAllDeliveryOrders(int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted, String searchKeyword) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -202,9 +202,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         Page<DeliveryOrder> pages;
 
         if (StringUtils.hasText(searchKeyword)) {
-            pages = deliveryOrderRepository.findByDeliveryCodeContainingIgnoreCase(searchKeyword, pageable);
+            pages = deliveryOrderRepository.findByDeletedAndDeliveryCodeContainingIgnoreCase(deleted, searchKeyword, pageable);
         } else {
-            pages = deliveryOrderRepository.findAll(pageable);
+            pages = deliveryOrderRepository.findAllByDeleted(deleted, pageable);
         }
 
         List<GetAllDeliveryOrderResponseDto> content = pages.getContent().stream()
@@ -268,6 +268,46 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             });
             log.info("Delivery order {} updated to DONE - All deliveries completed and debts paid.", order.getId());
         }
+    }
+
+    @Override
+    public void softDeleteDeliveryOrder(Long id) {
+        DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery Order", "id", id));
+
+        // Không cho soft-delete nếu đơn hàng đã hoàn thành hoặc đã bị hủy
+        if (deliveryOrder.getStatus() == OrderStatus.DONE
+                || deliveryOrder.getStatus() == OrderStatus.CANCELLED
+                || deliveryOrder.getStatus() == OrderStatus.IN_TRANSIT
+                || deliveryOrder.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+        }
+
+        deliveryOrder.setDeleted(true);
+        deliveryOrderRepository.save(deliveryOrder);
+
+        // Đồng bộ trạng thái deleted sang Elasticsearch
+        deliveryOrderSearchRepository.findById(id).ifPresent(doc -> {
+            doc.setDeleted(true);
+            deliveryOrderSearchRepository.save(doc);
+        });
+    }
+
+    @Override
+    public DeliveryOrderResponseDto restoreDeliveryOrder(Long id) {
+        DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery Order", "id", id));
+
+        deliveryOrder.setDeleted(false);
+        DeliveryOrder restoredOrder = deliveryOrderRepository.save(deliveryOrder);
+
+        // Đồng bộ trạng thái deleted sang Elasticsearch
+        deliveryOrderSearchRepository.findById(id).ifPresent(doc -> {
+            doc.setDeleted(false);
+            deliveryOrderSearchRepository.save(doc);
+        });
+
+        return mapToResponseDtoWithSnapshots(restoredOrder);
     }
 
 

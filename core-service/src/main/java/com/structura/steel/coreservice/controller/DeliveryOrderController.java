@@ -1,7 +1,6 @@
 package com.structura.steel.coreservice.controller;
 
 import com.structura.steel.commons.dto.core.request.delivery.UpdateDeliveryOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.DeliveryOrderService;
@@ -27,9 +26,10 @@ public class DeliveryOrderController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir,
+            @RequestParam(value = "deleted", defaultValue = AppConstants.DELETED, required = false) boolean deleted,
             @RequestParam(value = "search", required = false) String searchKeyword
     ) {
-        return ResponseEntity.ok(deliveryOrderService.getAllDeliveryOrders(pageNo, pageSize, sortBy, sortDir, searchKeyword));
+        return ResponseEntity.ok(deliveryOrderService.getAllDeliveryOrders(pageNo, pageSize, sortBy, sortDir, deleted, searchKeyword));
     }
 
     @GetMapping("/suggest")
@@ -67,5 +67,16 @@ public class DeliveryOrderController {
             @PathVariable Long id,
             @RequestParam(value = "reason", defaultValue = "Cancelled by user") String reason) {
         return ResponseEntity.ok(deliveryOrderService.cancelDeliveryOrder(id, reason));
+    }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDeleteDeliveryOrder(@PathVariable Long id) {
+        deliveryOrderService.softDeleteDeliveryOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{id}")
+    public ResponseEntity<DeliveryOrderResponseDto> restoreDeliveryOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(deliveryOrderService.restoreDeliveryOrder(id));
     }
 }

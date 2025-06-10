@@ -134,7 +134,7 @@
         }
 
         @Override
-        public PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+        public PagingResponse<GetAllPurchaseOrderResponseDto> getAllPurchaseOrders(int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted, String searchKeyword) {
             Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                     ? Sort.by(sortBy).ascending()
                     : Sort.by(sortBy).descending();
@@ -144,9 +144,9 @@
             Page<PurchaseOrder> pages;
 
             if (StringUtils.hasText(searchKeyword)) {
-                pages = purchaseOrderRepository.findByImportCodeContainingIgnoreCase(searchKeyword, pageable);
+                pages = purchaseOrderRepository.findByDeletedAndImportCodeContainingIgnoreCase(deleted, searchKeyword, pageable);
             } else {
-                pages = purchaseOrderRepository.findAll(pageable);
+                pages = purchaseOrderRepository.findAllByDeleted(deleted, pageable);
             }
 
             List<PurchaseOrder> purchaseOrders = pages.getContent();
@@ -190,6 +190,84 @@
                     .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", id));
 
             return executeCancelOrder(po, StringUtils.hasText(cancellationReason) ? cancellationReason : "Cancelled by user request.");
+        }
+
+        @Override
+        public void checkAndUpdateDoneStatus(PurchaseOrder po) {
+            PurchaseOrder order = purchaseOrderRepository.findById(po.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", po.getId()));
+
+            if (po.getStatus() == OrderStatus.DONE || po.getStatus() == OrderStatus.CANCELLED) {
+                return; // Đã DONE hoặc CANCELLED, không cần kiểm tra
+            }
+
+            // Kiểm tra tất cả DeliveryOrder
+            boolean allDelivered = po.getDeliveryOrders() != null &&
+                    !po.getDeliveryOrders().isEmpty() &&
+                    po.getDeliveryOrders().stream()
+                            .allMatch(deliveryOrder ->
+                                    deliveryOrder.getStatus().equals(OrderStatus.DELIVERED) ||
+                                            deliveryOrder.getStatus().equals(OrderStatus.DONE));
+
+            // Kiểm tra tất cả PurchaseDebt
+            boolean noDebtsOrAllPaid = purchaseDebtRepository.countNonPaidNonCancelledDebtsByPurchaseOrderId(po.getId()) == 0;
+
+            // Nếu tất cả DeliveryOrder DELIVERED và không có nợ hoặc tất cả nợ PAID
+            if (allDelivered && noDebtsOrAllPaid && po.getStatus() == OrderStatus.DELIVERED) {
+                po.setStatus(OrderStatus.DONE);
+                po.setPurchaseOrdersNote((StringUtils.hasText(po.getPurchaseOrdersNote()) ?
+                        po.getPurchaseOrdersNote() + " | " : "") + "Completed on " + Instant.now() +
+                        " - All deliveries completed and debts paid.");
+                purchaseOrderRepository.save(po);
+
+                // Cập nhật Elasticsearch
+                purchaseOrderSearchRepository.findById(po.getId()).ifPresent(doc -> {
+                    doc.setStatus(po.getStatus().name());
+                    doc.setPurchaseOrdersNote(po.getPurchaseOrdersNote());
+                    purchaseOrderSearchRepository.save(doc);
+                });
+                log.info("PurchaseOrder {} updated to DONE - All deliveries completed and debts paid.", po.getId());
+            }
+        }
+
+        @Override
+        public void softDeletePurchaseOrder(Long id) {
+            PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Purchase Order", "id", id));
+
+            // Không cho soft-delete nếu đơn hàng đã hoàn thành hoặc đã bị hủy
+            if (purchaseOrder.getStatus() == OrderStatus.DONE
+                    || purchaseOrder.getStatus() == OrderStatus.CANCELLED
+                    || purchaseOrder.getStatus() == OrderStatus.IN_TRANSIT
+                    || purchaseOrder.getStatus() == OrderStatus.DELIVERED) {
+                throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+            }
+
+            purchaseOrder.setDeleted(true);
+            purchaseOrderRepository.save(purchaseOrder);
+
+            // Đồng bộ trạng thái deleted sang Elasticsearch
+            purchaseOrderSearchRepository.findById(id).ifPresent(doc -> {
+                doc.setDeleted(true);
+                purchaseOrderSearchRepository.save(doc);
+            });
+        }
+
+        @Override
+        public PurchaseOrderResponseDto restorePurchaseOrder(Long id) {
+            PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Purchase Order", "id", id));
+
+            purchaseOrder.setDeleted(false);
+            PurchaseOrder restoredOrder = purchaseOrderRepository.save(purchaseOrder);
+
+            // Đồng bộ trạng thái deleted sang Elasticsearch
+            purchaseOrderSearchRepository.findById(id).ifPresent(doc -> {
+                doc.setDeleted(false);
+                purchaseOrderSearchRepository.save(doc);
+            });
+
+            return mapToResponseDtoWithSnapshots(restoredOrder);
         }
 
 
@@ -272,43 +350,5 @@
                 doc.setPurchaseOrdersNote(order.getPurchaseOrdersNote());
                 purchaseOrderSearchRepository.save(doc);
             });
-        }
-
-        @Override
-        public void checkAndUpdateDoneStatus(PurchaseOrder po) {
-            PurchaseOrder order = purchaseOrderRepository.findById(po.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", po.getId()));
-
-            if (po.getStatus() == OrderStatus.DONE || po.getStatus() == OrderStatus.CANCELLED) {
-                return; // Đã DONE hoặc CANCELLED, không cần kiểm tra
-            }
-
-            // Kiểm tra tất cả DeliveryOrder
-            boolean allDelivered = po.getDeliveryOrders() != null &&
-                    !po.getDeliveryOrders().isEmpty() &&
-                    po.getDeliveryOrders().stream()
-                            .allMatch(deliveryOrder ->
-                                    deliveryOrder.getStatus().equals(OrderStatus.DELIVERED) ||
-                                    deliveryOrder.getStatus().equals(OrderStatus.DONE));
-
-            // Kiểm tra tất cả PurchaseDebt
-            boolean noDebtsOrAllPaid = purchaseDebtRepository.countNonPaidNonCancelledDebtsByPurchaseOrderId(po.getId()) == 0;
-
-            // Nếu tất cả DeliveryOrder DELIVERED và không có nợ hoặc tất cả nợ PAID
-            if (allDelivered && noDebtsOrAllPaid && po.getStatus() == OrderStatus.DELIVERED) {
-                po.setStatus(OrderStatus.DONE);
-                po.setPurchaseOrdersNote((StringUtils.hasText(po.getPurchaseOrdersNote()) ?
-                        po.getPurchaseOrdersNote() + " | " : "") + "Completed on " + Instant.now() +
-                        " - All deliveries completed and debts paid.");
-                purchaseOrderRepository.save(po);
-
-                // Cập nhật Elasticsearch
-                purchaseOrderSearchRepository.findById(po.getId()).ifPresent(doc -> {
-                    doc.setStatus(po.getStatus().name());
-                    doc.setPurchaseOrdersNote(po.getPurchaseOrdersNote());
-                    purchaseOrderSearchRepository.save(doc);
-                });
-                log.info("PurchaseOrder {} updated to DONE - All deliveries completed and debts paid.", po.getId());
-            }
         }
     }

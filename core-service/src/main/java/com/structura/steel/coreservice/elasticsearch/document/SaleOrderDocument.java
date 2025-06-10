@@ -64,6 +64,9 @@ public class SaleOrderDocument {
     @Field(type = FieldType.Text)
     private String saleOrdersNote;
 
+    @Field(type = FieldType.Boolean)
+    private Boolean deleted;
+
     @Field(type = FieldType.Short)
     private Short version;
 

@@ -1,21 +1,15 @@
 package com.structura.steel.coreservice.service.impl;
 
 import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestDto;
-import com.structura.steel.commons.dto.core.response.delivery.DeliveryOrderResponseDto;
-import com.structura.steel.commons.dto.core.response.purchase.PurchaseOrderResponseDto;
-import com.structura.steel.commons.enumeration.ConfirmationStatus;
 import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.enumeration.OrderStatus;
-import com.structura.steel.commons.exception.ResourceNotBelongToException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.coreservice.elasticsearch.document.SaleOrderDocument;
 import com.structura.steel.coreservice.elasticsearch.repository.SaleOrderSearchRepository;
-import com.structura.steel.coreservice.entity.DeliveryOrder;
-import com.structura.steel.coreservice.entity.PurchaseOrder;
 import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.embedded.Partner;
 import com.structura.steel.coreservice.entity.embedded.PartnerProject;
@@ -45,8 +39,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,7 +122,7 @@ public class SaleOrderServiceImpl implements SaleOrderService {
     }
 
     @Override
-    public PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword) {
+    public PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted, String searchKeyword) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -140,9 +132,9 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         Page<SaleOrder> pages;
 
         if (StringUtils.hasText(searchKeyword)) {
-            pages = saleOrderRepository.findByExportCodeContainingIgnoreCase(searchKeyword, pageable);
+            pages = saleOrderRepository.findByDeletedAndExportCodeContainingIgnoreCase(deleted, searchKeyword, pageable);
         } else {
-            pages = saleOrderRepository.findAll(pageable);
+            pages = saleOrderRepository.findAllByDeleted(deleted, pageable);
         }
 
         List<SaleOrder> saleOrders = pages.getContent();
@@ -220,6 +212,47 @@ public class SaleOrderServiceImpl implements SaleOrderService {
         }
     }
 
+
+    @Override
+    public void softDeleteSaleOrder(Long id) {
+        SaleOrder saleOrder = saleOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale Order", "id", id));
+
+        // Không cho soft-delete nếu đơn hàng đã hoàn thành hoặc đã bị hủy
+        if (saleOrder.getStatus() == OrderStatus.DONE
+                || saleOrder.getStatus() == OrderStatus.CANCELLED
+                || saleOrder.getStatus() == OrderStatus.IN_TRANSIT
+                || saleOrder.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+        }
+
+        saleOrder.setDeleted(true);
+        saleOrderRepository.save(saleOrder);
+
+        // Đồng bộ trạng thái deleted sang Elasticsearch
+        saleOrderSearchRepository.findById(id).ifPresent(doc -> {
+            doc.setDeleted(true);
+            saleOrderSearchRepository.save(doc);
+        });
+    }
+
+    @Override
+    public SaleOrderResponseDto restoreSaleOrder(Long id) {
+        SaleOrder saleOrder = saleOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale Order", "id", id));
+
+        saleOrder.setDeleted(false);
+        SaleOrder restoredOrder = saleOrderRepository.save(saleOrder);
+
+        // Đồng bộ trạng thái deleted sang Elasticsearch
+        saleOrderSearchRepository.findById(id).ifPresent(doc -> {
+            doc.setDeleted(false);
+            saleOrderSearchRepository.save(doc);
+        });
+
+        return mapToResponseDtoWithSnapshots(restoredOrder);
+    }
+
     // --- Hàm private helper để cancel order ---
     private SaleOrderResponseDto executeCancelOrder(SaleOrder order, String reason) {
         // 1. Kiểm tra xem đơn hàng có thể hủy được không
@@ -285,13 +318,4 @@ public class SaleOrderServiceImpl implements SaleOrderService {
 
         return res;
     }
-//
-//    @EventListener
-//    public void handlePurchaseOrderCreated(PurchaseOrderCreatedEvent event) {
-//        List<SaleOrder> saleOrders = saleOrderRepository.findByProjectIdAndStatus(event.getProjectId(), OrderStatus.NEW);
-//        for (SaleOrder saleOrder : saleOrders) {
-//            saleOrder.setStatus(OrderStatus.PROCESSING);
-//            saleOrderRepository.save(saleOrder);
-//        }
-//    }
 }

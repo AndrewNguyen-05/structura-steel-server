@@ -19,11 +19,15 @@ public interface SaleOrderService {
 
     void deleteSaleOrderById(Long id);
 
-    PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir, String searchKeyword);
+    PagingResponse<GetAllSaleOrderResponseDto> getAllSaleOrders(int pageNo, int pageSize, String sortBy, String sortDir, boolean deleted, String searchKeyword);
 
     List<String> suggestSales(String prefix, int size);
 
     SaleOrderResponseDto cancelSaleOrder(Long id, String cancellationReason);
 
     void checkAndUpdateDoneStatus(SaleOrder so);
+
+    void softDeleteSaleOrder(Long id);
+
+    SaleOrderResponseDto restoreSaleOrder(Long id);
 }

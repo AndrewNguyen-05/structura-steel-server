@@ -79,6 +79,9 @@ public class DeliveryOrderDocument {
     @Field(type = FieldType.Text)
     private String deliveryOrderNote;
 
+    @Field(type = FieldType.Boolean)
+    private Boolean deleted;
+
     @Field(type = FieldType.Short)
     private Short version;
 
