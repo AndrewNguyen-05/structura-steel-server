@@ -1,6 +1,7 @@
 package com.structura.steel.commons.exception.exceptionHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.structura.steel.commons.exception.BadRequestException;
 import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
@@ -69,6 +70,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(StructuraSteelException.class)
     public ResponseEntity<ErrorDetails> handleResourceNotMatchException(StructuraSteelException ex,
                                                                         WebRequest webRequest){
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                webRequest.getDescription(false)
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorDetails> handleBadRequestException(BadRequestException ex,
+                                                                  WebRequest webRequest){
         ErrorDetails errorDetails = new ErrorDetails(
                 new Date(),
                 ex.getMessage(),

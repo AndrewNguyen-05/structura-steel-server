@@ -5,6 +5,7 @@
     import com.structura.steel.commons.enumeration.DebtStatus;
     import com.structura.steel.commons.enumeration.EntityType;
     import com.structura.steel.commons.enumeration.OrderStatus;
+    import com.structura.steel.commons.exception.BadRequestException;
     import com.structura.steel.commons.exception.ResourceNotFoundException;
     import com.structura.steel.commons.response.PagingResponse;
     import com.structura.steel.commons.client.PartnerFeignClient;
@@ -275,7 +276,7 @@
         private PurchaseOrderResponseDto executeCancelOrder(PurchaseOrder purchaseOrder, String reason) {
             // 1. Kiểm tra xem đơn hàng có thể hủy được không
             if (!canBeCancelled(purchaseOrder)) {
-                throw new IllegalStateException("PurchaseOrder with status " + purchaseOrder.getStatus() +
+                throw new BadRequestException("PurchaseOrder with status " + purchaseOrder.getStatus() +
                         " and confirmation " + purchaseOrder.getConfirmationFromSupplier() +
                         " cannot be cancelled.");
             }

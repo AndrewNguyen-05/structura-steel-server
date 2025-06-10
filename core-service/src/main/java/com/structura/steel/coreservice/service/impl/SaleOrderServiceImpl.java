@@ -4,6 +4,7 @@ import com.structura.steel.commons.dto.core.request.sale.UpdateSaleOrderRequestD
 import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.enumeration.OrderStatus;
+import com.structura.steel.commons.exception.BadRequestException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
@@ -257,7 +258,7 @@ public class SaleOrderServiceImpl implements SaleOrderService {
     private SaleOrderResponseDto executeCancelOrder(SaleOrder order, String reason) {
         // 1. Kiểm tra xem đơn hàng có thể hủy được không
         if (!canBeCancelled(order)) {
-            throw new IllegalStateException("Sale Order with status " + order.getStatus() +
+            throw new BadRequestException("Sale Order with status " + order.getStatus() +
                     " cannot be cancelled.");
         }
 

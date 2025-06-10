@@ -315,7 +315,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     private DeliveryOrderResponseDto executeCancelOrder(DeliveryOrder order, String reason) {
         if (!canBeCancelled(order)) {
-            throw new IllegalStateException("DeliveryOrder with status " + order.getStatus() + " cannot be cancelled.");
+            throw new BadRequestException("DeliveryOrder with status " + order.getStatus() + " cannot be cancelled.");
         }
 
         order.setStatus(OrderStatus.CANCELLED);
