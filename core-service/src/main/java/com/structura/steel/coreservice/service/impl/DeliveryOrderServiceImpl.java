@@ -74,6 +74,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         }
 
         DeliveryOrder order = deliveryOrderMapper.toDeliveryOrder(dto);
+        order.setTotalDeliveryFee(order.getDeliveryUnitPrice().add(order.getAdditionalFees()));
 
         VehicleResponseDto vehicleDto = partnerFeignClient.getVehicleByPartnerId(dto.partnerId(), dto.vehicleId());
         PartnerResponseDto partnerResponseDto = partnerFeignClient.getPartnerById(dto.partnerId());
@@ -117,6 +118,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         }
 
         deliveryOrderMapper.updateDeliveryOrderFromDto(dto, order);
+        order.setTotalDeliveryFee(order.getDeliveryUnitPrice().add(order.getAdditionalFees()));
         DeliveryOrder updated = new DeliveryOrder();
 
         if(order.getPurchaseOrder() != null) {

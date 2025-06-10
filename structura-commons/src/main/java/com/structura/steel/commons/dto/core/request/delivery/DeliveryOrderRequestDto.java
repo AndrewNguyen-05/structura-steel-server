@@ -32,11 +32,12 @@ public record DeliveryOrderRequestDto(
         @NotNull
         @NotEmpty(message = "Must contain distance")
         BigDecimal distance,
-        BigDecimal additionalFees,
 
         @NotNull
-        @NotEmpty(message = "Must contain total delivery fee")
-        BigDecimal totalDeliveryFee,
+        @NotEmpty(message = "Must contain total delivery unit price")
+        BigDecimal deliveryUnitPrice,
+
+        BigDecimal additionalFees,
 
         String deliveryOrderNote
 ) {}

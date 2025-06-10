@@ -14,6 +14,8 @@ public record GetAllDeliveryOrderResponseDto(
         Long purchaseOrderId,
         Long saleOrderId,
         Instant deliveryDate,
+		BigDecimal deliveryUnitPrice,
+		BigDecimal additionalFees,
         BigDecimal totalDeliveryFee,
         Short version,
         Instant createdAt,

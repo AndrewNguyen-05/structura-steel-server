@@ -74,7 +74,7 @@ public class DeliveryOrder extends BaseEntity {
     private BigDecimal deliveryUnitPrice;
 
     @Column(name = "additional_fees")
-    private BigDecimal additionalFees;
+    private BigDecimal additionalFees = new BigDecimal(0);
 
     @Column(name = "total_delivery_fee")
     private BigDecimal totalDeliveryFee;
