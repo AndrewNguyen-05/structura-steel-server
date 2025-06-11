@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +16,7 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
 	Page<Partner> findByDeletedFalseAndPartnerNameContainingIgnoreCaseOrDeletedFalseAndPartnerCodeContainingIgnoreCase(
 			String name, String code, Pageable pageable);
 
-	Optional<Partner> findByIdAndDeletedFalse(Long id);}
+	Optional<Partner> findByIdAndDeletedFalse(Long id);
+
+	List<Partner> findAllByDeletedTrueAndUpdatedAtBefore(Instant cutoffDate);
+}

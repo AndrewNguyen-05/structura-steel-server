@@ -124,13 +124,19 @@
 
         @Override
         public void deletePurchaseOrderById(Long id) {
-            PurchaseOrder po = purchaseOrderRepository.findById(id)
+            PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", id));
+
+            if (!purchaseOrder.getDeliveryOrders().isEmpty()) {
+                throw new BadRequestException(
+                        "Cannot delete this purchase order with code " + purchaseOrder.getImportCode() + ". There are active delivery orders associated with this purchase order."
+                );
+            }
 
             PurchaseOrderDocument pd = purchaseOrderSearchRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", id));
 
-            purchaseOrderRepository.delete(po);
+            purchaseOrderRepository.delete(purchaseOrder);
             purchaseOrderSearchRepository.delete(pd);
         }
 
@@ -242,6 +248,12 @@
                     || purchaseOrder.getStatus() == OrderStatus.IN_TRANSIT
                     || purchaseOrder.getStatus() == OrderStatus.DELIVERED) {
                 throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+            }
+
+            if (!purchaseOrder.getDeliveryOrders().isEmpty()) {
+                throw new BadRequestException(
+                        "Cannot delete this purchase order with code " + purchaseOrder.getImportCode() + ". There are active delivery orders associated with this purchase order."
+                );
             }
 
             purchaseOrder.setDeleted(true);

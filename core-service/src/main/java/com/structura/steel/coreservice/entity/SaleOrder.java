@@ -44,10 +44,10 @@ public class SaleOrder extends BaseEntity {
     @Column(name = "sale_orders_note")
     private String saleOrdersNote;
 
-    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SaleOrderDetail> saleOrderDetails;
 
-    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SaleDebt> saleDebts;
 
     @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

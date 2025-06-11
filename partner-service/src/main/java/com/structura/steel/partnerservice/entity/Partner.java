@@ -2,6 +2,7 @@ package com.structura.steel.partnerservice.entity;
 
 import com.structura.steel.commons.enumeration.PartnerType;
 import com.structura.steel.commons.persistence.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -61,13 +62,13 @@ public class Partner extends BaseEntity {
     @Column(name = "debt_receivable", precision = 19, scale = 4, nullable = false)
     private BigDecimal debtReceivable = BigDecimal.ZERO;
 
-    @OneToMany(mappedBy = "partner")
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartnerProject> partnerProjects;
 
-    @OneToMany(mappedBy = "partner")
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vehicle> vehicles;
 
-    @OneToMany(mappedBy = "partner")
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Warehouse> warehouses;
 
     @Column(name = "deleted", nullable = false)

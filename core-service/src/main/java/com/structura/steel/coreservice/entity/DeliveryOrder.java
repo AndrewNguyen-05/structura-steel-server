@@ -86,7 +86,7 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "delivery_order_note")
     private String deliveryOrderNote;
 
-    @OneToMany(mappedBy = "deliveryOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deliveryOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DeliveryDebt> deliveryDebts;
 
     private boolean deleted = false;

@@ -4,6 +4,8 @@ import com.structura.steel.productservice.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,4 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByIdAndDeletedFalse(Long id);
 
     List<Product> findAllByIdInAndDeletedFalse(List<Long> ids);
+
+    List<Product> findAllByDeletedTrueAndUpdatedAtBefore(Instant cutoffDate);
 }

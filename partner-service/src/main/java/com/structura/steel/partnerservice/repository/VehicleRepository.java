@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -30,5 +32,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
     // Find any vehicle by ID (including deleted) - needed for restore/soft-delete
     Optional<Vehicle> findById(Long id);
+
+    List<Vehicle> findAllByDeletedTrueAndUpdatedAtBefore(Instant cutoffDate);
 
 }

@@ -48,10 +48,10 @@ public class PurchaseOrder extends BaseEntity {
     @Column(name = "purchase_orders_note")
     private String purchaseOrdersNote;
 
-    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PurchaseOrderDetail> purchaseOrderDetails;
 
-    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PurchaseDebt> purchaseDebts;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
