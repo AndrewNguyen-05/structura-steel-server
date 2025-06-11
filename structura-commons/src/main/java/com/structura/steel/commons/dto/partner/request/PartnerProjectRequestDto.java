@@ -7,6 +7,8 @@ import java.util.List;
 
 public record PartnerProjectRequestDto (
 
+		Long partnerId,
+
 		@NotBlank(message = "Project name is required")
     	String projectName,
 
