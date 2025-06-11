@@ -35,7 +35,7 @@ public class Partner extends BaseEntity {
     @Column(name = "partner_code", nullable = false)
     private String partnerCode;
 
-    @Column(name = "tax_code")
+    @Column(name = "tax_code", nullable = false)
     private String taxCode;
 
     @Column(name = "legal_representative")

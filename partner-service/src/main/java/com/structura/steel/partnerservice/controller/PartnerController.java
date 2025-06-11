@@ -7,6 +7,7 @@ import com.structura.steel.commons.dto.partner.request.PartnerRequestDto;
 import com.structura.steel.commons.dto.partner.response.GetAllPartnerResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
 import com.structura.steel.partnerservice.service.PartnerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,13 +54,13 @@ public class PartnerController {
 
 
     @PostMapping
-    public ResponseEntity<PartnerResponseDto> createPartner(@RequestBody PartnerRequestDto partnerRequestDto) {
+    public ResponseEntity<PartnerResponseDto> createPartner(@RequestBody @Valid PartnerRequestDto partnerRequestDto) {
         return ResponseEntity.ok(partnerService.createPartner(partnerRequestDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PartnerResponseDto> updatePartner(@PathVariable Long id,
-                                                            @RequestBody PartnerRequestDto partnerRequestDto) {
+                                                            @RequestBody @Valid PartnerRequestDto partnerRequestDto) {
         return ResponseEntity.ok(partnerService.updatePartner(id, partnerRequestDto));
     }
 
