@@ -87,7 +87,7 @@
                     .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", id));
 
             if (po.getStatus() == OrderStatus.DONE || po.getStatus() == OrderStatus.CANCELLED) {
-                throw new IllegalStateException("PurchaseOrder with status " + po.getStatus() + " cannot be updated.");
+                throw new BadRequestException("PurchaseOrder with status " + po.getStatus() + " cannot be updated.");
             }
 
             if(dto.confirmationFromSupplier().equals(ConfirmationStatus.YES)) {
@@ -247,7 +247,7 @@
                     || purchaseOrder.getStatus() == OrderStatus.CANCELLED
                     || purchaseOrder.getStatus() == OrderStatus.IN_TRANSIT
                     || purchaseOrder.getStatus() == OrderStatus.DELIVERED) {
-                throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+                throw new BadRequestException("Cannot delete a completed, in transit, delivered or cancelled order.");
             }
 
             if (!purchaseOrder.getDeliveryOrders().isEmpty()) {

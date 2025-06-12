@@ -114,7 +114,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "id", id));
 
         if (order.getStatus() == OrderStatus.DONE || order.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalStateException("Delivery with status " + order.getStatus() + " cannot be updated.");
+            throw new BadRequestException("Delivery with status " + order.getStatus() + " cannot be updated.");
         }
 
         deliveryOrderMapper.updateDeliveryOrderFromDto(dto, order);
@@ -282,7 +282,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 || deliveryOrder.getStatus() == OrderStatus.CANCELLED
                 || deliveryOrder.getStatus() == OrderStatus.IN_TRANSIT
                 || deliveryOrder.getStatus() == OrderStatus.DELIVERED) {
-            throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+            throw new BadRequestException("Cannot delete a completed, in transit, delivered or cancelled order.");
         }
 
         deliveryOrder.setDeleted(true);

@@ -93,7 +93,7 @@ public class SaleOrderServiceImpl implements SaleOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", id));
 
         if (saleOrder.getStatus() == OrderStatus.DONE || saleOrder.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalStateException("PurchaseOrder with status " + saleOrder.getStatus() + " cannot be updated.");
+            throw new BadRequestException("PurchaseOrder with status " + saleOrder.getStatus() + " cannot be updated.");
         }
 
         saleOrderMapper.updateSaleOrderFromDto(dto, saleOrder);
@@ -224,7 +224,7 @@ public class SaleOrderServiceImpl implements SaleOrderService {
                 || saleOrder.getStatus() == OrderStatus.CANCELLED
                 || saleOrder.getStatus() == OrderStatus.IN_TRANSIT
                 || saleOrder.getStatus() == OrderStatus.DELIVERED) {
-            throw new IllegalStateException("Cannot delete a completed, in transit, delivered or cancelled order.");
+            throw new BadRequestException("Cannot delete a completed, in transit, delivered or cancelled order.");
         }
 
         saleOrder.setDeleted(true);
