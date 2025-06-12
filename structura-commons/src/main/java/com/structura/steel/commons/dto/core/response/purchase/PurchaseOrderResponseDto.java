@@ -2,6 +2,7 @@ package com.structura.steel.commons.dto.core.response.purchase;
 
 import com.structura.steel.commons.dto.partner.response.PartnerProjectResponseDto;
 import com.structura.steel.commons.dto.partner.response.PartnerResponseDto;
+import com.structura.steel.commons.enumeration.ConfirmationStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -18,7 +19,7 @@ public class PurchaseOrderResponseDto {
     private Long id;
     private String status;
     private String importCode;
-    private String confirmationFromSupplier;
+    private ConfirmationStatus confirmationFromSupplier;
     private PartnerResponseDto supplier;
     private PartnerProjectResponseDto project;
     private BigDecimal totalAmount;

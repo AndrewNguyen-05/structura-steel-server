@@ -16,7 +16,6 @@ public interface PurchaseOrderMapper {
     PurchaseOrder toPurchaseOrder(PurchaseOrderRequestDto dto);
 
     @Mapping(target = "status", expression = "java(order.getStatus().text())")
-    @Mapping(target = "confirmationFromSupplier", expression = "java(order.getConfirmationFromSupplier().text())")
     PurchaseOrderResponseDto toPurchaseOrderResponseDto(PurchaseOrder order);
 
     void updatePurchaseOrderFromDto(UpdatePurchaseOrderRequestDto dto,
@@ -29,7 +28,6 @@ public interface PurchaseOrderMapper {
     @Mapping(target = "projectName", source = "order.project.projectName", conditionExpression = "java(order.getProject() != null)")
     @Mapping(target = "projectCode", source = "order.project.projectCode", conditionExpression = "java(order.getProject() != null)")
     @Mapping(target = "status", expression = "java(order.getStatus().text())")
-    @Mapping(target = "confirmationFromSupplier", expression = "java(order.getConfirmationFromSupplier().text())")
     GetAllPurchaseOrderResponseDto toGetAllPurchaseOrderResponseDto(PurchaseOrder order);
 
     List<PurchaseOrderResponseDto> toPurchaseOrderResponseDtoList(List<PurchaseOrder> orders);
