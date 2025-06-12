@@ -19,9 +19,6 @@ public interface DeliveryOrderMapper {
     @Mapping(target = "saleOrderId", source = "saleOrder.id")
     @Mapping(target = "status", expression = "java(order.getStatus().text())")
     @Mapping(target = "deliveryType", expression = "java(order.getDeliveryType().text())")
-    @Mapping(target = "confirmationFromFactory", expression = "java(order.getConfirmationFromFactory() == null ? null : order.getConfirmationFromFactory().text())")
-    @Mapping(target = "confirmationFromPartner", expression = "java(order.getConfirmationFromPartner() == null ? null : order.getConfirmationFromPartner().text())")
-    @Mapping(target = "confirmationFromReceiver", expression = "java(order.getConfirmationFromReceiver() == null ? null : order.getConfirmationFromReceiver().text())")
     DeliveryOrderResponseDto toDeliveryOrderResponseDto(DeliveryOrder order);
 
     void updateDeliveryOrderFromDto(UpdateDeliveryOrderRequestDto dto,
@@ -31,9 +28,6 @@ public interface DeliveryOrderMapper {
     @Mapping(target = "saleOrderId", source = "saleOrder.id")
     @Mapping(target = "status", expression = "java(order.getStatus().text())")
     @Mapping(target = "deliveryType", expression = "java(order.getDeliveryType().text())")
-    @Mapping(target = "confirmationFromFactory", expression = "java(order.getConfirmationFromFactory() == null ? null : order.getConfirmationFromFactory().text())")
-    @Mapping(target = "confirmationFromPartner", expression = "java(order.getConfirmationFromPartner() == null ? null : order.getConfirmationFromPartner().text())")
-    @Mapping(target = "confirmationFromReceiver", expression = "java(order.getConfirmationFromReceiver() == null ? null : order.getConfirmationFromReceiver().text())")
     GetAllDeliveryOrderResponseDto toGetAllDeliveryOrderResponseDto(DeliveryOrder order);
 
     List<DeliveryOrderResponseDto> toDeliveryOrderResponseDtoList(List<DeliveryOrder> orders);

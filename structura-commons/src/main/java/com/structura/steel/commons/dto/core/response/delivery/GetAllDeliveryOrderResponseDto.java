@@ -1,5 +1,7 @@
 package com.structura.steel.commons.dto.core.response.delivery;
 
+import com.structura.steel.commons.enumeration.ConfirmationStatus;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -8,9 +10,9 @@ public record GetAllDeliveryOrderResponseDto(
         String status,
 		String deliveryCode,
         String deliveryType,
-        String confirmationFromPartner,
-        String confirmationFromFactory,
-        String confirmationFromReceiver,
+        ConfirmationStatus confirmationFromPartner,
+		ConfirmationStatus confirmationFromFactory,
+		ConfirmationStatus confirmationFromReceiver,
         Long purchaseOrderId,
         Long saleOrderId,
         Instant deliveryDate,
