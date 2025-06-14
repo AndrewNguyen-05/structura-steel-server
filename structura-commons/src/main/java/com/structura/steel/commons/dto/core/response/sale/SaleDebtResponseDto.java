@@ -15,7 +15,6 @@ public class SaleDebtResponseDto {
     private Long id;
     private String status;
     private Long saleOrderId;
-    private Long productId;
     private ProductResponseDto product;
     private BigDecimal originalAmount;
     private BigDecimal remainingAmount;

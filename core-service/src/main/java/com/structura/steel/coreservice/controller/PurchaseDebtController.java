@@ -6,6 +6,7 @@ import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.PurchaseDebtService;
 import com.structura.steel.commons.dto.core.request.purchase.PurchaseDebtRequestDto;
 import com.structura.steel.commons.dto.core.response.purchase.PurchaseDebtResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,13 +39,13 @@ public class PurchaseDebtController {
 
     @PostMapping
     public ResponseEntity<PurchaseDebtResponseDto> createPurchaseDebt(
-            @RequestBody PurchaseDebtRequestDto dto, @PathVariable Long purchaseId) {
+            @Valid @RequestBody PurchaseDebtRequestDto dto, @PathVariable Long purchaseId) {
         return ResponseEntity.ok(purchaseDebtService.createPurchaseDebt(dto, purchaseId));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PurchaseDebtResponseDto> updatePurchaseDebt(
-            @PathVariable Long id, @RequestBody UpdatePurchaseDebtRequestDto dto,
+            @Valid @PathVariable Long id, @RequestBody UpdatePurchaseDebtRequestDto dto,
             @PathVariable Long purchaseId) {
         return ResponseEntity.ok(purchaseDebtService.updatePurchaseDebt(id, dto, purchaseId));
     }
@@ -58,7 +59,7 @@ public class PurchaseDebtController {
     @PostMapping("/batch")
     public ResponseEntity<List<PurchaseDebtResponseDto>> createPurchaseDebtsBatch(
             @PathVariable Long purchaseId,
-            @RequestBody List<PurchaseDebtRequestDto> batchDto) {
+            @Valid @RequestBody List<PurchaseDebtRequestDto> batchDto) {
 
         return ResponseEntity.ok(purchaseDebtService.createPurchaseDebtsBatch(batchDto, purchaseId));
     }

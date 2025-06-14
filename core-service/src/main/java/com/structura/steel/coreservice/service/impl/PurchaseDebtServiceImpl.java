@@ -13,6 +13,7 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.PurchaseDebt;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
+import com.structura.steel.coreservice.entity.embedded.Product;
 import com.structura.steel.coreservice.mapper.ProductMapper;
 import com.structura.steel.coreservice.mapper.PurchaseDebtMapper;
 import com.structura.steel.coreservice.repository.PurchaseDebtRepository;
@@ -28,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -171,36 +175,67 @@ public class PurchaseDebtServiceImpl implements PurchaseDebtService {
         PurchaseOrder order = purchaseOrderRepository.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", purchaseId));
 
-        final BigDecimal[] totalBatchAmount = {BigDecimal.ZERO};
+        // 1. Lấy tất cả ID sản phẩm từ batch request
+        List<Long> productIds = batchDto.stream()
+                .map(PurchaseDebtRequestDto::productId)
+                .distinct()
+                .toList();
 
+        // 2. Gọi Product service MỘT LẦN để lấy tất cả thông tin sản phẩm
+        Map<Long, ProductResponseDto> productMap = productFeignClient.getProductsBatch(productIds).stream()
+                .collect(Collectors.toMap(ProductResponseDto::id, Function.identity()));
+
+        // 3. Tạo danh sách các thực thể PurchaseDebt và nhúng thông tin Product
         List<PurchaseDebt> entities = batchDto.stream()
                 .map(dto -> {
                     PurchaseDebt debt = purchaseDebtMapper.toPurchaseDebt(dto);
                     debt.setPurchaseOrder(order);
-                    debt.setRemainingAmount(dto.originalAmount()); // **Set remaining**
-                    debt.setStatus(DebtStatus.UNPAID); // **Set status**
-                    totalBatchAmount[0] = totalBatchAmount[0].add(dto.originalAmount()); // **Sum total**
+                    debt.setRemainingAmount(dto.originalAmount());
+                    debt.setStatus(DebtStatus.UNPAID);
+
+                    ProductResponseDto productDto = productMap.get(dto.productId());
+                    if (productDto != null) {
+                        // Giả định bạn có phương thức này trong ProductMapper
+                        Product productSnapshot = productMapper.toProductSnapShot(productDto);
+                        debt.setProduct(productSnapshot);
+                    } else {
+                        log.warn("Product with ID {} not found for purchase debt.", dto.productId());
+                    }
                     return debt;
                 })
                 .toList();
 
-        List<PurchaseDebt> saved = purchaseDebtRepository.saveAll(entities);
+        // 4. Lưu tất cả các entity vào DB trong một transaction
+        List<PurchaseDebt> savedDebts = purchaseDebtRepository.saveAll(entities);
 
-        // **Update Partner Debt Once for the whole batch**
-        Long partnerId = order.getSupplier().id();
-        try {
-            partnerFeignClient.updatePartnerDebt(partnerId,
-                    new UpdatePartnerDebtRequestDto(totalBatchAmount[0], DebtAccountType.PAYABLE));
-            log.info("Increased payable debt for partner {} by {} (Batch)", partnerId, totalBatchAmount[0]);
-        } catch (Exception e) {
-            log.error("Failed to update partner {} debt for batch purchase debt creation: {}",
-                    partnerId, e.getMessage(), e);
-            throw new RuntimeException("Failed to update partner debt. Batch creation failed.", e);
+        // 5. Tính tổng số tiền của cả batch một cách an toàn
+        BigDecimal totalBatchAmount = savedDebts.stream()
+                .map(PurchaseDebt::getOriginalAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 6. Cập nhật công nợ cho Partner MỘT LẦN DUY NHẤT
+        if (totalBatchAmount.compareTo(BigDecimal.ZERO) > 0) {
+            Long partnerId = order.getSupplier().id();
+            try {
+                partnerFeignClient.updatePartnerDebt(partnerId,
+                        new UpdatePartnerDebtRequestDto(totalBatchAmount, DebtAccountType.PAYABLE));
+                log.info("Increased payable debt for partner {} by {} (Batch)", partnerId, totalBatchAmount);
+            } catch (Exception e) {
+                log.error("Failed to update partner {} debt for batch purchase debt creation: {}",
+                        partnerId, e.getMessage(), e);
+                throw new RuntimeException("Failed to update partner debt. Batch creation failed.", e);
+            }
         }
 
-        return saved.stream()
-                .map(purchaseDebtMapper::toPurchaseDebtResponseDto)
-                .toList();
+        // 7. Map kết quả trả về
+        return savedDebts.stream()
+                .map(savedDebt -> {
+                    PurchaseDebtResponseDto responseDto = purchaseDebtMapper.toPurchaseDebtResponseDto(savedDebt);
+                    responseDto.setProduct(productMapper.toProductResponseDto(savedDebt.getProduct()));
+                    return responseDto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

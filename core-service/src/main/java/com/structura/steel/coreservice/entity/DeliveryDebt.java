@@ -19,9 +19,6 @@ public class DeliveryDebt extends BaseEntity {
     @JoinColumn(name = "delivery_order_id")
     private DeliveryOrder deliveryOrder;
 
-    @Column(name = "order_type")
-    private String orderType; // "SALE" hoặc "PURCHASE"
-
     @Column(name = "original_amount", nullable = false)
     private BigDecimal originalAmount;
 

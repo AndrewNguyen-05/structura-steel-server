@@ -3,6 +3,7 @@ package com.structura.steel.coreservice.service.impl;
 import com.structura.steel.commons.client.PartnerFeignClient;
 import com.structura.steel.commons.client.ProductFeignClient;
 import com.structura.steel.commons.dto.core.request.sale.SaleDebtRequestDto;
+import com.structura.steel.commons.dto.core.response.purchase.PurchaseDebtResponseDto;
 import com.structura.steel.commons.dto.core.response.sale.SaleDebtResponseDto;
 import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.dto.product.response.ProductResponseDto;
@@ -14,6 +15,8 @@ import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.coreservice.entity.SaleDebt;
 import com.structura.steel.coreservice.entity.SaleOrder;
+import com.structura.steel.coreservice.entity.embedded.Product;
+import com.structura.steel.coreservice.mapper.ProductMapper;
 import com.structura.steel.coreservice.mapper.SaleDebtMapper;
 import com.structura.steel.coreservice.repository.SaleDebtRepository;
 import com.structura.steel.coreservice.repository.SaleOrderRepository;
@@ -26,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +42,10 @@ public class SaleDebtServiceImpl implements SaleDebtService {
 
     private final SaleDebtRepository saleDebtRepository;
     private final SaleOrderRepository saleOrderRepository;
+
+    private final ProductMapper productMapper;
     private final SaleDebtMapper saleDebtMapper;
+
     private final ProductFeignClient productFeignClient;
     private final PartnerFeignClient partnerFeignClient;
 
@@ -64,7 +73,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             throw new RuntimeException("Failed to update partner debt. Sale debt creation failed.", e);
         }
 
-        return entityToResponseWithProduct(savedSaleDebt);
+        return entityToResponseWithProduct(savedSaleDebt, dto.productId());
     }
 
     @Override
@@ -115,7 +124,13 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             }
         }
 
-        return entityToResponseWithProduct(updated);
+        SaleDebtResponseDto result = saleDebtMapper.toSaleDebtResponseDto(updated);
+
+        ProductResponseDto product = productMapper.toProductResponseDto(updated.getProduct());
+
+        result.setProduct(product);
+
+        return result;
     }
 
     @Override
@@ -157,27 +172,55 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         SaleOrder saleOrder = saleOrderRepository.findById(saleId)
                 .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleId));
 
-        final BigDecimal[] totalBatchAmount = {BigDecimal.ZERO};
+        // 1. Lấy tất cả ID sản phẩm từ batch request
+        List<Long> productIds = batchDto.stream()
+                .map(SaleDebtRequestDto::productId)
+                .distinct()
+                .toList();
 
+        // 2. Gọi Product service MỘT LẦN để lấy tất cả thông tin sản phẩm
+        Map<Long, ProductResponseDto> productMap = productFeignClient.getProductsBatch(productIds).stream()
+                .collect(Collectors.toMap(ProductResponseDto::id, Function.identity()));
+
+        // 3. Tạo danh sách các thực thể SaleDebt và nhúng thông tin Product
         List<SaleDebt> entities = batchDto.stream()
                 .map(dto -> {
                     SaleDebt debt = saleDebtMapper.toSaleDebt(dto);
                     debt.setSaleOrder(saleOrder);
                     debt.setRemainingAmount(dto.originalAmount());
                     debt.setStatus(DebtStatus.UNPAID);
-                    totalBatchAmount[0] = totalBatchAmount[0].add(dto.originalAmount());
+
+                    // Lấy thông tin product đầy đủ từ map
+                    ProductResponseDto productDto = productMap.get(dto.productId());
+                    if (productDto != null) {
+                        // Giả định productMapper.toProductSnapShot đã được sửa để nhận ProductResponseDto
+                        // và trả về entity Product để lưu JSONB
+                        Product productSnapshot = productMapper.toProductSnapShot(productDto);
+                        debt.setProduct(productSnapshot);
+                    } else {
+                        log.warn("Product with ID {} not found for sale debt.", dto.productId());
+                        // Có thể throw exception ở đây nếu product là bắt buộc
+                    }
                     return debt;
                 })
                 .toList();
 
-        List<SaleDebt> saved = saleDebtRepository.saveAll(entities);
+        // 4. Lưu tất cả các entity vào DB trong một transaction
+        List<SaleDebt> savedDebts = saleDebtRepository.saveAll(entities);
 
-        Long partnerId = saleOrder.getPartner().id();
-        if (totalBatchAmount[0].compareTo(BigDecimal.ZERO) != 0) {
+        // 5. Tính tổng số tiền của cả batch một cách an toàn
+        BigDecimal totalBatchAmount = savedDebts.stream()
+                .map(SaleDebt::getOriginalAmount)
+                .filter(Objects::nonNull) // Lọc bỏ các giá trị null
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 6. Cập nhật công nợ cho Partner MỘT LẦN DUY NHẤT
+        if (totalBatchAmount.compareTo(BigDecimal.ZERO) > 0) {
+            Long partnerId = saleOrder.getPartner().id();
             try {
                 partnerFeignClient.updatePartnerDebt(partnerId,
-                        new UpdatePartnerDebtRequestDto(totalBatchAmount[0], DebtAccountType.RECEIVABLE));
-                log.info("Increased receivable debt for partner {} by {} (Batch)", partnerId, totalBatchAmount[0]);
+                        new UpdatePartnerDebtRequestDto(totalBatchAmount, DebtAccountType.RECEIVABLE));
+                log.info("Increased receivable debt for partner {} by {} (Batch)", partnerId, totalBatchAmount);
             } catch (Exception e) {
                 log.error("Failed to update partner {} debt for batch sale debt creation: {}",
                         partnerId, e.getMessage(), e);
@@ -185,9 +228,15 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             }
         }
 
-        return saved.stream()
-                .map(this::entityToResponseWithProduct)
-                .toList();
+        // 7. Map kết quả trả về, thông tin product đã có sẵn, không cần gọi API nữa
+        return savedDebts.stream()
+                .map(savedDebt -> {
+                    SaleDebtResponseDto responseDto = saleDebtMapper.toSaleDebtResponseDto(savedDebt);
+                    // productMapper.toProductResponseDto sẽ chuyển từ entity Product (JSONB) sang DTO
+                    responseDto.setProduct(productMapper.toProductResponseDto(savedDebt.getProduct()));
+                    return responseDto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -199,7 +248,14 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         if(!saleOrder.getSaleDebts().contains(saleDebt)) {
             throw new ResourceNotBelongToException("Debt", "id", id, "sale order", "id", saleId);
         }
-        return entityToResponseWithProduct(saleDebt);
+
+        SaleDebtResponseDto result = saleDebtMapper.toSaleDebtResponseDto(saleDebt);
+
+        ProductResponseDto product = productMapper.toProductResponseDto(saleDebt.getProduct());
+
+        result.setProduct(product);
+
+        return result;
     }
 
     @Override
@@ -208,7 +264,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         if(all) {
             List<SaleDebt> allDetails = saleDebtRepository.findAllBySaleOrderId(saleId);
             List<SaleDebtResponseDto> content = allDetails.stream()
-                    .map(this::entityToResponseWithProduct)
+                    .map(saleDebtMapper::toSaleDebtResponseDto)
                     .collect(Collectors.toList());
 
             PagingResponse<SaleDebtResponseDto> response = new PagingResponse<>();
@@ -226,7 +282,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
             Page<SaleDebt> pages = saleDebtRepository.findAllBySaleOrderId(saleId, pageable);
             List<SaleDebtResponseDto> content = pages.getContent().stream() // Changed variable name
-                    .map(this::entityToResponseWithProduct)
+                    .map(saleDebtMapper::toSaleDebtResponseDto)
                     .collect(Collectors.toList());
 
             PagingResponse<SaleDebtResponseDto> response = new PagingResponse<>();
@@ -240,7 +296,7 @@ public class SaleDebtServiceImpl implements SaleDebtService {
         }
     }
 
-    private SaleDebtResponseDto entityToResponseWithProduct(SaleDebt debt) {
+    private SaleDebtResponseDto entityToResponseWithProduct(SaleDebt debt, Long productId) {
         SaleDebtResponseDto responseDto = saleDebtMapper.toSaleDebtResponseDto(debt);
         if (debt.getStatus() != null) { // Check for null status before calling text()
             responseDto.setStatus(debt.getStatus().text());
@@ -248,13 +304,12 @@ public class SaleDebtServiceImpl implements SaleDebtService {
             responseDto.setStatus(null); // Or some default string like "N/A"
         }
 
-        // Lấy thông tin sản phẩm nếu productId có và ProductFeignClient được inject
-        if (debt.getProduct().id() != null && productFeignClient != null) {
+        if (productId != null && productFeignClient != null) {
             try {
-                ProductResponseDto product = productFeignClient.getProductById(debt.getProduct().id());
+                ProductResponseDto product = productFeignClient.getProductById(productId);
                 responseDto.setProduct(product);
             } catch (Exception e) {
-                log.error("Failed to fetch product info for product ID {}: {}", debt.getProduct().id(), e.getMessage());
+                log.error("Failed to fetch product info for product ID {}: {}", productId, e.getMessage());
                 // Optionally set product to null or a default error representation
                 responseDto.setProduct(null);
             }

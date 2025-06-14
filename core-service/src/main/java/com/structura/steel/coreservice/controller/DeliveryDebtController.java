@@ -5,9 +5,12 @@ import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.service.DeliveryDebtService;
 import com.structura.steel.commons.dto.core.request.delivery.DeliveryDebtRequestDto;
 import com.structura.steel.commons.dto.core.response.delivery.DeliveryDebtResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/delivery/{deliveryId}/debts")
@@ -50,5 +53,12 @@ public class DeliveryDebtController {
     public ResponseEntity<Void> deleteDeliveryDebt(@PathVariable Long id, @PathVariable Long deliveryId) {
         deliveryDebtService.deleteDeliveryDebtById(id, deliveryId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<DeliveryDebtResponseDto>> createDeliveryDebtsBatch(
+            @PathVariable Long deliveryId,
+            @Valid @RequestBody List<DeliveryDebtRequestDto> batchDto) {
+        return ResponseEntity.ok(deliveryDebtService.createDeliveryDebtsBatch(batchDto, deliveryId));
     }
 }

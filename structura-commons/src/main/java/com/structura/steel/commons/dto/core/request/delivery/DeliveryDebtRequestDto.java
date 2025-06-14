@@ -6,13 +6,12 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 public record DeliveryDebtRequestDto(
+
         Long deliveryOrderId,
-        String orderType, // "SALE" | "PURCHASE"
 
         @NotNull(message = "Original amount cannot be null")
         @Positive(message = "Original amount must be positive")
         BigDecimal originalAmount,
 
-        String debtNote,
-        String status
+        String debtNote
 ) {}

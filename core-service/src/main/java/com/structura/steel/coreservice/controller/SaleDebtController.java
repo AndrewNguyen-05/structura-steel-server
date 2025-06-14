@@ -5,6 +5,7 @@ import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.commons.dto.core.request.sale.SaleDebtRequestDto;
 import com.structura.steel.commons.dto.core.response.sale.SaleDebtResponseDto;
 import com.structura.steel.coreservice.service.SaleDebtService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,7 +56,7 @@ public class SaleDebtController {
     @PostMapping("/batch")
     public ResponseEntity<List<SaleDebtResponseDto>> createSaleDebtsBatch(
             @PathVariable Long saleId,
-            @RequestBody List<SaleDebtRequestDto> batchDto) {
+            @Valid @RequestBody List<SaleDebtRequestDto> batchDto) {
 
         return ResponseEntity.ok(saleDebtService.createSaleDebtsBatch(batchDto, saleId));
     }

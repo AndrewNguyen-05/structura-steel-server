@@ -17,7 +17,6 @@ public class DeliveryDebtResponseDto {
     private Long id;
     private String status;
     private Long deliveryOrderId;
-    private String orderType;
     private BigDecimal originalAmount;
     private BigDecimal remainingAmount;
     private String debtNote;

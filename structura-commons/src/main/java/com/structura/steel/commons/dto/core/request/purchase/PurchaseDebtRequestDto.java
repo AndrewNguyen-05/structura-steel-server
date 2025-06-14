@@ -12,6 +12,5 @@ public record PurchaseDebtRequestDto(
         @Positive(message = "Original amount must be positive")
         BigDecimal originalAmount,
 
-        String debtNote,
-        String status
+        String debtNote
 ) {}

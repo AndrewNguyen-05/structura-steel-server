@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -200,6 +201,60 @@ public class DeliveryDebtServiceImpl implements DeliveryDebtService {
         response.setTotalPages(pages.getTotalPages());
         response.setLast(pages.isLast());
         return response;
+    }
+
+    @Override
+    public List<DeliveryDebtResponseDto> createDeliveryDebtsBatch(
+            List<DeliveryDebtRequestDto> batchDto,
+            Long deliveryId) {
+
+        DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(deliveryId)
+                .orElseThrow(() -> new ResourceNotFoundException("DeliveryOrder", "id", deliveryId));
+
+        // 1. Map từ List DTO sang List Entity
+        List<DeliveryDebt> entities = batchDto.stream()
+                .map(dto -> {
+                    DeliveryDebt debt = deliveryDebtMapper.toDeliveryDebt(dto);
+                    debt.setDeliveryOrder(deliveryOrder);
+                    debt.setRemainingAmount(dto.originalAmount());
+                    debt.setStatus(DebtStatus.UNPAID);
+                    return debt;
+                })
+                .toList();
+
+        // 2. Lưu tất cả các entity vào DB trong một transaction
+        List<DeliveryDebt> savedDebts = deliveryDebtRepository.saveAll(entities);
+
+        // 3. Tính tổng số tiền của cả batch một cách an toàn (tránh NullPointerException)
+        BigDecimal totalBatchAmount = savedDebts.stream()
+                .map(DeliveryDebt::getOriginalAmount)
+                .filter(Objects::nonNull) // Lọc bỏ các giá trị null để tránh lỗi
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 4. Cập nhật công nợ cho Partner (nhà vận chuyển)
+        if (totalBatchAmount.compareTo(BigDecimal.ZERO) > 0) {
+            Long partnerId = deliveryOrder.getPartner().id();
+            if (partnerId == null) {
+                log.error("Cannot update partner debt as DeliveryOrder ID {} is missing partnerId (transporterId).", deliveryId);
+                throw new BadRequestException("Transporter (PartnerId) not found on DeliveryOrder ID: " + deliveryId);
+            }
+            try {
+                partnerFeignClient.updatePartnerDebt(partnerId,
+                        new UpdatePartnerDebtRequestDto(totalBatchAmount, DebtAccountType.PAYABLE));
+                log.info("Increased payable debt for partner (transporter) {} by {} for batch delivery debts.",
+                        partnerId, totalBatchAmount);
+            } catch (Exception e) {
+                log.error("Failed to update partner {} debt for batch delivery debt creation: {}",
+                        partnerId, e.getMessage(), e);
+                // Rollback transaction sẽ tự động xảy ra nếu đây là RuntimeException
+                throw new RuntimeException("Failed to update partner debt. Batch creation failed.", e);
+            }
+        }
+
+        // 5. Map kết quả trả về cho client
+        return savedDebts.stream()
+                .map(this::mapEntityToDto)
+                .collect(Collectors.toList());
     }
 
     // Helper method to map Entity to DTO and set String status
