@@ -120,10 +120,10 @@ public class ReportServiceImpl implements ReportService {
             BigDecimal revenue = so.getTotalAmount();
 
             // B. Giá vốn: Chỉ lấy PO liên quan đến SO này và trong khoảng thời gian phù hợp
-            BigDecimal costOfGoods = calculateCostOfGoods(so, start, end);
+            BigDecimal costOfGoods = calculateCostOfGoods(so);
 
             // C. Chi phí vận chuyển: Tính riêng cho từng loại
-            BigDecimal deliveryCost = calculateDeliveryCost(so, start, end);
+            BigDecimal deliveryCost = calculateDeliveryCost(so);
 
             // D. Lợi nhuận gộp
             BigDecimal grossProfit = revenue.subtract(costOfGoods.add(deliveryCost));
@@ -241,21 +241,15 @@ public class ReportServiceImpl implements ReportService {
     /**
      * Tính giá vốn cho một SaleOrder cụ thể
      */
-    private BigDecimal calculateCostOfGoods(SaleOrder saleOrder, Instant start, Instant end) {
-        // OPTION 1: Nếu có trường direct linking giữa SO và PO
-        // return saleOrder.getRelatedPurchaseOrders().stream()
-        //     .filter(po -> po.getStatus() == OrderStatus.DONE)
-        //     .map(PurchaseOrder::getTotalAmount)
-        //     .reduce(BigDecimal.ZERO, BigDecimal::add);
+    private BigDecimal calculateCostOfGoods(SaleOrder saleOrder) {
 
-        // OPTION 2: Linking qua project và thời gian (cẩn thận hơn)
         if (saleOrder.getProject() == null || saleOrder.getProject().id() == null) {
             return BigDecimal.ZERO;
         }
 
         // Chỉ lấy PO của cùng project và được tạo TRƯỚC HOẶC CÙNG THỜI GIAN với SO
         List<PurchaseOrder> relatedPOs = purchaseOrderRepository
-                .findByProjectIdAndCreatedAtBeforeAndStatus(
+                .findByProjectIdAndCreatedAtAfterAndStatus(
                         saleOrder.getProject().id(),
                         saleOrder.getCreatedAt().plusSeconds(1), // Thêm 1 giây để bao gồm cùng thời điểm
                         OrderStatus.DONE.name()
@@ -269,7 +263,7 @@ public class ReportServiceImpl implements ReportService {
     /**
      * Tính chi phí vận chuyển cho một SaleOrder cụ thể
      */
-    private BigDecimal calculateDeliveryCost(SaleOrder saleOrder, Instant start, Instant end) {
+    private BigDecimal calculateDeliveryCost(SaleOrder saleOrder) {
         BigDecimal totalDeliveryCost = BigDecimal.ZERO;
 
         // 1. Chi phí vận chuyển của chính SaleOrder này
@@ -284,7 +278,7 @@ public class ReportServiceImpl implements ReportService {
         // 2. Chi phí vận chuyển của các PO liên quan (nếu cần tính)
         if (saleOrder.getProject() != null && saleOrder.getProject().id() != null) {
             List<PurchaseOrder> relatedPOs = purchaseOrderRepository
-                    .findByProjectIdAndCreatedAtBeforeAndStatus(
+                    .findByProjectIdAndCreatedAtAfterAndStatus(
                             saleOrder.getProject().id(),
                             saleOrder.getCreatedAt().plusSeconds(1),
                             OrderStatus.DONE.name()

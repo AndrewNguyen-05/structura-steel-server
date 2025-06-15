@@ -23,17 +23,16 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
 	List<PurchaseOrder> findByCreatedAtBetween(java.time.Instant start, java.time.Instant end);
 
 	@Query(value = """
-    SELECT * 
-    FROM purchase_orders po 
-    WHERE 
-        (po.project->>'id')::bigint = :projectId
-        AND po.created_at < :beforeTime 
-        AND po.status = :status
-        AND po.deleted = false
-    """, nativeQuery = true)
-	List<PurchaseOrder> findByProjectIdAndCreatedAtBeforeAndStatus(
+   SELECT * FROM purchase_orders po 
+   WHERE 
+       (po.project->>'id')::bigint = :projectId
+       AND po.created_at >= :afterTime 
+       AND po.status = :status
+       AND po.deleted = false
+   """, nativeQuery = true)
+	List<PurchaseOrder> findByProjectIdAndCreatedAtAfterAndStatus(
 			@Param("projectId") Long projectId,
-			@Param("beforeTime") Instant beforeTime,
+			@Param("afterTime") Instant afterTime,
 			@Param("status") String status
 	);
 
