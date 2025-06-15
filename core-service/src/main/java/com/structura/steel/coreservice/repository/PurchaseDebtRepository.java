@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.repository;
 
+import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.coreservice.entity.PurchaseDebt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -23,5 +25,16 @@ public interface PurchaseDebtRepository extends JpaRepository<PurchaseDebt, Long
 			"WHERE pd.purchaseOrder.id = :purchaseOrderId " +
 			"AND pd.status NOT IN ('PAID', 'CANCELLED')")
 	long countNonPaidNonCancelledDebtsByPurchaseOrderId(@Param("purchaseOrderId") Long purchaseOrderId);
+
+
+	/**
+	 * Tìm các khoản nợ mua hàng theo trạng thái và khoảng thời gian.
+	 */
+	@Query("SELECT pd FROM PurchaseDebt pd WHERE pd.status IN :statuses AND pd.createdAt BETWEEN :start AND :end")
+	List<PurchaseDebt> findByStatusInAndCreatedAtBetween(
+			@Param("statuses") List<DebtStatus> statuses,
+			@Param("start") Instant start,
+			@Param("end") Instant end
+	);
 
 }

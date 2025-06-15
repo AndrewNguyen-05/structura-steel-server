@@ -368,3 +368,19 @@ INSERT INTO purchase_orders (created_at, created_by, updated_at, updated_by, ver
        "updatedBy": "System"
      }'::jsonb,
      'Đặt hàng thép hình từ NCC 22 (theo SO 1)', 'PROCESSING', 300500.00, 'NO', false);
+
+INSERT INTO purchase_orders (
+    created_at, created_by, updated_at, updated_by, version,
+    import_code, supplier, project, status, total_amount, deleted
+) VALUES (
+             '2025-06-13T10:00:00Z', 'System', '2025-06-13T11:00:00Z', 'System', 1,
+             'IMP20250613K4X3PQR1A7',
+             '{
+               "id": 1, "partnerType": "SUPPLIER", "partnerName": "Công ty TNHH Thép Hòa Hưng", "partnerCode": "PTN202505146BYQ1WBC7KA1",
+               "taxCode": "0300100001", "bankName": "Vietcombank", "bankAccountNumber": "9704180010001"
+             }'::jsonb,
+             '{
+               "id": 6, "partnerId": 2, "projectCode": "PRJ202505148K0QEZ0R00F6", "projectName": "Cung cấp thép tấm cho Công trình Nâng cấp Cảng Cát Lái"
+             }'::jsonb,
+             'DONE', 25000000.00, false
+         );

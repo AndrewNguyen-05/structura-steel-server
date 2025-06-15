@@ -192,3 +192,43 @@ INSERT INTO delivery_orders (
      65.0, 17000.00, 45000.00, 1150000.00,
      'Giao hàng SO 10 KCN Mỹ Phước 3', NULL, 10, false
     );
+
+INSERT INTO delivery_orders (
+    created_at, created_by, updated_at, updated_by, version, delivery_code,
+    status, delivery_date, delivery_address, delivery_type,
+    partner, vehicle, driver_name,
+    total_delivery_fee, delivery_order_note,
+    purchase_order_id, sale_order_id, deleted
+) VALUES (
+             '2025-06-13T12:00:00Z', 'TestUser', '2025-06-13T15:00:00Z', 'TestUser', 1, 'DLV20250613L9Y4QRS2B8',
+             'DONE', '2025-06-13T15:00:00Z', 'Kho Structura - Sóng Thần', 'WAREHOUSE_IMPORT',
+             '{
+               "id": 3, "partnerType": "TRANSPORTER", "partnerName": "Công ty Vận Tải Sắt Thép Nam Bắc"
+             }'::jsonb,
+             '{
+               "id": 1, "vehicleType": "TRACTOR_TRAILER", "licensePlate": "51C-10001", "driverName": "Nguyễn Văn Tèo", "partnerId": 3
+             }'::jsonb,
+             'Nguyễn Văn Tèo',
+             1500000.00, 'Giao hàng cho PO liên quan SO4',
+             (SELECT id FROM purchase_orders WHERE import_code = 'IMP20250613K4X3PQR1A7'), NULL, false
+         );
+
+INSERT INTO delivery_orders (
+    created_at, created_by, updated_at, updated_by, version, delivery_code,
+    status, delivery_date, delivery_address, delivery_type,
+    partner, vehicle, driver_name,
+    total_delivery_fee, delivery_order_note,
+    purchase_order_id, sale_order_id, deleted
+) VALUES (
+             '2025-06-14T08:00:00Z', 'TestUser', '2025-06-14T11:30:00Z', 'TestUser', 1, 'DLV20250614M1Z5STU3C9',
+             'DONE', '2025-06-14T11:30:00Z', 'Cảng Cát Lái, Đường Nguyễn Thị Định, TP. Thủ Đức', 'PROJECT_DELIVERY',
+             '{
+               "id": 6, "partnerType": "TRANSPORTER", "partnerName": "Công ty Logistics Hàng Nặng Cường Trang"
+             }'::jsonb,
+             '{
+               "id": 2, "vehicleType": "TRACTOR_TRAILER", "licensePlate": "60A-10002", "driverName": "Lê Minh Tâm", "partnerId": 6
+             }'::jsonb,
+             'Lê Minh Tâm',
+             3250000.00, 'Giao hàng SO4 đến Cảng Cát Lái',
+             NULL, 4, false
+         );
