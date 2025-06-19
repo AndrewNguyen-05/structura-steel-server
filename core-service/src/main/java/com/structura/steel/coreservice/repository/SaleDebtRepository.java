@@ -2,6 +2,8 @@ package com.structura.steel.coreservice.repository;
 
 import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.coreservice.entity.SaleDebt;
+import com.structura.steel.coreservice.entity.analytic.AgingProjection;
+import com.structura.steel.coreservice.entity.analytic.DebtStatusDistributionProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -38,5 +41,20 @@ public interface SaleDebtRepository extends JpaRepository<SaleDebt, Long> {
 			@Param("start") Instant start,
 			@Param("end") Instant end
 	);
+
+	// ham COALESCE de mac dinh tra ve 0 neu khong co total, bth la se tra ve null
+	@Query("SELECT COALESCE(SUM(sd.remainingAmount), 0) FROM SaleDebt sd WHERE sd.status IN :statuses")
+	BigDecimal sumRemainingAmountByStatusIn(@Param("statuses") List<DebtStatus> statuses);
+
+	@Query("SELECT sd.status AS status, COUNT(sd) AS count, COALESCE(SUM(sd.remainingAmount), 0) AS totalAmount " +
+			"FROM SaleDebt sd WHERE sd.status IN :statuses GROUP BY sd.status")
+	List<DebtStatusDistributionProjection> getDebtStatusDistribution(@Param("statuses") List<DebtStatus> statuses);
+
+	@Query(value = """
+			SELECT so.partner ->> 'partnerName' AS partnerName, sd.remainingAmount AS remainingAmount, sd.createdAt AS createdAt " +
+			"FROM SaleDebt sd JOIN sd.saleOrder so WHERE sd.status IN :statuses
+			""", nativeQuery = true)
+	List<AgingProjection> getReceivableAgingData(List<DebtStatus> statuses);
+
 }
 

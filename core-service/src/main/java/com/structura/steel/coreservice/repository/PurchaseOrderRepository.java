@@ -1,5 +1,6 @@
 package com.structura.steel.coreservice.repository;
 
+import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.coreservice.entity.PurchaseOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,5 +36,9 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
 			@Param("afterTime") Instant afterTime,
 			@Param("status") String status
 	);
+
+	// ham COALESCE de mac dinh tra ve 0 neu khong co total, bth la se tra ve null
+	@Query("SELECT COALESCE(SUM(po.totalAmount), 0) FROM PurchaseOrder po WHERE po.status = :status AND po.updatedAt BETWEEN :start AND :end AND po.deleted = false")
+	java.math.BigDecimal sumTotalAmountByStatusAndDateRange(@Param("status") OrderStatus status, @Param("start") Instant start, @Param("end") Instant end);
 
 }
