@@ -55,6 +55,8 @@ public class SecurityConfig {
         corsConfig.setAllowedMethods(Collections.singletonList("*"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
 
+        corsConfig.setExposedHeaders(List.of("Content-Disposition"));
+
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
