@@ -15,11 +15,11 @@ import java.util.Optional;
 @Repository
 public interface DebtPaymentRepository extends JpaRepository<DebtPayment, Long> {
 
-    @Query("SELECT SUM(dp.amountPaid) FROM DebtPayment dp WHERE dp.paymentDate BETWEEN :start AND :end AND dp.debtType = :type")
-    Optional<BigDecimal> sumAmountPaidByDateAndType(@Param("start") Instant start, @Param("end") Instant end, @Param("type") DebtType type);
+    @Query("SELECT SUM(dp.amountPaid) FROM DebtPayment dp WHERE dp.createdAt BETWEEN :start AND :end AND dp.debtType = :type")
+    Optional<BigDecimal> sumAmountPaidByCreatedAtAndType(@Param("start") Instant start, @Param("end") Instant end, @Param("type") DebtType type);
 
-    @Query("SELECT SUM(dp.amountPaid) FROM DebtPayment dp WHERE dp.paymentDate BETWEEN :start AND :end AND dp.debtType IN :types")
-    Optional<BigDecimal> sumAmountPaidByDateAndTypes(@Param("start") Instant start, @Param("end") Instant end, @Param("types") List<DebtType> types);
+    @Query("SELECT SUM(dp.amountPaid) FROM DebtPayment dp WHERE dp.createdAt BETWEEN :start AND :end AND dp.debtType IN :types")
+    Optional<BigDecimal> sumAmountPaidByCreatedAtAndTypes(@Param("start") Instant start, @Param("end") Instant end, @Param("types") List<DebtType> types);
 
     List<DebtPayment> findByPaymentDateBetween(Instant start, Instant end);
 }

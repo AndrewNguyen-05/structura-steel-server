@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.ArrayList;
@@ -155,10 +154,10 @@ public class ReportServiceImpl implements ReportService {
         BigDecimal newSaleOrdersValue = saleOrderRepository.sumTotalAmountByCreatedAtBetween(startOfDay, endOfDay)
                 .orElse(BigDecimal.ZERO);
         long newPurchaseOrdersCount = purchaseOrderRepository.countByCreatedAtBetween(startOfDay, endOfDay);
-        long completedDeliveriesCount = deliveryOrderRepository.countByStatusAndUpdatedAtBetween(OrderStatus.DELIVERED, startOfDay, endOfDay);
-        BigDecimal totalAmountReceived = debtPaymentRepository.sumAmountPaidByDateAndType(startOfDay, endOfDay, DebtType.SALE_DEBT)
+        long completedDeliveriesCount = deliveryOrderRepository.countByStatusInAndUpdatedAtBetween(List.of(OrderStatus.DELIVERED, OrderStatus.DONE), startOfDay, endOfDay);
+        BigDecimal totalAmountReceived = debtPaymentRepository.sumAmountPaidByCreatedAtAndType(startOfDay, endOfDay, DebtType.SALE_DEBT)
                 .orElse(BigDecimal.ZERO);
-        BigDecimal totalAmountPaid = debtPaymentRepository.sumAmountPaidByDateAndTypes(startOfDay, endOfDay, List.of(DebtType.PURCHASE_DEBT, DebtType.DELIVERY_DEBT))
+        BigDecimal totalAmountPaid = debtPaymentRepository.sumAmountPaidByCreatedAtAndTypes(startOfDay, endOfDay, List.of(DebtType.PURCHASE_DEBT, DebtType.DELIVERY_DEBT))
                 .orElse(BigDecimal.ZERO);
 
         DailySummaryDto.SummarySection summary = new DailySummaryDto.SummarySection(

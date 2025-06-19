@@ -5,6 +5,7 @@ import com.structura.steel.coreservice.entity.DeliveryOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -17,7 +18,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
 
 	Page<DeliveryOrder> findAllByDeleted(boolean deleted, Pageable pageable);
 
-	long countByStatusAndUpdatedAtBetween(OrderStatus status, Instant start, Instant end);
+	@Query("SELECT COUNT(do) FROM DeliveryOrder do WHERE do.status IN :statuses AND do.updatedAt BETWEEN :start AND :end")
+	long countByStatusInAndUpdatedAtBetween(List<OrderStatus> statuses, Instant start, Instant end);
 
 	List<DeliveryOrder> findByStatusAndUpdatedAtBetween(OrderStatus status, Instant start, Instant end);
 

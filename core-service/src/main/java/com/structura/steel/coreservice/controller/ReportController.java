@@ -78,7 +78,7 @@ public class ReportController {
     }
 
     @GetMapping("/daily-activity")
-    public ResponseEntity<?> downloadDailyActivityReport(
+    public ResponseEntity<?> getDailyActivityReport(
             @RequestParam(required = false) boolean download) throws IOException {
 
         DailySummaryDto data = reportService.getDailyActivityReportData();
