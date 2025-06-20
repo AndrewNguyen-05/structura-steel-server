@@ -149,15 +149,19 @@ public class ReportServiceImpl implements ReportService {
         Instant startOfDay = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Instant endOfDay = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
 
+//        ZoneId zone = ZoneOffset.UTC;
+//        Instant startOfDay = today.atStartOfDay(zone).toInstant();
+//        Instant endOfDay = today.plusDays(1).atStartOfDay(zone).toInstant();
+
         // === PHẦN 1: TÓM TẮT NHANH ===
         long newSaleOrdersCount = saleOrderRepository.countByCreatedAtBetween(startOfDay, endOfDay);
         BigDecimal newSaleOrdersValue = saleOrderRepository.sumTotalAmountByCreatedAtBetween(startOfDay, endOfDay)
                 .orElse(BigDecimal.ZERO);
         long newPurchaseOrdersCount = purchaseOrderRepository.countByCreatedAtBetween(startOfDay, endOfDay);
         long completedDeliveriesCount = deliveryOrderRepository.countByStatusInAndUpdatedAtBetween(List.of(OrderStatus.DELIVERED, OrderStatus.DONE), startOfDay, endOfDay);
-        BigDecimal totalAmountReceived = debtPaymentRepository.sumAmountPaidByCreatedAtAndType(startOfDay, endOfDay, DebtType.SALE_DEBT)
+        BigDecimal totalAmountReceived = debtPaymentRepository.sumAmountPaidByDateAndType(startOfDay, endOfDay, DebtType.SALE_DEBT)
                 .orElse(BigDecimal.ZERO);
-        BigDecimal totalAmountPaid = debtPaymentRepository.sumAmountPaidByCreatedAtAndTypes(startOfDay, endOfDay, List.of(DebtType.PURCHASE_DEBT, DebtType.DELIVERY_DEBT))
+        BigDecimal totalAmountPaid = debtPaymentRepository.sumAmountPaidByDateAndTypes(startOfDay, endOfDay, List.of(DebtType.PURCHASE_DEBT, DebtType.DELIVERY_DEBT))
                 .orElse(BigDecimal.ZERO);
 
         DailySummaryDto.SummarySection summary = new DailySummaryDto.SummarySection(
@@ -181,7 +185,7 @@ public class ReportServiceImpl implements ReportService {
 
         // === PHẦN 3: CHI TIẾT GIAO HÀNG HOÀN TẤT ===
         List<DailySummaryDto.CompletedDelivery> completedDeliveries = deliveryOrderRepository
-                .findByStatusAndUpdatedAtBetween(OrderStatus.DELIVERED, startOfDay, endOfDay).stream()
+                .findByStatusInAndUpdatedAtBetween(List.of(OrderStatus.DELIVERED, OrderStatus.DONE), startOfDay, endOfDay).stream()
                 .map(de -> {
                     String originalOrderCode = de.getSaleOrder() != null ? de.getSaleOrder().getExportCode() : (de.getPurchaseOrder() != null ? de.getPurchaseOrder().getImportCode() : "N/A");
                     return new DailySummaryDto.CompletedDelivery(

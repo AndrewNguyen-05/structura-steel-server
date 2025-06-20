@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -19,9 +20,9 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
 
 	Page<PurchaseOrder> findAllByDeleted(boolean deleted, Pageable pageable);
 
-	// Thêm các phương thức khác nếu cần cho báo cáo hàng ngày
-	long countByCreatedAtBetween(java.time.Instant start, java.time.Instant end);
-	List<PurchaseOrder> findByCreatedAtBetween(java.time.Instant start, java.time.Instant end);
+	long countByCreatedAtBetween(Instant start, Instant end);
+
+	List<PurchaseOrder> findByCreatedAtBetween(Instant start, Instant end);
 
 	@Query(value = """
    SELECT * FROM purchase_orders po 
@@ -39,6 +40,6 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
 
 	// ham COALESCE de mac dinh tra ve 0 neu khong co total, bth la se tra ve null
 	@Query("SELECT COALESCE(SUM(po.totalAmount), 0) FROM PurchaseOrder po WHERE po.status = :status AND po.updatedAt BETWEEN :start AND :end AND po.deleted = false")
-	java.math.BigDecimal sumTotalAmountByStatusAndDateRange(@Param("status") OrderStatus status, @Param("start") Instant start, @Param("end") Instant end);
+	BigDecimal sumTotalAmountByStatusAndDateRange(@Param("status") OrderStatus status, @Param("start") Instant start, @Param("end") Instant end);
 
 }
