@@ -112,7 +112,6 @@ public class ReportServiceImpl implements ReportService {
             return new ArrayList<>();
         }
 
-
         List<ProfitLossReportDto> results = new ArrayList<>();
         for (SaleOrder so : completedSaleOrders) {
             // A. Doanh thu
@@ -159,14 +158,14 @@ public class ReportServiceImpl implements ReportService {
                 .orElse(BigDecimal.ZERO);
         long newPurchaseOrdersCount = purchaseOrderRepository.countByCreatedAtBetween(startOfDay, endOfDay);
         long completedDeliveriesCount = deliveryOrderRepository.countByStatusInAndUpdatedAtBetween(List.of(OrderStatus.DELIVERED, OrderStatus.DONE), startOfDay, endOfDay);
-        BigDecimal totalAmountReceived = debtPaymentRepository.sumAmountPaidByDateAndType(startOfDay, endOfDay, DebtType.SALE_DEBT)
+        BigDecimal totalDebtAmountReceived = debtPaymentRepository.sumAmountPaidByDateAndType(startOfDay, endOfDay, DebtType.SALE_DEBT)
                 .orElse(BigDecimal.ZERO);
-        BigDecimal totalAmountPaid = debtPaymentRepository.sumAmountPaidByDateAndTypes(startOfDay, endOfDay, List.of(DebtType.PURCHASE_DEBT, DebtType.DELIVERY_DEBT))
+        BigDecimal totalDebtAmountPaid = debtPaymentRepository.sumAmountPaidByDateAndTypes(startOfDay, endOfDay, List.of(DebtType.PURCHASE_DEBT, DebtType.DELIVERY_DEBT))
                 .orElse(BigDecimal.ZERO);
 
         DailySummaryDto.SummarySection summary = new DailySummaryDto.SummarySection(
                 newSaleOrdersCount, newSaleOrdersValue, newPurchaseOrdersCount,
-                completedDeliveriesCount, totalAmountReceived, totalAmountPaid
+                completedDeliveriesCount, totalDebtAmountReceived, totalDebtAmountPaid
         );
 
         // === PHẦN 2: CHI TIẾT CÁC ĐƠN HÀNG MỚI TẠO ===
@@ -267,19 +266,12 @@ public class ReportServiceImpl implements ReportService {
      * Tính chi phí vận chuyển cho một SaleOrder cụ thể
      */
     private BigDecimal calculateDeliveryCost(SaleOrder saleOrder) {
+
         BigDecimal totalDeliveryCost = BigDecimal.ZERO;
 
-        // 1. Chi phí vận chuyển của chính SaleOrder này
-        BigDecimal saleDeliveryCost = saleOrder.getDeliveryOrders().stream()
-                .filter(deliveryOrder -> deliveryOrder.getStatus() == OrderStatus.DONE)
-                .map(DeliveryOrder::getTotalDeliveryFee)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        totalDeliveryCost = totalDeliveryCost.add(saleDeliveryCost);
-
-        // 2. Chi phí vận chuyển của các PO liên quan (nếu cần tính)
+        // Nếu không có project thì bỏ qua
         if (saleOrder.getProject() != null && saleOrder.getProject().id() != null) {
+            // Lấy các PO cùng project và đã hoàn thành (DONE), được tạo trước hoặc bằng thời gian của SO
             List<PurchaseOrder> relatedPOs = purchaseOrderRepository
                     .findByProjectIdAndCreatedAtAfterAndStatus(
                             saleOrder.getProject().id(),
@@ -287,14 +279,13 @@ public class ReportServiceImpl implements ReportService {
                             OrderStatus.DONE.name()
                     );
 
-            BigDecimal purchaseDeliveryCost = relatedPOs.stream()
+            // Lấy tổng chi phí vận chuyển từ các delivery order của PO
+            totalDeliveryCost = relatedPOs.stream()
                     .flatMap(po -> po.getDeliveryOrders().stream())
                     .filter(deliveryOrder -> deliveryOrder.getStatus() == OrderStatus.DONE)
                     .map(DeliveryOrder::getTotalDeliveryFee)
                     .filter(Objects::nonNull)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            totalDeliveryCost = totalDeliveryCost.add(purchaseDeliveryCost);
         }
 
         return totalDeliveryCost;

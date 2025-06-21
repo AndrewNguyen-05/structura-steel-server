@@ -79,13 +79,13 @@ public class AnalyticServiceImpl implements AnalyticService {
         BigDecimal grossProfit = totalRevenue.subtract(totalCostOfGoods);
 
         List<DebtStatus> unpaidStatuses = List.of(DebtStatus.UNPAID, DebtStatus.PARTIALLY_PAID);
-        BigDecimal totalReceivable = saleDebtRepository.sumRemainingAmountByStatusIn(unpaidStatuses);
+        BigDecimal totalDebtReceivable = saleDebtRepository.sumRemainingAmountByStatusIn(unpaidStatuses);
 
         BigDecimal purchasePayable = purchaseDebtRepository.sumRemainingAmountByStatusIn(unpaidStatuses);
         BigDecimal deliveryPayable = deliveryDebtRepository.sumRemainingAmountByStatusIn(unpaidStatuses);
-        BigDecimal totalPayable = purchasePayable.add(deliveryPayable);
+        BigDecimal totalDebtPayable = purchasePayable.add(deliveryPayable);
 
-        return new SummaryDto(totalRevenue, totalCostOfGoods, grossProfit, totalReceivable, totalPayable);
+        return new SummaryDto(totalRevenue, totalCostOfGoods, grossProfit, totalDebtReceivable, totalDebtPayable);
     }
 
     @Transactional(readOnly = true)

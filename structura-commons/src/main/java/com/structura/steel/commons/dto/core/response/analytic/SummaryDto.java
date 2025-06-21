@@ -6,6 +6,6 @@ public record SummaryDto(
     BigDecimal totalRevenue,
     BigDecimal totalCostOfGoods,
     BigDecimal grossProfit,
-    BigDecimal totalReceivable,
-    BigDecimal totalPayable
+    BigDecimal totalDebtReceivable,
+    BigDecimal totalDebtPayable
 ) {}
