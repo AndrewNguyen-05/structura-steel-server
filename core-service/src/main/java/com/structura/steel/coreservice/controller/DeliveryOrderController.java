@@ -3,10 +3,12 @@ package com.structura.steel.coreservice.controller;
 import com.structura.steel.commons.dto.core.request.delivery.UpdateDeliveryOrderRequestDto;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.AppConstants;
+import com.structura.steel.commons.utils.CustomHeaders;
 import com.structura.steel.coreservice.service.DeliveryOrderService;
 import com.structura.steel.commons.dto.core.request.delivery.DeliveryOrderRequestDto;
 import com.structura.steel.commons.dto.core.response.delivery.DeliveryOrderResponseDto;
 import com.structura.steel.commons.dto.core.response.delivery.GetAllDeliveryOrderResponseDto;
+import com.structura.steel.coreservice.utils.DeliveryAuthorizationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,8 @@ import java.util.List;
 public class DeliveryOrderController {
 
     private final DeliveryOrderService deliveryOrderService;
+
+    private final DeliveryAuthorizationUtils deliveryAuthorizationUtils;
 
     @GetMapping
     public ResponseEntity<PagingResponse<GetAllDeliveryOrderResponseDto>> getAllDeliveryOrders(
@@ -46,13 +50,20 @@ public class DeliveryOrderController {
     }
 
     @PostMapping
-    public ResponseEntity<DeliveryOrderResponseDto> createDeliveryOrder(@RequestBody DeliveryOrderRequestDto dto) {
+    public ResponseEntity<DeliveryOrderResponseDto> createDeliveryOrder(
+            @RequestBody DeliveryOrderRequestDto dto,
+            @RequestHeader(CustomHeaders.X_AUTH_USER_AUTHORITIES) String authorities) {
+
+        deliveryAuthorizationUtils.validateCreatePermission(dto, authorities);
+
         return ResponseEntity.ok(deliveryOrderService.createDeliveryOrder(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryOrderResponseDto> updateDeliveryOrder(
-            @PathVariable Long id, @RequestBody UpdateDeliveryOrderRequestDto dto) {
+            @PathVariable Long id,
+            @RequestBody UpdateDeliveryOrderRequestDto dto) {
+
         return ResponseEntity.ok(deliveryOrderService.updateDeliveryOrder(id, dto));
     }
 

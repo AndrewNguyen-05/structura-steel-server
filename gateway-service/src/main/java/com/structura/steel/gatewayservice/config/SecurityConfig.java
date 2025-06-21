@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -74,27 +75,62 @@ public class SecurityConfig {
                         .pathMatchers("/api/auth/**").permitAll()
                         .pathMatchers("/api/v1/core/users/first-time-password-change/**").permitAll()
                         .pathMatchers("/api/v1/core/users/forgot-password", "/api/v1/core/users/verify-otp", "/api/v1/core/users/reset-password", "/api/v1/core/users/check-email").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/users/my-profile").permitAll()
 
-//                        // Admin Only
-//                        .pathMatchers("/api/v1/core/users/**").hasAuthority(RoleType.ADMIN.text())
-//
-//                        // Sale Order Management
-//                        .pathMatchers("/api/v1/core/sale/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
-//                        .pathMatchers("/api/v1/core/sale/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
-//                        .pathMatchers("/api/v1/core/sale/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
-//
-//
-//                        // Purchase Order Management
-//                        .pathMatchers("/api/v1/core/purchase/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
-//                        .pathMatchers("/api/v1/core/purchase/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
-//                        .pathMatchers("/api/v1/core/purchase/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.ACCOUNTANT.text())
-//
-//                        // Delivery Order Management (cả nhập và xuất)
-//                        .pathMatchers("/api/v1/core/delivery/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.IMPORTER.text())
-//                        .pathMatchers("/api/v1/core/delivery/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
-//
-//                        // Debt & Payment Management
-//                        .pathMatchers("/api/v1/core/payments/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.ACCOUNTANT.text())
+                        // Admin Only
+                        .pathMatchers("/api/v1/core/users/**").hasAuthority(RoleType.ADMIN.text())
+
+                        // Sale Order Management - GET cho mọi role, POST/PUT/DELETE cho ADMIN + SALER
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/sale/**").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/sale/*/details/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/sale/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/sale/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/sale/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/sale/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/sale/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/sale/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text())
+
+                        // Sale Debts - GET cho mọi role, POST/PUT/DELETE cho ADMIN + SALER + ACCOUNTANT
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/sale/*/debts/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/sale/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/sale/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/sale/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
+
+                        // Purchase Management - GET cho mọi role, POST/PUT/DELETE cho ADMIN + IMPORTER
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/purchase/**").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/purchase/*/details/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/purchase/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/purchase/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/purchase/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/purchase/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/purchase/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/purchase/*/details/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text())
+
+                        // Purchase Debts - GET cho mọi role, POST/PUT/DELETE cho ADMIN + IMPORTER + ACCOUNTANT
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/purchase/*/debts/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/purchase/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/purchase/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/purchase/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.ACCOUNTANT.text())
+
+                        // Delivery Order Management - GET cho mọi role
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/delivery/**").authenticated()
+
+                        // Delivery POST
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/delivery/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/delivery/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.IMPORTER.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/delivery/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.SALER.text(), RoleType.IMPORTER.text())
+
+                        // Delivery Debts - GET cho mọi role, POST/PUT/DELETE cho tất cả roles
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/delivery/*/debts/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/delivery/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/delivery/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/delivery/*/debts/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.IMPORTER.text(), RoleType.SALER.text(), RoleType.ACCOUNTANT.text())
+
+                        // Debt & Payment Management - ACCOUNTANT + ADMIN only
+                        .pathMatchers(HttpMethod.GET, "/api/v1/core/payments/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/v1/core/payments/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.PUT, "/api/v1/core/payments/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.ACCOUNTANT.text())
+                        .pathMatchers(HttpMethod.DELETE, "/api/v1/core/payments/**").hasAnyAuthority(RoleType.ADMIN.text(), RoleType.ACCOUNTANT.text())
 
                         // Default rule: any other request must be authenticated
                         .anyExchange().authenticated()

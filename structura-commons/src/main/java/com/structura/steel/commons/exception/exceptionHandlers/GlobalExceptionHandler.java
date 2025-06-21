@@ -3,6 +3,7 @@ package com.structura.steel.commons.exception.exceptionHandlers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.structura.steel.commons.exception.BadRequestException;
 import com.structura.steel.commons.exception.DuplicateKeyException;
+import com.structura.steel.commons.exception.ForbiddenException;
 import com.structura.steel.commons.exception.ResourceAlreadyExistException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.exception.StructuraSteelException;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private final ObjectMapper mapper;
 
     // handle specific exception
+
+
+    // bad forbidden exception
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleForbiddenException(ForbiddenException ex,
+                                                            WebRequest webRequest) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                webRequest.getDescription(false)
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
+    }
 
     // Not found resource
     @ExceptionHandler(ResourceNotFoundException.class)
