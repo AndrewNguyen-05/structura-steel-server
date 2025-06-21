@@ -42,6 +42,18 @@ public class RateLimiter {
         redisTemplate.expire(key, Duration.ofMinutes(AppConstants.LOCKOUT_DURATION_MINUTES));
     }
 
+    public int getOtpAttempts(String email) {
+        String key = "otp_attempts:" + email;
+        String attempts = redisTemplate.opsForValue().get(key);
+
+        // Nếu key chưa có trong Redis (attempts là null), nghĩa là đã thử 0 lần.
+        if (attempts == null) {
+            return 0;
+        }
+
+        return Integer.parseInt(attempts);
+    }
+
     public void resetOtpAttempts(String email) {
         String key = "otp_attempts:" + email;
         redisTemplate.delete(key);

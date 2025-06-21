@@ -26,7 +26,7 @@ public class OtpUtils {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Password Reset OTP");
-        message.setText("Your OTP for password reset is: " + otp + ". It is valid for 5 minutes.");
+        message.setText("Your OTP for password reset is: " + otp + ". It is valid for 10 minutes.");
         mailSender.send(message);
     }
 }

@@ -29,5 +29,5 @@ public interface KeycloakService {
 
     void resetPassword(String email, String newPassword);
 
-    void firstTimePasswordChange(String email, String temporaryPassword, String newPassword);
+    void firstTimePasswordChange(String email, String newPassword);
 }

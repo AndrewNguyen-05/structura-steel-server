@@ -11,6 +11,7 @@ import com.structura.steel.commons.response.RestResponse;
 import com.structura.steel.commons.dto.core.request.authentication.CreateUserRequest;
 import com.structura.steel.commons.dto.core.request.authentication.UpdateUserRequest;
 import com.structura.steel.commons.dto.core.response.UserResponse;
+import com.structura.steel.commons.utils.AppConstants;
 import com.structura.steel.coreservice.entity.User;
 import com.structura.steel.coreservice.mapper.UserMapper;
 import com.structura.steel.coreservice.repository.UserRepository;
@@ -218,8 +219,22 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User", "email", request.email());
         }
 
+        String redisKey = "temp_pass:" + request.email();
+        String storedTempPassword = redisTemplate.opsForValue().get(redisKey);
+
+        if (storedTempPassword == null) {
+            throw new RuntimeException("Temporary password has expired or does not exist. Please contact admin for support.");
+        }
+
+        if (!storedTempPassword.equals(request.temporaryPassword())) {
+            throw new RuntimeException("Invalid temporary password.");
+        }
+
         // Update password in Keycloak
-        keycloakService.firstTimePasswordChange(request.email(), request.temporaryPassword(), request.newPassword());
+        keycloakService.firstTimePasswordChange(request.email(), request.newPassword());
+
+        // xoa mk tam sau khi verify thanh cong
+        redisTemplate.delete(redisKey);
 
         return RestResponse.ok("Password changed successfully. Please log in with your new password.");
     }
@@ -236,7 +251,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String otp = otpUtil.generateOtp();
-        redisTemplate.opsForValue().set("otp:" + request.email(), otp, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set("otp:" + request.email(), otp, Duration.ofMinutes(10));
         otpUtil.sendOtpEmail(request.email(), otp);
         rateLimiter.resetEmailAttempts(request.email());
 
@@ -245,17 +260,42 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public RestResponse<String> verifyOtp(VerifyOtpRequest request) {
-        if (rateLimiter.isOtpLockedOut(request.email())) {
-            throw new RuntimeException("Too many OTP attempts. Please wait 5 minutes before trying again.");
+
+        String email = request.email();
+        String otpFromUser = request.otp();
+
+        // Nếu otp đang bị khóa, không cần xử lý gì thêm.
+        if (rateLimiter.isOtpLockedOut(email)) {
+            throw new RuntimeException("Too many failed attempts. Account is temporarily locked. Please wait 5 minutes.");
         }
 
-        String storedOtp = redisTemplate.opsForValue().get("otp:" + request.email());
-        if (storedOtp == null || !storedOtp.equals(request.otp())) {
-            rateLimiter.incrementOtpAttempts(request.email());
-            throw new RuntimeException("Invalid OTP.");
+        String storedOtp = redisTemplate.opsForValue().get("otp:" + email);
+
+        // OTP không tồn tại (hết hạn hoặc đã bị xóa).
+        if (storedOtp == null) {
+
+            throw new RuntimeException("OTP has expired or is invalid. Please request a new one.");
         }
 
-        return RestResponse.ok("OTP verified successfully.");
+        // success case - xoa OTP va reset email attempt otp
+        if (storedOtp.equals(otpFromUser)) {
+            rateLimiter.resetOtpAttempts(email);
+            redisTemplate.delete("otp:" + email);
+            return RestResponse.ok("OTP verified successfully.");
+        } else {
+            // fail case - tang số lan dem len
+            rateLimiter.incrementOtpAttempts(email);
+
+            // Check xem day phai lan thu cuoi cung k, neu cuoi thi xoa OTP do va bat doi 5p r bat user gui cai moi (if dau tien)
+            if (rateLimiter.isOtpLockedOut(email)) {
+                redisTemplate.delete("otp:" + email);
+                throw new RuntimeException("Invalid OTP. Too many failed attempts, account is now locked. Please wait 5 minutes.");
+            } else {
+                int attemptsMade = rateLimiter.getOtpAttempts(email);
+                int remainingAttempts = AppConstants.MAX_OTP_ATTEMPTS - attemptsMade;
+                throw new RuntimeException("Invalid OTP. You have " + remainingAttempts + " attempts left.");
+            }
+        }
     }
 
     @Override

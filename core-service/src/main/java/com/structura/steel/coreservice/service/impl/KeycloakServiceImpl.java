@@ -21,9 +21,11 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +39,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     private final KeycloakProperty keycloak;
     private final RealmResource realmResource;
     private final EmailUtils emailUtils;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public String createUser(CreateUserRequest request) {
@@ -63,6 +66,12 @@ public class KeycloakServiceImpl implements KeycloakService {
 
             // Generate random password
             String randomPassword = PasswordGenerator.generateRandomPassword();
+
+            // Lưu xuống redis
+            String redisKey = "temp_pass:" + request.email();
+//          redisTemplate.opsForValue().set(redisKey, randomPassword, Duration.ofHours(24));
+            redisTemplate.opsForValue().set(redisKey, randomPassword);
+            log.info("Stored temporary password for email {} in Redis.", request.email());
 
             // Đặt mật khẩu
             CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
@@ -199,7 +208,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     @Override
-    public void firstTimePasswordChange(String email, String temporaryPassword, String newPassword) {
+    public void firstTimePasswordChange(String email, String newPassword) {
         UserRepresentation user = getUserByEmail(email);
         if (user == null) {
             throw new ResourceNotFoundException("User", "email", email);
