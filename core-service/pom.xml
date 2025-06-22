@@ -22,8 +22,13 @@
         <zipkin-reporter-brave.version>2.16.4</zipkin-reporter-brave.version>
         <micrometer-tracing-bridge-brave.version>1.1.5</micrometer-tracing-bridge-brave.version>
         <keycloak.version>25.0.2</keycloak.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
@@ -120,6 +125,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>

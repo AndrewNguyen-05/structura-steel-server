@@ -50,13 +50,21 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: anhvhnguyen.052003@gmail.com
-    password: lnurhejndpnocdrb
+    password: ${GOOGLE_APP_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+  ai:
+    openai:
+      api-key: ${GOOGLE_API_KEY}
+      chat:
+        base-url: https://generativelanguage.googleapis.com
+        completions-path: /v1beta/openai/chat/completions
+        options:
+          model: gemini-2.0-flash
 
 management:
   endpoints:
