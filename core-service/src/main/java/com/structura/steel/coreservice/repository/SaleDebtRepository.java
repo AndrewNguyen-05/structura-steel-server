@@ -56,5 +56,6 @@ public interface SaleDebtRepository extends JpaRepository<SaleDebt, Long> {
 			""", nativeQuery = true)
 	List<AgingProjection> getReceivableAgingData(List<DebtStatus> statuses);
 
+	List<SaleDebt> findBySaleOrderId(Long saleOrderId);
 }
 

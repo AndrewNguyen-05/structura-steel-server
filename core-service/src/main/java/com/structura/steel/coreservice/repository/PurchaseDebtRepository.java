@@ -52,4 +52,6 @@ public interface PurchaseDebtRepository extends JpaRepository<PurchaseDebt, Long
 			"FROM PurchaseDebt pd JOIN pd.purchaseOrder po WHERE pd.status IN :statuses
 			""", nativeQuery = true)
 	List<AgingProjection> getPayableAgingData(@Param("statuses") List<DebtStatus> statuses);
+
+	List<PurchaseDebt> findByPurchaseOrderId(Long purchaseOrderId);
 }

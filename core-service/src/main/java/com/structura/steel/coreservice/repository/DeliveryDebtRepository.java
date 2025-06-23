@@ -50,4 +50,6 @@ public interface DeliveryDebtRepository extends JpaRepository<DeliveryDebt, Long
 			"FROM DeliveryDebt dd JOIN dd.deliveryOrder do WHERE dd.status IN :statuses
 			""", nativeQuery = true)
 	List<AgingProjection> getPayableAgingData(@Param("statuses") List<DebtStatus> statuses);
+
+	List<DeliveryDebt> findByDeliveryOrderId(Long deliveryOrderId);
 }

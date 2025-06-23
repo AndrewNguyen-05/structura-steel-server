@@ -22,4 +22,6 @@ public interface DebtPaymentRepository extends JpaRepository<DebtPayment, Long> 
     Optional<BigDecimal> sumAmountPaidByDateAndTypes(@Param("start") Instant start, @Param("end") Instant end, @Param("types") List<DebtType> types);
 
     List<DebtPayment> findByPaymentDateBetween(Instant start, Instant end);
+
+    List<DebtPayment> findByDebtTypeAndDebtIdIn(DebtType debtType, List<Long> debtIds);
 }

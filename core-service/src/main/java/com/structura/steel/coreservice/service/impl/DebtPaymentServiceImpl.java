@@ -6,6 +6,7 @@ import com.structura.steel.commons.dto.core.response.DebtPaymentResponseDto;
 import com.structura.steel.commons.dto.partner.request.UpdatePartnerDebtRequestDto;
 import com.structura.steel.commons.enumeration.DebtAccountType;
 import com.structura.steel.commons.enumeration.DebtStatus;
+import com.structura.steel.commons.enumeration.DebtType;
 import com.structura.steel.commons.exception.BadRequestException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.coreservice.entity.*;
@@ -21,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -99,6 +103,48 @@ public class DebtPaymentServiceImpl implements DebtPaymentService {
         }
 
         return debtPaymentMapper.toDebtPaymentResponseDto(savedPayment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DebtPaymentResponseDto> getPaymentHistoryForOrder(Long orderId, DebtType debtType) {
+        // 1. Dựa vào debtType và orderId, tìm ra các bản ghi công nợ (Debt) liên quan.
+        // Một order có thể có nhiều khoản nợ (ví dụ: mỗi sản phẩm một khoản nợ)
+        List<Long> debtIds;
+
+        switch (debtType) {
+            case PURCHASE_DEBT:
+                List<PurchaseDebt> purchaseDebts = purchaseDebtRepository.findByPurchaseOrderId(orderId);
+                if (purchaseDebts.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                debtIds = purchaseDebts.stream().map(PurchaseDebt::getId).collect(Collectors.toList());
+                break;
+            case SALE_DEBT:
+                List<SaleDebt> saleDebts = saleDebtRepository.findBySaleOrderId(orderId);
+                if (saleDebts.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                debtIds = saleDebts.stream().map(SaleDebt::getId).collect(Collectors.toList());
+                break;
+            case DELIVERY_DEBT:
+                List<DeliveryDebt> deliveryDebts = deliveryDebtRepository.findByDeliveryOrderId(orderId);
+                if (deliveryDebts.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                debtIds = deliveryDebts.stream().map(DeliveryDebt::getId).collect(Collectors.toList());
+                break;
+            default:
+                throw new BadRequestException("Invalid Debt Type: " + debtType);
+        }
+
+        // 2. Từ danh sách debtIds, tìm tất cả các lần thanh toán (DebtPayment) tương ứng
+        List<DebtPayment> payments = debtPaymentRepository.findByDebtTypeAndDebtIdIn(debtType, debtIds);
+
+        // 3. Map danh sách DebtPayment sang DebtPaymentResponseDto
+        return payments.stream()
+                .map(debtPaymentMapper::toDebtPaymentResponseDto)
+                .collect(Collectors.toList());
     }
 
     private void validateAndProcessPayment(PurchaseDebt debt, BigDecimal amountPaid) {
