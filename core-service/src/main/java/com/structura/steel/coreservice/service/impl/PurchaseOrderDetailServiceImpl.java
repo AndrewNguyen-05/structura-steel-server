@@ -48,20 +48,26 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
     public PurchaseOrderDetailResponseDto createPurchaseOrderDetail(PurchaseOrderDetailRequestDto dto, Long purchaseId) {
         PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", purchaseId));
+        PurchaseOrderDetail detail = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
 
         ProductResponseDto productDto = productFeignClient.getProductById(dto.productId());
         Product product = productMapper.toProductSnapShot(productDto);
 
-        PurchaseOrderDetail detail = purchaseOrderDetailMapper.toPurchaseOrderDetail(dto);
+        BigDecimal productWeight = productFeignClient.getProductWeight(dto.productId());
+        if (productWeight == null) {
+            throw new RuntimeException("Could not fetch weight for product id: " + dto.productId());
+        }
+        detail.setWeight(dto.quantity().multiply(productWeight));
         detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
         detail.setPurchaseOrder(purchaseOrder);
         detail.setProduct(product);
 
         PurchaseOrderDetail saved = purchaseOrderDetailRepository.save(detail);
         purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(detail.getSubtotal()));
+        purchaseOrder.setTotalWeight(purchaseOrder.getTotalWeight().add(detail.getWeight()));
         purchaseOrderRepository.save(purchaseOrder);
 
-        return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(detail);
+        return purchaseOrderDetailMapper.toPurchaseOrderDetailResponseDto(saved);
     }
 
     @Override

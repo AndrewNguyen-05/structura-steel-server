@@ -17,6 +17,7 @@ public class PurchaseOrderDetailResponseDto {
         private Long productId;
         private ProductResponseDto product;
         private BigDecimal quantity;
+        private BigDecimal weight;
         private BigDecimal unitPrice;
         private BigDecimal subtotal;
         private Short version;

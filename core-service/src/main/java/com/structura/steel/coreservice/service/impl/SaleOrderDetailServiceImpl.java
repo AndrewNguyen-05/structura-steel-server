@@ -60,6 +60,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
 
         SaleOrderDetail saved = saleOrderDetailRepository.save(detail);
         saleOrder.setTotalAmount(saleOrder.getTotalAmount().add(detail.getSubtotal()));
+        saleOrder.setTotalWeight(saleOrder.getTotalWeight().add(detail.getWeight()));
 
         SaleOrderDetailResponseDto result = saleOrderDetailMapper.toSaleOrderDetailResponseDto(saved);
         result.setProduct(productResponse);

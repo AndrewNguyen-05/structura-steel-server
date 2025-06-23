@@ -23,6 +23,7 @@ public class PurchaseOrderResponseDto {
     private PartnerResponseDto supplier;
     private PartnerProjectResponseDto project;
     private BigDecimal totalAmount;
+    private BigDecimal totalWeight;
     private String purchaseOrdersNote;
 
     private Set<PurchaseOrderDetailResponseDto> purchaseOrderDetails;

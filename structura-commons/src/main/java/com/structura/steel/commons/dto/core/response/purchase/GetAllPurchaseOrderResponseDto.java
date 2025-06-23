@@ -23,6 +23,7 @@ public class GetAllPurchaseOrderResponseDto {
 	private String projectName;
 	private String projectCode;
 	private BigDecimal totalAmount;
+	private BigDecimal totalWeight;
 	private Short version;
 	private Instant createdAt;
 	private Instant updatedAt;

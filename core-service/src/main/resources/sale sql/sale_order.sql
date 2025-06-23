@@ -1,8 +1,5 @@
--- Dữ liệu mẫu cho bảng sale_orders
--- Ghi chú: Thông tin các kho hàng (warehouses) được nhúng thành một mảng JSON bên trong cột 'partner'.
-
--- Sale Order 1: Công ty TNHH Thép Hình Tú Hà - Dự án Tân Tạo
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 1: (Total Weight: 1.20 + 2.00 = 3.20)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '5 day', 'System', NOW() - INTERVAL '5 day', 'System', 1, 'EXP20250610AABBCCDD01',
      '{
        "id": 22, "partnerType": "CUSTOMER", "partnerName": "Công ty TNHH Thép Hình Tú Hà", "partnerCode": "PTN202505146BYQ1YUGYMMMM", "taxCode": "0100100022",
@@ -17,10 +14,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Lê Thị Hoa", "contactPersonPhone": "0987654321", "address": "10 Lý Tự Trọng, P. Bến Nghé, Q.1, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'DONE', 125500000.00, 'Đã hoàn thành giao hàng và thanh toán.', false);
+     'DONE', 125500000.00, 3.20, 'Đã hoàn thành giao hàng và thanh toán.', false);
 
--- Sale Order 2: Doanh nghiệp Xây Lắp Việt Tùng - Dự án Trung tâm CNC
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 2: (Total Weight: 0.80 + 1.20 = 2.00)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '4 day', 'System', NOW() - INTERVAL '3 day', 'System', 1, 'EXP20250610AABBCCDD02',
      '{
        "id": 5, "partnerType": "CUSTOMER", "partnerName": "Doanh nghiệp Xây Lắp Việt Tùng", "partnerCode": "PTN202505146BYQ1WVKLEE5", "taxCode": "0100100005",
@@ -35,10 +32,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Phạm Minh Tuấn", "contactPersonPhone": "0987654322", "address": "25 Pasteur, P. Nguyễn Thái Bình, Q.1, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'PROCESSING', 350200000.00, 'Đang xử lý xuất kho, dự kiến giao hàng trong 2 ngày.', false);
+     'PROCESSING', 350200000.00, 2.00, 'Đang xử lý xuất kho, dự kiến giao hàng trong 2 ngày.', false);
 
--- Sale Order 3: Công ty Hợp Tác Đầu Tư Xây Dựng Khiêm Lam - Dự án nhà máy Amata
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 3: (Total Weight: 2.10)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '3 day', 'System', NOW() - INTERVAL '3 day', 'System', 1, 'EXP20250610AABBCCDD03',
      '{
        "id": 41, "partnerType": "CUSTOMER", "partnerName": "Công ty Hợp Tác Đầu Tư Xây Dựng Khiêm Lam", "partnerCode": "PTN202505146BYQ21SFTC15", "taxCode": "0300100041",
@@ -53,10 +50,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Vũ Ngọc Anh", "contactPersonPhone": "0987654324", "address": "112 Hàm Nghi, P. Bến Thành, Q.1, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'CANCELLED', 410000000.00, 'Khách hàng hủy đơn do thay đổi thiết kế.', true);
+     'CANCELLED', 410000000.00, 2.10, 'Khách hàng hủy đơn do thay đổi thiết kế.', true);
 
--- Sale Order 4: Tập đoàn Xây Dựng Việt Phát - Dự án Cảng Cát Lái
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 4: (Total Weight: 1.50 + 1.10 + 0.70 = 3.30)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '2 day', 'System', NOW() - INTERVAL '1 day', 'System', 1, 'EXP20250610AABBCCDD04',
      '{
        "id": 2, "partnerType": "CUSTOMER", "partnerName": "Tập đoàn Xây Dựng Việt Phát", "partnerCode": "PTN202505146BYQ1WGNL8B2", "taxCode": "0100100002",
@@ -71,10 +68,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Ngô Thị Mai", "contactPersonPhone": "0987654326", "address": "30 Tôn Đức Thắng, P. Bến Nghé, Q.1, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'DELIVERED', 88750000.00, 'Đã giao hàng thành công, chờ đối soát công nợ.', false);
+     'DELIVERED', 88750000.00, 3.30, 'Đã giao hàng thành công, chờ đối soát công nợ.', false);
 
--- Sale Order 5: Công ty Thương Mại Kết Cấu Thép Công Ánh - Dự án Phú Mỹ Hưng
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 5: (Total Weight: 1.00 + 0.90 = 1.90)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW(), 'System', NOW(), 'System', 1, 'EXP20250610AABBCCDD05',
      '{
        "id": 8, "partnerType": "CUSTOMER", "partnerName": "Công ty Thương Mại Kết Cấu Thép Công Ánh", "partnerCode": "PTN202505146BYQ1XAX24H8", "taxCode": "0400100008",
@@ -89,10 +86,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Châu Minh Đức", "contactPersonPhone": "0987654328", "address": "45 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'NEW', 560000000.00, 'Đơn hàng mới, yêu cầu báo giá gấp.', false);
+     'NEW', 560000000.00, 1.90, 'Đơn hàng mới, yêu cầu báo giá gấp.', false);
 
--- Sale Order 6: Đối tác Xây dựng Dân Dụng Long Nhi - Dự án Sala
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 6: (Total Weight: 0.00 - No details provided)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '10 day', 'System', NOW() - INTERVAL '2 day', 'System', 1, 'EXP20250610AABBCCDD06',
      '{
        "id": 11, "partnerType": "CUSTOMER", "partnerName": "Đối tác Xây dựng Dân Dụng Long Nhi", "partnerCode": "PTN202505146BYQ1XQSI8KB", "taxCode": "0300100011",
@@ -107,10 +104,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Lương Thị Hồng", "contactPersonPhone": "0987654331", "address": "123 Võ Văn Tần, P.6, Q.3, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'IN_TRANSIT', 220450000.00, 'Xe BKS 51C-10001 đang vận chuyển, dự kiến tới nơi lúc 16:00.', false);
+     'IN_TRANSIT', 220450000.00, 0.00, 'Xe BKS 51C-10001 đang vận chuyển, dự kiến tới nơi lúc 16:00.', false);
 
--- Sale Order 7: Công ty Vận Tải Sắt Thép Nam Bắc - Dự án Sunshine Tower
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 7: (Total Weight: 0.00 - No details provided)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '20 day', 'System', NOW() - INTERVAL '15 day', 'System', 1, 'EXP20250610AABBCCDD07',
      '{
        "id": 3, "partnerType": "CUSTOMER", "partnerName": "Công ty Vận Tải Sắt Thép Nam Bắc", "partnerCode": "PTN202505146BYQ1WLTTGC3", "taxCode": "0400100003",
@@ -128,10 +125,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Vũ Minh Hiếu", "contactPersonPhone": "0987654340", "address": "205 Nguyễn Văn Trỗi, P.10, Q. Phú Nhuận, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'DONE', 95000000.00, 'Đơn hàng nhỏ, đã hoàn tất.', false);
+     'DONE', 95000000.00, 0.00, 'Đơn hàng nhỏ, đã hoàn tất.', false);
 
--- Sale Order 8: Đối Tác Chiến Lược Nam Lan Construction - Dự án Vinmec
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 8: (Total Weight: 0.00 - No details provided)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW(), 'System', NOW(), 'System', 1, 'EXP20250610AABBCCDD08',
      '{
        "id": 77, "partnerType": "CUSTOMER", "partnerName": "Đối Tác Chiến Lược Nam Lan Construction", "partnerCode": "PTN202505146BYQ27HZU425", "taxCode": "0100100077",
@@ -146,10 +143,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Lê Bảo Ngọc", "contactPersonPhone": "0987654415", "address": "101 Phùng Hưng, P.14, Q.5, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'NEW', 1800000000.00, 'Đơn hàng lớn, cần xác nhận khả năng cung ứng.', false);
+     'NEW', 1800000000.00, 0.00, 'Đơn hàng lớn, cần xác nhận khả năng cung ứng.', false);
 
--- Sale Order 9: Công ty Thép Khang Vân - Dự án Cầu Vĩnh Tuy
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 9: (Total Weight: 0.00 - No details provided)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '8 day', 'System', NOW() - INTERVAL '1 day', 'System', 1, 'EXP20250610AABBCCDD09',
      '{
        "id": 100, "partnerType": "CUSTOMER", "partnerName": "Công ty Thép Khang Vân", "partnerCode": "PTN202505146BYQ2B731U2S", "taxCode": "0100100100",
@@ -164,10 +161,10 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Châu Phương Thảo", "contactPersonPhone": "0987654398", "address": "70 Lãnh Binh Thăng, P.13, Q.11, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'DELIVERED', 495800000.00, 'Đã giao 2/3 lô hàng. Lô cuối đang trên đường.', false);
+     'DELIVERED', 495800000.00, 0.00, 'Đã giao 2/3 lô hàng. Lô cuối đang trên đường.', false);
 
--- Sale Order 10: Đối Tác Xây Dựng Khánh Dương - Dự án Aeon Mall Hà Đông
-INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, sale_orders_note, deleted) VALUES
+-- Sale Order 10: (Total Weight: 0.00 - No details provided)
+INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version, export_code, partner, project, status, total_amount, total_weight, sale_orders_note, deleted) VALUES
     (NOW() - INTERVAL '1 day', 'System', NOW(), 'System', 1, 'EXP20250610AABBCCDD10',
      '{
        "id": 50, "partnerType": "CUSTOMER", "partnerName": "Đối Tác Xây Dựng Khánh Dương", "partnerCode": "PTN202505146BYQ2379201E", "taxCode": "0100100050",
@@ -182,4 +179,4 @@ INSERT INTO sale_orders (created_at, created_by, updated_at, updated_by, version
        "contactPerson": "Vương Ngọc Hà", "contactPersonPhone": "0987654409", "address": "25 Thuận Kiều, P.12, Q.5, TP.HCM",
        "version": 0, "createdAt": "2025-05-14T10:00:00Z", "updatedAt": "2025-05-14T10:00:00Z", "createdBy": "System", "updatedBy": "System"
      }'::jsonb,
-     'PROCESSING', 782150000.00, 'Đã nhận cọc. Chuẩn bị hàng theo yêu cầu.', false);
+     'PROCESSING', 782150000.00, 0.00, 'Đã nhận cọc. Chuẩn bị hàng theo yêu cầu.', false);

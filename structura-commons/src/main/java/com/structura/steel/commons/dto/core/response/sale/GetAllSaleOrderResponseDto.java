@@ -22,6 +22,7 @@ public class GetAllSaleOrderResponseDto {
 	private String projectName;
     private String projectCode;
     private BigDecimal totalAmount;
+    private BigDecimal totalWeight;
     private String saleOrdersNote;
     private Set<SaleOrderDetailResponseDto>saleOrderDetails;
     private Set<SaleDebtResponseDto> saleDebts;

@@ -45,6 +45,9 @@ public class PurchaseOrder extends BaseEntity {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
+    @Column(name = "total_weight")
+    private BigDecimal totalWeight;
+
     @Column(name = "purchase_orders_note")
     private String purchaseOrdersNote;
 
