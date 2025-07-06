@@ -27,10 +27,6 @@ public class DeliveryOrder extends BaseEntity {
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
-    @ManyToOne
-    @JoinColumn(name = "sale_order_id")
-    private SaleOrder saleOrder;
-
     @Column(name = "delivery_code")
     private String deliveryCode;
 
@@ -51,6 +47,9 @@ public class DeliveryOrder extends BaseEntity {
 
     @Column(name = "driver_name")
     private String driverName;
+
+    @Column(name = "sender_address")
+    private String senderAddress;
 
     @Column(name = "delivery_address")
     private String deliveryAddress;
@@ -78,10 +77,6 @@ public class DeliveryOrder extends BaseEntity {
 
     @Column(name = "total_delivery_fee")
     private BigDecimal totalDeliveryFee;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "delivery_type")
-    private DeliveryType deliveryType;
 
     @Column(name = "delivery_order_note")
     private String deliveryOrderNote;

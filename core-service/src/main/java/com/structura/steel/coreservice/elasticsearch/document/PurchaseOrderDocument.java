@@ -43,6 +43,9 @@ public class PurchaseOrderDocument {
     @Field(type = FieldType.Long)
     private Long projectId;
 
+    @Field(type = FieldType.Long)
+    private Long saleOrderId;
+
     @Field(type = FieldType.Keyword)
     private String projectName;
 

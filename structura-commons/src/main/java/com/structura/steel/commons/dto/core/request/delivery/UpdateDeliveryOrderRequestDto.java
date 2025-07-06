@@ -17,6 +17,10 @@ public record UpdateDeliveryOrderRequestDto(
         String driverName,
 
         @NotNull
+        @NotEmpty(message = "Must contain sender address")
+        String senderAddress,
+
+        @NotNull
         @NotEmpty(message = "Must contain delivery address")
         String deliveryAddress,
 

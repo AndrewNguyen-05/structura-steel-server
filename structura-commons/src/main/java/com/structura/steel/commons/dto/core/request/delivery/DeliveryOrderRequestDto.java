@@ -10,8 +10,6 @@ public record DeliveryOrderRequestDto(
 
         Long purchaseOrderId,
 
-        Long saleOrderId,
-
         @NotNull
         @NotEmpty(message = "Must contain delivery date")
         Instant deliveryDate,
@@ -24,6 +22,10 @@ public record DeliveryOrderRequestDto(
         @NotNull
         @NotEmpty(message = "Must contain driver name")
         String driverName,
+
+        @NotNull
+        @NotEmpty(message = "Must contain sender address")
+        String senderAddress,
 
         @NotNull
         @NotEmpty(message = "Must contain delivery address")

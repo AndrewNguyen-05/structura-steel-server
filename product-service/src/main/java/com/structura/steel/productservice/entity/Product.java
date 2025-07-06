@@ -48,6 +48,13 @@ public class Product extends BaseEntity {
 
     private String standard;
 
+    private BigDecimal importPrice;
+
+    private BigDecimal exportPrice;
+
+    @Column(name = "profit_percentage")
+    private BigDecimal profitPercentage;
+
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = Boolean.FALSE;
 }

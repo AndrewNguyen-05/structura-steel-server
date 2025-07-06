@@ -16,18 +16,15 @@ public interface DeliveryOrderMapper {
     DeliveryOrder toDeliveryOrder(DeliveryOrderRequestDto dto);
 
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
-    @Mapping(target = "saleOrderId", source = "saleOrder.id")
+//    @Mapping(target = "saleOrderId", source = "saleOrder.id")
     @Mapping(target = "status", expression = "java(order.getStatus().text())")
-    @Mapping(target = "deliveryType", expression = "java(order.getDeliveryType().text())")
     DeliveryOrderResponseDto toDeliveryOrderResponseDto(DeliveryOrder order);
 
     void updateDeliveryOrderFromDto(UpdateDeliveryOrderRequestDto dto,
                                     @MappingTarget DeliveryOrder order);
 
     @Mapping(target = "purchaseOrderId", source = "purchaseOrder.id")
-    @Mapping(target = "saleOrderId", source = "saleOrder.id")
     @Mapping(target = "status", expression = "java(order.getStatus().text())")
-    @Mapping(target = "deliveryType", expression = "java(order.getDeliveryType().text())")
     GetAllDeliveryOrderResponseDto toGetAllDeliveryOrderResponseDto(DeliveryOrder order);
 
     List<DeliveryOrderResponseDto> toDeliveryOrderResponseDtoList(List<DeliveryOrder> orders);

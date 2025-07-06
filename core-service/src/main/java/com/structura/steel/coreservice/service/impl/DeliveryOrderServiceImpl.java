@@ -66,11 +66,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     @Override
     public DeliveryOrderResponseDto createDeliveryOrder(DeliveryOrderRequestDto dto) {
 
-        if (dto.purchaseOrderId() == null && dto.saleOrderId() == null) {
-            throw new BadRequestException("Either purchaseOrderId or saleOrderId must be provided.");
-        }
-        if (dto.purchaseOrderId() != null && dto.saleOrderId() != null) {
-            throw new BadRequestException("Only one of purchaseOrderId or saleOrderId should be provided.");
+        if (dto.purchaseOrderId() == null) {
+            throw new BadRequestException("PurchaseOrderId must be provided.");
         }
 
         DeliveryOrder order = deliveryOrderMapper.toDeliveryOrder(dto);
@@ -90,19 +87,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setConfirmationFromPartner(ConfirmationStatus.PENDING);
         order.setConfirmationFromReceiver(ConfirmationStatus.PENDING);
 
-        // Xác định DeliveryType dựa trên orderId
-        if (dto.purchaseOrderId() != null) {
-            PurchaseOrder po = purchaseOrderRepository.findById(dto.purchaseOrderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrder", "id", dto.purchaseOrderId()));
-            order.setPurchaseOrder(po);
-            order.setDeliveryType(DeliveryType.WAREHOUSE_IMPORT); // SUPPLIER
-        } else {
-            SaleOrder so = saleOrderRepository.findById(dto.saleOrderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", dto.saleOrderId()));
-            order.setSaleOrder(so);
-            order.setDeliveryType(DeliveryType.PROJECT_DELIVERY); // CUSTOMER
-        }
-
         DeliveryOrder saved = deliveryOrderRepository.save(order);
         return mapToResponseDtoWithSnapshots(saved);
     }
@@ -119,59 +103,50 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
         deliveryOrderMapper.updateDeliveryOrderFromDto(dto, order);
         order.setTotalDeliveryFee(order.getDeliveryUnitPrice().add(order.getAdditionalFees()));
+
+        PurchaseOrder purchaseOrder = order.getPurchaseOrder();
+        SaleOrder saleOrder = saleOrderRepository.findById(purchaseOrder.getSaleOrder().getId()).orElse(null);
+
         DeliveryOrder updated = new DeliveryOrder();
 
-        if(order.getPurchaseOrder() != null) {
-            // Check trạng thái, đầu tiên là delivered, nếu vậy thì gọi hàm check của purchase
-            if(dto.confirmationFromReceiver().equals(ConfirmationStatus.YES) && order.getStatus() == OrderStatus.IN_TRANSIT) {
-                order.setStatus(OrderStatus.DELIVERED);
-                /** update ngay tại đây để lúc check thì check cho purchase,
-                 *  nếu không save ở dây, thì lúc purchase nó check bên dưới
-                 *  nó thấy vẫn còn delivery chưa DELIVERED (do chưa lưu mà)
-                 *  thì nó sẽ set là DELIVERED chứ khng phải DONE
-                 */
-                updated = deliveryOrderRepository.saveAndFlush(order);
-                checkAndUpdateDoneStatus(order); // check xem có done hết nợ chưa
-                PurchaseOrder po = order.getPurchaseOrder();
-                po.setStatus(OrderStatus.DELIVERED);
-                purchaseOrderRepository.save(po);
-                purchaseOrderService.checkAndUpdateDoneStatus(po);
+        // Check trạng thái, đầu tiên là delivered, nếu vậy thì gọi hàm check của purchase
+        if(dto.confirmationFromReceiver().equals(ConfirmationStatus.YES) && order.getStatus() == OrderStatus.IN_TRANSIT) {
+            order.setStatus(OrderStatus.DELIVERED);
+            /** update ngay tại đây để lúc check thì check cho purchase,
+             *  nếu không save ở dây, thì lúc purchase nó check bên dưới
+             *  nó thấy vẫn còn delivery chưa DELIVERED (do chưa lưu mà)
+             *  thì nó sẽ set là DELIVERED chứ khng phải DONE
+             */
+            updated = deliveryOrderRepository.saveAndFlush(order);
+            checkAndUpdateDoneStatus(order); // check xem có done hết nợ chưa
 
-            } else if(dto.confirmationFromFactory().equals(ConfirmationStatus.YES) && order.getStatus() == OrderStatus.NEW) {
-                order.setStatus(OrderStatus.IN_TRANSIT);
-                order.setConfirmationFromFactory(ConfirmationStatus.YES);
-                updated = deliveryOrderRepository.saveAndFlush(order);
-                PurchaseOrder po = order.getPurchaseOrder();
-                po.setStatus(OrderStatus.IN_TRANSIT);
-                purchaseOrderRepository.save(po);
+            // set status cho order và lưu
+            purchaseOrder.setStatus(OrderStatus.DELIVERED);
+            purchaseOrderRepository.save(purchaseOrder);
+            purchaseOrderService.checkAndUpdateDoneStatus(purchaseOrder);
 
-            } else if(dto.confirmationFromFactory().equals(ConfirmationStatus.NO)) {
-                return executeCancelOrder(order, "Delivery partner rejected the order.");
+            if(saleOrder != null) {
+                saleOrder.setStatus(OrderStatus.DELIVERED);
+                saleOrderRepository.save(saleOrder);
+                saleOrderService.checkAndUpdateDoneStatus(saleOrder);
             }
-        } else {
-            if(dto.confirmationFromReceiver().equals(ConfirmationStatus.YES) && order.getStatus() == OrderStatus.IN_TRANSIT) {
-                order.setStatus(OrderStatus.DELIVERED);
-                updated = deliveryOrderRepository.saveAndFlush(order);
-                checkAndUpdateDoneStatus(order); // check xem có done hết nợ chưa
-                SaleOrder so = order.getSaleOrder();
-                so.setStatus(OrderStatus.DELIVERED);
-                saleOrderRepository.save(so);
-                saleOrderService.checkAndUpdateDoneStatus(so);
+        } else if(dto.confirmationFromFactory().equals(ConfirmationStatus.YES) && order.getStatus() == OrderStatus.NEW) {
+            order.setStatus(OrderStatus.IN_TRANSIT);
+            order.setConfirmationFromFactory(ConfirmationStatus.YES);
+            updated = deliveryOrderRepository.saveAndFlush(order);
 
-            } else if(dto.confirmationFromPartner().equals(ConfirmationStatus.YES) && order.getStatus() == OrderStatus.NEW) {
-                order.setStatus(OrderStatus.IN_TRANSIT);
-                order.setConfirmationFromPartner(ConfirmationStatus.YES);
-                updated = deliveryOrderRepository.saveAndFlush(order);
-                SaleOrder so = order.getSaleOrder();
-                so.setStatus(OrderStatus.IN_TRANSIT);
-                saleOrderRepository.save(so);
+            // set status and save
+            purchaseOrder.setStatus(OrderStatus.IN_TRANSIT);
+            purchaseOrderRepository.save(purchaseOrder);
 
-            } else if(dto.confirmationFromPartner().equals(ConfirmationStatus.NO)) {
-                return executeCancelOrder(order, "Delivery partner rejected the order.");
+            if(saleOrder != null) {
+                saleOrder.setStatus(OrderStatus.IN_TRANSIT);
+                saleOrderRepository.save(saleOrder);
             }
+        } else if(dto.confirmationFromFactory().equals(ConfirmationStatus.NO)) {
+            return executeCancelOrder(order, "Delivery partner rejected the order.");
         }
-
-
+        
         return mapToResponseDtoWithSnapshots(updated);
     }
 

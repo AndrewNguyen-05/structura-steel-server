@@ -58,7 +58,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
             throw new RuntimeException("Could not fetch weight for product id: " + dto.productId());
         }
         detail.setWeight(dto.quantity().multiply(productWeight));
-        detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+        detail.setSubtotal(dto.quantity().multiply(productDto.exportPrice()));
         detail.setPurchaseOrder(purchaseOrder);
         detail.setProduct(product);
 
@@ -79,7 +79,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
                 .orElseThrow(() -> new ResourceNotFoundException("PurchaseOrderDetail", "id", id));
 
         purchaseOrderDetailMapper.updatePurchaseOrderDetailFromDto(dto, existing);
-        existing.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+        existing.setSubtotal(dto.quantity().multiply(existing.getProduct().exportPrice()));
         PurchaseOrderDetail updated = purchaseOrderDetailRepository.save(existing);
 
         purchaseOrder.setTotalAmount(purchaseOrder.getTotalAmount().add(updated.getSubtotal()));
@@ -202,7 +202,7 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
 
             BigDecimal unitWeight = weightMap.get(dto.productId());
             e.setWeight(unitWeight.multiply(dto.quantity()));
-            e.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+            e.setSubtotal(dto.quantity().multiply(productInfo.exportPrice()));
             e.setPurchaseOrder(purchaseOrder);
 
             entities.add(e);

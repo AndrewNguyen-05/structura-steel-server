@@ -54,7 +54,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
             throw new RuntimeException("Could not fetch weight for product id: " + dto.productId());
         }
         detail.setWeight(dto.quantity().multiply(productWeight));
-        detail.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+        detail.setSubtotal(dto.quantity().multiply(productResponse.exportPrice()));
         detail.setSaleOrder(saleOrder);
         detail.setProduct(product);
 
@@ -79,6 +79,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
         }
 
         saleOrderDetailMapper.updateSaleOrderDetailFromDto(dto, existing);
+        existing.setSubtotal(dto.quantity().multiply(existing.getProduct().exportPrice()));
         SaleOrderDetail updated = saleOrderDetailRepository.save(existing);
 
         ProductResponseDto responseDto = productMapper.toProductResponseDto(updated.getProduct());
@@ -212,7 +213,7 @@ public class SaleOrderDetailServiceImpl implements SaleOrderDetailService {
 
             BigDecimal unitWeight = weightMap.get(dto.productId());
             e.setWeight(unitWeight.multiply(dto.quantity()));
-            e.setSubtotal(dto.quantity().multiply(dto.unitPrice()));
+            e.setSubtotal(dto.quantity().multiply(productInfo.exportPrice()));
             e.setSaleOrder(saleOrder);
 
             entities.add(e);

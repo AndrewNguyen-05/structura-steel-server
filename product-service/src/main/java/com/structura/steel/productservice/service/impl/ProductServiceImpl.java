@@ -125,11 +125,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
-        validateProductRequest(productRequestDto);
+    public ProductResponseDto createProduct(ProductRequestDto dto) {
+        validateProductRequest(dto);
 
-        Product product = productMapper.toProduct(productRequestDto);
+        Product product = productMapper.toProduct(dto);
         product.setCode(CodeGenerator.generateCode(EntityType.PRODUCT));
+        product.setExportPrice(dto.importPrice().multiply(dto.profitPercentage().add(BigDecimal.valueOf(100)))); // vd gia nhap la 100.000 con % la loi 2% thi se la 100.000 * 102%
         product.setDeleted(false);
 
         Product savedProduct = productRepository.save(product);
@@ -149,13 +150,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto updateProduct(Long id, ProductRequestDto productRequestDto) {
+    public ProductResponseDto updateProduct(Long id, ProductRequestDto dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
-        validateProductRequest(productRequestDto);
+        validateProductRequest(dto);
 
-        productMapper.updateProductFromDto(productRequestDto, product);
+        productMapper.updateProductFromDto(dto, product);
+        product.setExportPrice(dto.importPrice().multiply(dto.profitPercentage().add(BigDecimal.valueOf(100))));
         Product updatedProduct = productRepository.save(product);
 
         ProductDocument productDocument = productMapper.toDocument(updatedProduct);

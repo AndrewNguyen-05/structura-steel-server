@@ -60,5 +60,9 @@ public class PurchaseOrder extends BaseEntity {
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<DeliveryOrder> deliveryOrders = new HashSet<>();
 
+    @OneToOne
+    @JoinColumn(name = "sale_order_id", unique = true) // enforce duy nhất
+    private SaleOrder saleOrder;
+
     private boolean deleted = false;
 }

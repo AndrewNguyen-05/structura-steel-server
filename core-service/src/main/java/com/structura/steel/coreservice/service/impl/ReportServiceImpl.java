@@ -186,7 +186,7 @@ public class ReportServiceImpl implements ReportService {
         List<DailySummaryDto.CompletedDelivery> completedDeliveries = deliveryOrderRepository
                 .findByStatusInAndUpdatedAtBetween(List.of(OrderStatus.DELIVERED, OrderStatus.DONE), startOfDay, endOfDay).stream()
                 .map(de -> {
-                    String originalOrderCode = de.getSaleOrder() != null ? de.getSaleOrder().getExportCode() : (de.getPurchaseOrder() != null ? de.getPurchaseOrder().getImportCode() : "N/A");
+                    String originalOrderCode = de.getPurchaseOrder() != null ? de.getPurchaseOrder().getImportCode() : "N/A";
                     return new DailySummaryDto.CompletedDelivery(
                             de.getDeliveryCode(),
                             originalOrderCode,

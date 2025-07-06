@@ -53,6 +53,12 @@ public class ProductDocument {
 	private BigDecimal diameter;
 	private String standard;
 
+	private BigDecimal importPrice;
+
+	private BigDecimal exportPrice;
+
+	private BigDecimal profitPercentage;
+
 	@Field(type = FieldType.Boolean)
 	private Boolean deleted;
 

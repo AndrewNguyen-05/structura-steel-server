@@ -19,11 +19,11 @@ public class DeliveryOrderResponseDto {
     private String status;
     private String deliveryCode;
     private Long purchaseOrderId;
-    private Long saleOrderId;
     private Instant deliveryDate;
     private VehicleResponseDto vehicle;
     private PartnerResponseDto partner;
     private String driverName;
+    private String senderAddress;
     private String deliveryAddress;
     private String confirmationFromPartner;
     private String confirmationFromFactory;
@@ -32,7 +32,6 @@ public class DeliveryOrderResponseDto {
     private BigDecimal deliveryUnitPrice;
     private BigDecimal additionalFees;
     private BigDecimal totalDeliveryFee;
-    private String deliveryType;
     private String deliveryOrderNote;
 
     private Set<DeliveryDebtResponseDto> deliveryDebts;

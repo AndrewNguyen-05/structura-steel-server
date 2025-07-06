@@ -1,89 +1,70 @@
--- Debt for SO_ID=1, Product_ID=1 (Product có ID=1 là "Thép vằn phi 100")
-INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:00:00Z', 'System', '2025-04-08T08:00:00Z', 'System', 1, 5000.00, 5000.00, 'Partial payment due for order 1',
-     '{
-       "id": 1, "code": "PRD202503225EWPERSI4A1B", "name": "Thép vằn phi 100", "unitWeight": 61.7, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 100, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'UNPAID', 1);
+-- Ghi chú: Mỗi chi tiết đơn hàng (sale_order_details) giờ sẽ có một công nợ (sale_debts) tương ứng.
 
--- Debt for SO_ID=2, Product_ID=2 (Product có ID=2 là "Thép vằn phi 105")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 1 (Status: DONE) => Tất cả công nợ phải PAID
+-- =============================================================================
+-- Debt for Detail 1 of SO_ID=1
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:05:00Z', 'System', '2025-04-08T08:05:00Z', 'System', 1, 20000.00, 0.00, 'Full payment received for order 2',
-     '{
-       "id": 2, "code": "PRD202503225EWPERXHSJC2", "name": "Thép vằn phi 105", "unitWeight": 68.0, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 105, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'PAID', 2);
+    ('2025-07-10 09:00:00+07', 'admin', '2025-07-10 09:00:00+07', 'admin', 1, 358110.00, 0.00, 'Công nợ cho sản phẩm Thép vằn D12. Đã thanh toán.', '{"id": 2, "code": "PRD20250707RBAR12D", "name": "Thép vằn D12"}'::jsonb, 'PAID', 1);
+-- Debt for Detail 2 of SO_ID=1
+INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
+    ('2025-07-10 09:01:00+07', 'admin', '2025-07-10 09:01:00+07', 'admin', 1, 1209396.00, 0.00, 'Công nợ cho sản phẩm Thép vằn D18. Đã thanh toán.', '{"id": 5, "code": "PRD20250707RBAR18D", "name": "Thép vằn D18"}'::jsonb, 'PAID', 1);
 
--- Debt for SO_ID=3, Product_ID=3 (Product có ID=3 là "Thép vằn phi 110")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 2 (Status: PROCESSING) => Trạng thái nợ tùy ý
+-- =============================================================================
+-- Debt for Detail 1 of SO_ID=2 - Giả sử đã trả
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:10:00Z', 'System', '2025-04-08T08:10:00Z', 'System', 1, 15000.00, 15000.00, 'Partial debt for order 3',
-     '{
-       "id": 3, "code": "PRD202503225EWPES383KD3", "name": "Thép vằn phi 110", "unitWeight": 74.6, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 110, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'UNPAID', 3);
+    ('2025-07-10 10:00:00+07', 'admin', '2025-07-10 10:00:00+07', 'admin', 1, 124372.00, 0.00, 'Công nợ cho sản phẩm Thép vằn D10. Đã thanh toán cọc.', '{"id": 1, "code": "PRD20250707RBAR10D", "name": "Thép vằn D10"}'::jsonb, 'PAID', 2);
+-- Debt for Detail 2 of SO_ID=2 - Giả sử chưa trả
+INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
+    ('2025-07-10 10:01:00+07', 'admin', '2025-07-10 10:01:00+07', 'admin', 1, 11374650.00, 11374650.00, 'Công nợ cho sản phẩm Thép tấm 14ly. Chờ thanh toán.', '{"id": 8, "code": "PRD20250707PLAT14T", "name": "Thép tấm 14ly"}'::jsonb, 'UNPAID', 2);
 
--- Debt for SO_ID=4, Product_ID=4 (Product có ID=4 là "Thép vằn phi 115")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 3 (Status: CANCELLED) => Trạng thái nợ CANCELLED
+-- =============================================================================
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:15:00Z', 'System', '2025-04-08T08:15:00Z', 'System', 1, 0.00, 0.00, 'Order 4 cancelled, no debt',
-     '{
-       "id": 4, "code": "PRD202503225EWPES8HPRE4", "name": "Thép vằn phi 115", "unitWeight": 81.5, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 115, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'CANCELLED', 4);
+    ('2025-07-11 11:00:00+07', 'admin', '2025-07-11 11:00:00+07', 'admin', 1, 14624550.00, 0.00, 'Công nợ đã hủy do đơn hàng bị hủy.', '{"id": 7, "code": "PRD20250707PLAT12T", "name": "Thép tấm 12ly"}'::jsonb, 'CANCELLED', 3);
 
--- Debt for SO_ID=5, Product_ID=5 (Product có ID=5 là "Thép vằn phi 120")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 4 (Status: DELIVERED) => Nợ không được PAID
+-- =============================================================================
+-- Debt for Detail 1 of SO_ID=4 - Giả sử chưa trả
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:20:00Z', 'System', '2025-04-08T08:20:00Z', 'System', 1, 50000.00, 50000.00, 'Full amount pending for order 5',
-     '{
-       "id": 5, "code": "PRD202503225EWPESE2B4F5", "name": "Thép vằn phi 120", "unitWeight": 88.8, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 120, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'UNPAID', 5);
+    ('2025-07-11 15:00:00+07', 'admin', '2025-07-11 15:00:00+07', 'admin', 1, 243742.00, 243742.00, 'Công nợ cho sản phẩm Thép vằn D14.', '{"id": 3, "code": "PRD20250707RBAR14D", "name": "Thép vằn D14"}'::jsonb, 'UNPAID', 4);
+-- Debt for Detail 2 of SO_ID=4 - Giả sử trả một phần
+INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
+    ('2025-07-11 15:01:00+07', 'admin', '2025-07-11 15:01:00+07', 'admin', 1, 734850.00, 300000.00, 'Công nợ cho sản phẩm Thép hình I 200. Còn lại 300,000.', '{"id": 13, "code": "PRD20250707SHPI200", "name": "Thép hình I 200"}'::jsonb, 'PARTIALLY_PAID', 4);
+-- Debt for Detail 3 of SO_ID=4 - Giả sử chưa trả
+INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
+    ('2025-07-11 15:02:00+07', 'admin', '2025-07-11 15:02:00+07', 'admin', 1, 633075.00, 633075.00, 'Công nợ cho sản phẩm Thép hình I 300.', '{"id": 14, "code": "PRD20250707SHPI300", "name": "Thép hình I 300"}'::jsonb, 'UNPAID', 4);
 
--- Debt for SO_ID=6, Product_ID=6 (Product có ID=6 là "Thép vằn phi 125")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 5 (Status: NEW) => Nợ UNPAID
+-- =============================================================================
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:25:00Z', 'System', '2025-04-08T08:25:00Z', 'System', 1, 30000.00, 30000.00, 'Partial payment, 50% due for order 6',
-     '{
-       "id": 6, "code": "PRD202503225EWPESJMQNG6", "name": "Thép vằn phi 125", "unitWeight": 96.4, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 125, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'UNPAID', 6);
+    ('2025-07-12 08:30:00+07', 'admin', '2025-07-12 08:30:00+07', 'admin', 1, 636870.00, 636870.00, 'Công nợ cho sản phẩm Thép vằn D16.', '{"id": 4, "code": "PRD20250707RBAR16D", "name": "Thép vằn D16"}'::jsonb, 'UNPAID', 5);
+INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
+    ('2025-07-12 08:31:00+07', 'admin', '2025-07-12 08:31:00+07', 'admin', 1, 777802.00, 777802.00, 'Công nợ cho sản phẩm Thép hộp 150x150.', '{"id": 10, "code": "PRD20250707BOX15010", "name": "Thép hộp 150x150"}'::jsonb, 'UNPAID', 5);
 
--- Debt for SO_ID=7, Product_ID=7 (Product có ID=7 là "Thép vằn phi 130")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 6 (Status: IN_TRANSIT) => Trạng thái nợ tùy ý
+-- =============================================================================
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:30:00Z', 'System', '2025-04-08T08:30:00Z', 'System', 1, 70000.00, 0.00, 'Full payment received for order 7, paid late',
-     '{
-       "id": 7, "code": "PRD202503225EWPESP72RH7", "name": "Thép vằn phi 130", "unitWeight": 104.2, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 130, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'PAID', 7);
+    ('2025-06-27 09:00:00+07', 'admin', '2025-06-27 09:00:00+07', 'admin', 1, 5052520.00, 5052520.00, 'Công nợ cho sản phẩm Thép hộp 100x100.', '{"id": 9, "code": "PRD20250707BOX10010", "name": "Thép hộp 100x100"}'::jsonb, 'UNPAID', 6);
+INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
+    ('2025-06-27 09:01:00+07', 'admin', '2025-06-27 09:01:00+07', 'admin', 1, 6218600.00, 0.00, 'Công nợ cho sản phẩm Thép vằn D10. Đã thanh toán trước.', '{"id": 1, "code": "PRD20250707RBAR10D", "name": "Thép vằn D10"}'::jsonb, 'PAID', 6);
 
--- Debt for SO_ID=8, Product_ID=8 (Product có ID=8 là "Thép vằn phi 135")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 7 (Status: DONE) => Tất cả công nợ phải PAID
+-- =============================================================================
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:35:00Z', 'System', '2025-04-08T08:35:00Z', 'System', 1, 0.00, 0.00, 'Cancelled order, no debt for order 8',
-     '{
-       "id": 8, "code": "PRD202503225EWPESUMMUI8", "name": "Thép vằn phi 135", "unitWeight": 112.3, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 135, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'CANCELLED', 8);
+    ('2025-06-17 10:00:00+07', 'admin', '2025-06-17 10:00:00+07', 'admin', 1, 4830000.00, 0.00, 'Công nợ cho sản phẩm Thép hình I 150. Đã thanh toán.', '{"id": 12, "code": "PRD20250707SHPI150", "name": "Thép hình I 150"}'::jsonb, 'PAID', 7);
 
--- Debt for SO_ID=9, Product_ID=9 (Product có ID=9 là "Thép vằn phi 140")
+-- =============================================================================
+-- Công nợ cho Đơn hàng SO_ID = 8 (Status: NEW) => Nợ UNPAID
+-- =============================================================================
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:40:00Z', 'System', '2025-04-08T08:40:00Z', 'System', 1, 45000.00, 45000.00, 'Partial payment, remaining due for order 9',
-     '{
-       "id": 9, "code": "PRD202503225EWPET0H88J9", "name": "Thép vằn phi 140", "unitWeight": 120.9, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 140, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'UNPAID', 9);
-
--- Debt for SO_ID=10, Product_ID=10 (Product có ID=10 là "Thép vằn phi 145")
+    ('2025-07-06 17:00:00+07', 'admin', '2025-07-06 17:00:00+07', 'admin', 1, 568732500.00, 568732500.00, 'Công nợ cho sản phẩm Thép tấm 14ly.', '{"id": 8, "code": "PRD20250707PLAT14T", "name": "Thép tấm 14ly"}'::jsonb, 'UNPAID', 8);
 INSERT INTO sale_debts (created_at, created_by, updated_at, updated_by, version, original_amount, remaining_amount, debt_note, product, status, sale_order_id) VALUES
-    ('2025-04-08T08:45:00Z', 'System', '2025-04-08T08:45:00Z', 'System', 1, 100000.00, 0.00, 'Full payment received for order 10',
-     '{
-       "id": 10, "code": "PRD202503225EWPET61T6KA", "name": "Thép vằn phi 145", "unitWeight": 129.7, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 145, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 'PAID', 10);
+    ('2025-07-06 17:01:00+07', 'admin', '2025-07-06 17:01:00+07', 'admin', 1, 80626400.00, 80626400.00, 'Công nợ cho sản phẩm Thép vằn D18.', '{"id": 5, "code": "PRD20250707RBAR18D", "name": "Thép vằn D18"}'::jsonb, 'UNPAID', 8);

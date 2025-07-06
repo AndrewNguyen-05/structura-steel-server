@@ -191,9 +191,9 @@ public class SaleOrderServiceImpl implements SaleOrderService {
             return;
         }
 
-        boolean allDelivered = order.getDeliveryOrders() != null &&
-                !order.getDeliveryOrders().isEmpty() &&
-                order.getDeliveryOrders().stream()
+        boolean allDelivered = order.getPurchaseOrder().getDeliveryOrders() != null &&
+                !order.getPurchaseOrder().getDeliveryOrders().isEmpty() &&
+                order.getPurchaseOrder().getDeliveryOrders().stream()
                         .allMatch(deliveryOrder ->
                                 deliveryOrder.getStatus().equals(OrderStatus.DELIVERED) ||
                                 deliveryOrder.getStatus().equals(OrderStatus.DONE));

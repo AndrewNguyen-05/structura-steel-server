@@ -53,8 +53,8 @@ public class SaleOrder extends BaseEntity {
     @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SaleDebt> saleDebts;
 
-    @OneToMany(mappedBy = "saleOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<DeliveryOrder> deliveryOrders = new HashSet<>();
+    @OneToOne(mappedBy = "saleOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PurchaseOrder purchaseOrder;
 
     private boolean deleted = false;
 }

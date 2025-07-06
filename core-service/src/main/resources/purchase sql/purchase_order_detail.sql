@@ -1,89 +1,59 @@
--- Detail for PO_ID=1, Product_ID=10
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 10, "code": "PRD202503225EWPET61T6KA", "name": "Thép vằn phi 145", "unitWeight": 129.7, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 145, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 50.00, 750000.00, 15000.00, 45.50, 1);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 1 (Liên kết với SO_ID = 1)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 2, "code": "PRD20250707RBAR12D", "name": "Thép vằn D12", "importPrice": 155700}'::jsonb, 2.00, 155700.00, 311400.00, 20.76, 1);
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 5, "code": "PRD20250707RBAR18D", "name": "Thép vằn D18", "importPrice": 350550}'::jsonb, 3.00, 350550.00, 1051650.00, 70.11, 1);
 
--- Detail for PO_ID=1, Product_ID=20
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 20, "code": "PRD202503225EWPEUU89CUK", "name": "Thép vằn phi 195", "unitWeight": 234.9, "productType": "RIBBED_BAR",
-       "length": 100, "width": null, "height": null, "thickness": null, "diameter": 195, "standard": "Big Rebar",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 25.50, 420750.00, 16500.00, 23.20, 1);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 2 (Tự do, nhập kho)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 8, "code": "PRD20250707PLAT14T", "name": "Thép tấm 14ly x 3m", "importPrice": 4945500}'::jsonb, 20.00, 4945500.00, 98910000.00, 6594.00, 2);
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 9, "code": "PRD20250707BOX10010", "name": "Thép hộp vuông 100x100x10", "importPrice": 439350}'::jsonb, 100.00, 439350.00, 43935000.00, 2929.00, 2);
 
--- Detail for PO_ID=2, Product_ID=30
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 30, "code": "PRD202503225EWPEW5O8CSS", "name": "Thép tấm dày 14mm", "unitWeight": 329.7, "productType": "PLATE",
-       "length": 50, "width": 3.0, "height": null, "thickness": 14, "diameter": null, "standard": "Big Plate",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 10.00, 140000.00, 14000.00, 15.00, 2);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 3 (Liên kết với SO_ID = 4)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 3, "code": "PRD20250707RBAR14D", "name": "Thép vằn D14", "importPrice": 211950}'::jsonb, 1.00, 211950.00, 211950.00, 14.13, 3);
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 13, "code": "PRD20250707SHPI200", "name": "Thép hình I 200x100x5.5", "importPrice": 319500}'::jsonb, 2.00, 319500.00, 639000.00, 42.60, 3);
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 14, "code": "PRD20250707SHPI300", "name": "Thép hình I 300x150x6.5", "importPrice": 550500}'::jsonb, 1.00, 550500.00, 550500.00, 36.70, 3);
 
--- Detail for PO_ID=2, Product_ID=35
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 35, "code": "PRD202503225EWPF09L7W10", "name": "Thép tấm dày 28mm", "unitWeight": 659.4, "productType": "PLATE",
-       "length": 50, "width": 3.0, "height": null, "thickness": 28, "diameter": null, "standard": "Big Plate",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 15.00, 217500.00, 14500.00, 22.50, 2);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 4 (Tự do, nhập kho)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 1, "code": "PRD20250707RBAR10D", "name": "Thép vằn D10", "importPrice": 108150}'::jsonb, 500.00, 108150.00, 54075000.00, 3605.00, 4);
 
--- Detail for PO_ID=2, Product_ID=40
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 40, "code": "PRD202503225EWPF17LFM16", "name": "Thép tấm dày 40mm", "unitWeight": 942.0, "productType": "PLATE",
-       "length": 50, "width": 3.0, "height": null, "thickness": 40, "diameter": null, "standard": "Big Plate",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 5.00, 72500.00, 14500.00, 7.50, 2);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 5 (Liên kết với SO_ID = 5)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 4, "code": "PRD20250707RBAR16D", "name": "Thép vằn D16", "importPrice": 276900}'::jsonb, 2.00, 276900.00, 553800.00, 36.92, 5);
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 10, "code": "PRD20250707BOX15010", "name": "Thép hộp vuông 150x150x10", "importPrice": 676350}'::jsonb, 1.00, 676350.00, 676350.00, 45.09, 5);
 
--- Detail for PO_ID=3, Product_ID=55
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 55, "code": "PRD202503225EWPF3LWI41L", "name": "Thép hộp vuông 150x150x10", "unitWeight": 72.2, "productType": "BOX",
-       "length": 100, "width": 150, "height": 150, "thickness": 10, "diameter": null, "standard": "Big Box",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 30.00, 495000.00, 16500.00, 33.00, 3);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 6 (Tự do, nhập kho, CANCELLED)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 6, "code": "PRD20250707PLAT10T", "name": "Thép tấm 10ly x 3m", "importPrice": 3532500}'::jsonb, 10.00, 3532500.00, 35325000.00, 2355.00, 6);
 
--- Detail for PO_ID=3, Product_ID=60
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 60, "code": "PRD202503225EWPF4EU201Q", "name": "Thép hộp vuông 200x200x10", "unitWeight": 121.6, "productType": "BOX",
-       "length": 100, "width": 200, "height": 200, "thickness": 10, "diameter": null, "standard": "Big Box",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 20.00, 340000.00, 17000.00, 25.00, 3);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 7 (Liên kết với SO_ID = 2)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 1, "code": "PRD20250707RBAR10D", "name": "Thép vằn D10", "importPrice": 108150}'::jsonb, 1.00, 108150.00, 108150.00, 7.21, 7);
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 8, "code": "PRD20250707PLAT14T", "name": "Thép tấm 14ly x 3m", "importPrice": 4945500}'::jsonb, 2.00, 4945500.00, 9891000.00, 659.40, 7);
 
--- Detail for PO_ID=4, Product_ID=80
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 80, "code": "PRD202503225EWPF7N9UK2A", "name": "Thép hình I 240", "unitWeight": 240.0, "productType": "SHAPED",
-       "length": 50, "width": null, "height": null, "thickness": null, "diameter": null, "standard": "Big Shape",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 12.00, 264000.00, 22000.00, 18.00, 4);
-
--- Detail for PO_ID=4, Product_ID=85
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 85, "code": "PRD202503225EWPF8H1TW2F", "name": "Thép hình I 280", "unitWeight": 280.0, "productType": "SHAPED",
-       "length": 50, "width": null, "height": null, "thickness": null, "diameter": null, "standard": "Big Shape",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 8.00, 180000.00, 22500.00, 12.00, 4);
-
--- Detail for PO_ID=4, Product_ID=90
-INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, subtotal, unit_price, weight, purchase_order_id) VALUES
-    (NOW(), 'System', NOW(), 'System', 1,
-     '{
-       "id": 90, "code": "PRD202503225EWPF99SO62K", "name": "Thép hình I 320", "unitWeight": 320.0, "productType": "SHAPED",
-       "length": 50, "width": null, "height": null, "thickness": null, "diameter": null, "standard": "Big Shape",
-       "version": 1, "createdAt": "2025-03-22T10:00:00Z", "updatedAt": "2025-03-22T10:00:00Z", "createdBy": "System", "updatedBy": "System"
-     }'::jsonb, 5.50, 126500.00, 23000.00, 9.00, 4);
+-- =============================================================================
+-- Chi tiết cho Đơn hàng PO_ID = 8 (Tự do, nhập kho)
+-- =============================================================================
+INSERT INTO purchase_order_details (created_at, created_by, updated_at, updated_by, version, product, quantity, unit_price, subtotal, weight, purchase_order_id) VALUES
+    (NOW(), 'System', NOW(), 'System', 1, '{"id": 12, "code": "PRD20250707SHPI150", "name": "Thép hình I 150x75x5", "importPrice": 210000}'::jsonb, 50.00, 210000.00, 10500000.00, 700.00, 8);

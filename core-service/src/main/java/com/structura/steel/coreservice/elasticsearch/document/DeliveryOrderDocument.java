@@ -31,9 +31,6 @@ public class DeliveryOrderDocument {
     @Field(type = FieldType.Long)
     private Long purchaseOrderId;
 
-    @Field(type = FieldType.Long)
-    private Long saleOrderId;
-
     @MultiField(
             mainField = @Field(type = FieldType.Text, analyzer = "folding"),
             otherFields = {@InnerField(suffix = "keyword", type = FieldType.Keyword)}
@@ -59,6 +56,9 @@ public class DeliveryOrderDocument {
     private String deliveryAddress;
 
     @Field(type = FieldType.Keyword)
+    private String senderAddress;
+
+    @Field(type = FieldType.Keyword)
     private String status;
 
     @Field(type = FieldType.Double)
@@ -72,9 +72,6 @@ public class DeliveryOrderDocument {
 
     @Field(type = FieldType.Double)
     private BigDecimal totalDeliveryFee;
-
-    @Field(type = FieldType.Keyword)
-    private String deliveryType;
 
     @Field(type = FieldType.Text)
     private String deliveryOrderNote;

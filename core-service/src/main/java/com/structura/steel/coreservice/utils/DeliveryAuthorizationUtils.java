@@ -14,10 +14,6 @@ public class DeliveryAuthorizationUtils {
         if (dto.purchaseOrderId() != null && !authorities.contains("ROLE_IMPORTER")) {
             throw new ForbiddenException("Only ADMIN or IMPORTER can create purchase delivery orders");
         }
-
-        if (dto.saleOrderId() != null && !authorities.contains("ROLE_SALER")) {
-            throw new ForbiddenException("Only ADMIN or SALER can create sale delivery orders");
-        }
     }
 
     public void validateUpdatePermission(DeliveryOrderResponseDto order, String authorities) {
@@ -25,10 +21,6 @@ public class DeliveryAuthorizationUtils {
 
         if (order.getPurchaseOrderId() != null && !authorities.contains("ROLE_IMPORTER")) {
             throw new ForbiddenException("Only ADMIN or IMPORTER can modify purchase delivery orders");
-        }
-
-        if (order.getSaleOrderId() != null && !authorities.contains("ROLE_SALER")) {
-            throw new ForbiddenException("Only ADMIN or SALER can modify sale delivery orders");
         }
     }
 }

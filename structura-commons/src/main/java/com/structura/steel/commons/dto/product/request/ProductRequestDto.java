@@ -35,6 +35,14 @@ public record ProductRequestDto(
         @Positive(message = "Diameter must be positive")
         BigDecimal diameter,
 
+        @NotNull(message = "Import price cannot be null")
+        @Positive(message = "Import price must be positive")
+        BigDecimal importPrice,
+
+        @NotNull(message = "Profit percentage cannot be null")
+        @Positive(message = "Profit percentage must be positive")
+        BigDecimal profitPercentage,
+
         String standard,
         boolean deleted
 ) {}

@@ -10,9 +10,5 @@ public record PurchaseOrderDetailRequestDto(
 
         @NotNull(message = "Quantity cannot be null")
         @Positive(message = "Quantity must be positive")
-        BigDecimal quantity,
-
-        @NotNull(message = "Unit price cannot be null")
-        @Positive(message = "Unit price must be positive")
-        BigDecimal unitPrice
+        BigDecimal quantity
 ) {}
