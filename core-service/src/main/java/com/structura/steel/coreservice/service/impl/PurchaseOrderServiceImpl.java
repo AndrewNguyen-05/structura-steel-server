@@ -6,6 +6,7 @@ import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.commons.enumeration.EntityType;
 import com.structura.steel.commons.enumeration.OrderStatus;
 import com.structura.steel.commons.exception.BadRequestException;
+import com.structura.steel.commons.exception.DuplicateKeyException;
 import com.structura.steel.commons.exception.ResourceNotFoundException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.client.PartnerFeignClient;
@@ -78,6 +79,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         } else {
             SaleOrder so = saleOrderRepository.findById(dto.saleOrderId())
                     .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", dto.saleOrderId()));
+
+            // kiểm tra trạng thái SaleOrder
+            if (so.getStatus() == OrderStatus.CANCELLED) {
+                throw new BadRequestException("Cannot create PurchaseOrder for a cancelled SaleOrder with id " + dto.saleOrderId());
+            }
+
+            // kiểm tra đã có PurchaseOrder chưa
+            if (so.getPurchaseOrder() != null) {
+                throw new DuplicateKeyException("PurchaseOrder", "saleOrderId", dto.saleOrderId());
+            }
 
             PartnerProjectResponseDto projectResponse = partnerFeignClient.getProjectById(so.getProject().id());
             PartnerProject projectSnapshot = partnerMapper.toProjectSnapshot(projectResponse);
@@ -312,6 +323,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         // 2. Cập nhật trạng thái đơn hàng
         purchaseOrder.setStatus(OrderStatus.CANCELLED);
+        purchaseOrder.setSaleOrder(null);
         // thêm lý do hủy vào purchaseOrdersNote hoặc một trường mới
         String existingNote = purchaseOrder.getPurchaseOrdersNote();
         String cancellationNote = "Cancelled: " + reason;
