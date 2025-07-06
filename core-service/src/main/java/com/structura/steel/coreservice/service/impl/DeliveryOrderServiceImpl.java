@@ -70,6 +70,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             throw new BadRequestException("PurchaseOrderId must be provided.");
         }
 
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(dto.purchaseOrderId()).orElse(null);
+        if(!purchaseOrder.getStatus().equals(OrderStatus.PROCESSING)) {
+            throw new BadRequestException("Purchase order with the code "
+                    + purchaseOrder.getImportCode()
+                    + " must be confirmed by factory before create delivery order.");
+        }
+
         DeliveryOrder order = deliveryOrderMapper.toDeliveryOrder(dto);
         order.setTotalDeliveryFee(order.getDeliveryUnitPrice().add(order.getAdditionalFees()));
 
@@ -83,6 +90,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setStatus(OrderStatus.NEW);
         order.setVehicle(vehicle);
         order.setPartner(partner);
+        order.setPurchaseOrder(purchaseOrder);
         order.setConfirmationFromFactory(ConfirmationStatus.PENDING);
         order.setConfirmationFromPartner(ConfirmationStatus.PENDING);
         order.setConfirmationFromReceiver(ConfirmationStatus.PENDING);
