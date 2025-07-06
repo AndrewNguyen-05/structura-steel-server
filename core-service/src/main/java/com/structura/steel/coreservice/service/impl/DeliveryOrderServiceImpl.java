@@ -70,7 +70,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             throw new BadRequestException("PurchaseOrderId must be provided.");
         }
 
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(dto.purchaseOrderId()).orElse(null);
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(dto.purchaseOrderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", dto.purchaseOrderId()));
         if(!purchaseOrder.getStatus().equals(OrderStatus.PROCESSING)) {
             throw new BadRequestException("Purchase order with the code "
                     + purchaseOrder.getImportCode()
