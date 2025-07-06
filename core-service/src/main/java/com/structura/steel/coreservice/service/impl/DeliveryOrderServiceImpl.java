@@ -71,11 +71,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         }
 
         PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(dto.purchaseOrderId())
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase order", "id", dto.purchaseOrderId()));
-        if(!purchaseOrder.getStatus().equals(OrderStatus.PROCESSING)) {
-            throw new BadRequestException("Purchase order with the code "
+                .orElseThrow(() -> new ResourceNotFoundException("Import order", "id", dto.purchaseOrderId()));
+        if(purchaseOrder.getStatus().equals(OrderStatus.NEW)) {
+            throw new BadRequestException("Import order with the code "
                     + purchaseOrder.getImportCode()
                     + " must be confirmed by factory before create delivery order.");
+        } else if(purchaseOrder.getStatus().equals(OrderStatus.CANCELLED)) {
+            throw new BadRequestException("Import order with the code "
+                    + purchaseOrder.getImportCode()
+                    + " is cancelled, please use another import order.");
         }
 
         DeliveryOrder order = deliveryOrderMapper.toDeliveryOrder(dto);
