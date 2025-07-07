@@ -1,7 +1,5 @@
 package com.structura.steel.commons.enumeration;
 
-import lombok.RequiredArgsConstructor;
-
 public enum DebtStatus implements HasText {
     /** Chưa thanh toán */
     UNPAID("Unpaid"),
