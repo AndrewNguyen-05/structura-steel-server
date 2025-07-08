@@ -62,6 +62,24 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final PartnerProject INTERNAL_STOCK_PROJECT = new PartnerProject(
+            -1L,
+            null,
+            "INTERNAL_STOCK",
+            "Đơn hàng nhập kho nội bộ",
+            "Structura Steel",
+            "Anh Nguyen",
+            "0985274643",
+            "Anh Nguyen",
+            "0985274643",
+            "Structura Steel",
+            (short) 1,
+            Instant.now(),
+            Instant.now(),
+            "System",
+            "System"
+    );
+
     @Override
     public PurchaseOrderResponseDto createPurchaseOrder(PurchaseOrderRequestDto dto) {
 
@@ -71,10 +89,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         Partner supplierSnapshot = partnerMapper.toPartnerSnapshot(supplierResponse);
 
         if(dto.saleOrderId() == null) {
-            PartnerProjectResponseDto projectResponse = partnerFeignClient.getProjectById(dto.projectId());
-            PartnerProject projectSnapshot = partnerMapper.toProjectSnapshot(projectResponse);
-
-            purchaseOrder.setProject(projectSnapshot);
+            purchaseOrder.setProject(INTERNAL_STOCK_PROJECT);
 
         } else {
             SaleOrder so = saleOrderRepository.findById(dto.saleOrderId())
