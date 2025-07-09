@@ -63,6 +63,17 @@ public interface SaleOrderRepository extends JpaRepository<SaleOrder, Long> {
         """, nativeQuery = true)
     List<TopCustomerProjection> findTopCustomers(@Param("start") Instant start, @Param("end") Instant end, @Param("limit") int limit);
 
+
+    @Query("SELECT so FROM SaleOrder so " +
+            "LEFT JOIN FETCH so.purchaseOrder po " +
+            "LEFT JOIN FETCH po.deliveryOrders " +
+            "WHERE so.status = :status AND so.updatedAt BETWEEN :start AND :end AND so.deleted = false")
+    List<SaleOrder> findAllByStatusAndUpdatedAtBetweenWithJoins(
+            @Param("status") OrderStatus status,
+            @Param("start") Instant start,
+            @Param("end") Instant end
+    );
+
     // ham COALESCE de mac dinh tra ve 0 neu khong co total, bth la se tra ve null
     @Query("SELECT COALESCE(SUM(so.totalAmount), 0) FROM SaleOrder so WHERE so.status = :status AND so.updatedAt BETWEEN :start AND :end AND so.deleted = false")
     java.math.BigDecimal sumTotalAmountByStatusAndDateRange(@Param("status") OrderStatus status, @Param("start") Instant start, @Param("end") Instant end);

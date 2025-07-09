@@ -8,10 +8,14 @@ import com.structura.steel.commons.dto.core.response.analytic.TopItemDto;
 import com.structura.steel.commons.enumeration.DebtStatus;
 import com.structura.steel.commons.enumeration.DebtType;
 import com.structura.steel.commons.enumeration.OrderStatus;
+import com.structura.steel.coreservice.entity.DeliveryOrder;
+import com.structura.steel.coreservice.entity.PurchaseOrder;
+import com.structura.steel.coreservice.entity.SaleOrder;
 import com.structura.steel.coreservice.entity.analytic.AgingProjection;
 import com.structura.steel.coreservice.entity.analytic.DebtStatusDistributionProjection;
 import com.structura.steel.coreservice.entity.analytic.RevenueOverTimeProjection;
 import com.structura.steel.coreservice.repository.DeliveryDebtRepository;
+import com.structura.steel.coreservice.repository.DeliveryOrderRepository;
 import com.structura.steel.coreservice.repository.PurchaseDebtRepository;
 import com.structura.steel.coreservice.repository.PurchaseOrderRepository;
 import com.structura.steel.coreservice.repository.SaleDebtRepository;
@@ -39,6 +43,7 @@ public class AnalyticServiceImpl implements AnalyticService {
 
     private final SaleOrderRepository saleOrderRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final DeliveryOrderRepository deliveryOrderRepository;
 
     private final SaleOrderDetailRepository saleOrderDetailRepository;
 
@@ -74,9 +79,36 @@ public class AnalyticServiceImpl implements AnalyticService {
 
     @Transactional(readOnly = true)
     public SummaryDto getSummary(Instant start, Instant end) {
-        BigDecimal totalRevenue = saleOrderRepository.sumTotalAmountByStatusAndDateRange(OrderStatus.DONE, start, end);
-        BigDecimal totalCostOfGoods = purchaseOrderRepository.sumTotalAmountByStatusAndDateRange(OrderStatus.DONE, start, end);
-        BigDecimal grossProfit = totalRevenue.subtract(totalCostOfGoods);
+
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        BigDecimal totalCostOfGoods = BigDecimal.ZERO;
+        BigDecimal totalDeliveryCost = BigDecimal.ZERO;
+
+        // 1. Lấy danh sách các đơn sale đã DONE trong kỳ cùng với các chi phí liên quan
+        List<SaleOrder> completedSaleOrders = saleOrderRepository.findAllByStatusAndUpdatedAtBetweenWithJoins(OrderStatus.DONE, start, end);
+
+        // 2. Lặp qua từng đơn sale để tính
+        for (SaleOrder saleOrder : completedSaleOrders) {
+            // Cộng dồn doanh thu từ sale
+            totalRevenue = totalRevenue.add(saleOrder.getTotalAmount());
+
+            // Lấy đơn purchase tương ứng
+            PurchaseOrder purchaseOrder = saleOrder.getPurchaseOrder();
+            if (purchaseOrder != null) {
+                // Cộng dồn giá vốn từ purchase
+                totalCostOfGoods = totalCostOfGoods.add(purchaseOrder.getTotalAmount());
+
+                // Cộng dồn chi phí vận chuyển từ các delivery order của purchase đó
+                for (DeliveryOrder deliveryOrder : purchaseOrder.getDeliveryOrders()) {
+                    if (deliveryOrder.getStatus() == OrderStatus.DONE) {
+                        totalDeliveryCost = totalDeliveryCost.add(deliveryOrder.getTotalDeliveryFee());
+                    }
+                }
+            }
+        }
+
+        BigDecimal totalExpenses = totalCostOfGoods.add(totalDeliveryCost);
+        BigDecimal grossProfit = totalRevenue.subtract(totalExpenses);
 
         List<DebtStatus> unpaidStatuses = List.of(DebtStatus.UNPAID, DebtStatus.PARTIALLY_PAID);
         BigDecimal totalDebtReceivable = saleDebtRepository.sumRemainingAmountByStatusIn(unpaidStatuses);
