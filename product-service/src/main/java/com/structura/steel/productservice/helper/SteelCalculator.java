@@ -2,6 +2,7 @@ package com.structura.steel.productservice.helper;
 
 import com.structura.steel.commons.dto.product.request.ProductRequestDto;
 import com.structura.steel.commons.enumeration.ProductType;
+import com.structura.steel.commons.exception.BadRequestException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,10 +22,10 @@ public class SteelCalculator {
     public static BigDecimal calculateSteelWeight(ProductRequestDto dto) {
         // --- 1. Kiểm tra đầu vào cơ bản ---
         if (dto == null || dto.productType() == null) {
-            throw new IllegalArgumentException("Invalid product data. ProductType cannot be null.");
+            throw new BadRequestException("Invalid product data. ProductType cannot be null.");
         }
         if (dto.length() == null || dto.length().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invalid product data. Length must be provided and greater than zero.");
+            throw new BadRequestException("Invalid product data. Length must be provided and greater than zero.");
         }
 
         // --- 2. Kiểm tra các thuộc tính bắt buộc theo ProductType ---
@@ -65,7 +66,7 @@ public class SteelCalculator {
                 BigDecimal innerDiameter = diameterMeter.subtract(BigDecimal.valueOf(2).multiply(thicknessMeter));
 
                 if (innerDiameter.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the diameter for PIPE.");
+                    throw new BadRequestException("Thickness cannot be greater than or equal to half the diameter for PIPE.");
                 }
                 BigDecimal innerVolume = getCircleVolume(innerDiameter, length);
                 return totalVolume.subtract(innerVolume).multiply(DENSITY);
@@ -82,7 +83,7 @@ public class SteelCalculator {
                 BigDecimal innerHeight = heightMeter.subtract(BigDecimal.valueOf(2).multiply(thicknessMeter));
 
                 if (innerWidth.compareTo(BigDecimal.ZERO) <= 0 || innerHeight.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the width/height for BOX.");
+                    throw new BadRequestException("Thickness cannot be greater than or equal to half the width/height for BOX.");
                 }
                 BigDecimal innerVolume = getRectangularPrismVolume(innerWidth, innerHeight, length);
                 return totalVolume.subtract(innerVolume).multiply(DENSITY);
@@ -130,10 +131,10 @@ public class SteelCalculator {
      */
     private static void require(Object fieldValue, String message) {
         if (fieldValue == null) {
-            throw new IllegalArgumentException(message);
+            throw new BadRequestException(message);
         }
         if (fieldValue instanceof BigDecimal && ((BigDecimal) fieldValue).compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException(message.replace("must not be null", "must be positive"));
+            throw new BadRequestException(message.replace("must not be null", "must be positive"));
         }
     }
 
@@ -159,16 +160,16 @@ public class SteelCalculator {
      */
     public static BigDecimal calculateUnitWeight(ProductRequestDto dto) {
         if (dto == null || dto.productType() == null) {
-            throw new IllegalArgumentException("Invalid product data. ProductType cannot be null.");
+            throw new BadRequestException("Invalid product data. ProductType cannot be null.");
         }
         if (dto.length() == null || dto.length().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invalid product data. Length must be provided and greater than zero.");
+            throw new BadRequestException("Invalid product data. Length must be provided and greater than zero.");
         }
 
         // SHAPED thì unitWeight do user nhập
         if (ProductType.SHAPED.equals(dto.productType())) {
             if (dto.unitWeight() == null || dto.unitWeight().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Unit weight must be provided and positive for SHAPED.");
+                throw new BadRequestException("Unit weight must be provided and positive for SHAPED.");
             }
             return dto.unitWeight();
         }

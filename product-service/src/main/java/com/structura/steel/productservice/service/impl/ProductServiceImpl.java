@@ -1,6 +1,7 @@
 package com.structura.steel.productservice.service.impl;
 
 import com.structura.steel.commons.enumeration.EntityType;
+import com.structura.steel.commons.exception.BadRequestException;
 import com.structura.steel.commons.response.PagingResponse;
 import com.structura.steel.commons.utils.CodeGenerator;
 import com.structura.steel.commons.dto.product.request.ProductRequestDto;
@@ -235,7 +236,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Kiểm tra các trường chung
         if (type == null) {
-            throw new IllegalArgumentException("ProductType must not be null.");
+            throw new BadRequestException("ProductType must not be null.");
         }
         require(dto.length(), "Length must not be null."); // Length bắt buộc cho tất cả
 
@@ -260,7 +261,7 @@ public class ProductServiceImpl implements ProductService {
                 BigDecimal thickness = require(dto.thickness(), "Thickness must not be null for " + type);
                 BigDecimal halfDiameter = diameter.divide(BigDecimal.valueOf(2), 10, RoundingMode.HALF_UP);
                 if (thickness.compareTo(halfDiameter) >= 0) {
-                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the diameter for PIPE.");
+                    throw new BadRequestException("Thickness cannot be greater than or equal to half the diameter for PIPE.");
                 }
                 shouldBeNull(dto.width(), "Width", type);
                 shouldBeNull(dto.height(), "Height", type);
@@ -274,7 +275,7 @@ public class ProductServiceImpl implements ProductService {
                 BigDecimal halfWidth = width.divide(BigDecimal.valueOf(2), 10, RoundingMode.HALF_UP);
                 BigDecimal halfHeight = height.divide(BigDecimal.valueOf(2), 10, RoundingMode.HALF_UP);
                 if (thickness.compareTo(halfWidth) >= 0 || thickness.compareTo(halfHeight) >= 0) {
-                    throw new IllegalArgumentException("Thickness cannot be greater than or equal to half the width/height for BOX.");
+                    throw new BadRequestException("Thickness cannot be greater than or equal to half the width/height for BOX.");
                 }
                 shouldBeNull(dto.diameter(), "Diameter", type);
                 shouldBeNull(dto.unitWeight(), "UnitWeight", type);
@@ -293,19 +294,19 @@ public class ProductServiceImpl implements ProductService {
 
     private <T> T require(T fieldValue, String message) {
         if (fieldValue == null) {
-            throw new IllegalArgumentException(message);
+            throw new BadRequestException(message);
         }
 
         if (fieldValue instanceof BigDecimal && ((BigDecimal) fieldValue).compareTo(BigDecimal.ZERO) <= 0) {
             String positiveMessage = message.replace("must not be null", "must be positive");
-            throw new IllegalArgumentException(positiveMessage);
+            throw new BadRequestException(positiveMessage);
         }
         return fieldValue;
     }
 
     private void shouldBeNull(Object fieldValue, String fieldName, ProductType type) {
         if (fieldValue != null) {
-            throw new IllegalArgumentException(fieldName + " must be null for product type: " + type);
+            throw new BadRequestException(fieldName + " must be null for product type: " + type);
         }
     }
 
