@@ -132,6 +132,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCode(CodeGenerator.generateCode(EntityType.PRODUCT));
         product.setExportPrice(dto.importPrice().multiply(dto.profitPercentage().add(BigDecimal.valueOf(100)))); // vd gia nhap la 100.000 con % la loi 2% thi se la 100.000 * 102%
         product.setDeleted(false);
+        product.setUnitWeight(SteelCalculator.calculateUnitWeight(dto));
 
         Product savedProduct = productRepository.save(product);
 
@@ -158,6 +159,8 @@ public class ProductServiceImpl implements ProductService {
 
         productMapper.updateProductFromDto(dto, product);
         product.setExportPrice(dto.importPrice().multiply(dto.profitPercentage().add(BigDecimal.valueOf(100))));
+        product.setUnitWeight(SteelCalculator.calculateUnitWeight(dto));
+
         Product updatedProduct = productRepository.save(product);
 
         ProductDocument productDocument = productMapper.toDocument(updatedProduct);

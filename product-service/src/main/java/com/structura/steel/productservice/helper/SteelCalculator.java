@@ -153,4 +153,28 @@ public class SteelCalculator {
                 .divide(BigDecimal.valueOf(4), 10, RoundingMode.HALF_UP);
         return crossSectionArea.multiply(length);
     }
+
+    /**
+     * Tính unit weight cho mọi thép
+     */
+    public static BigDecimal calculateUnitWeight(ProductRequestDto dto) {
+        if (dto == null || dto.productType() == null) {
+            throw new IllegalArgumentException("Invalid product data. ProductType cannot be null.");
+        }
+        if (dto.length() == null || dto.length().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invalid product data. Length must be provided and greater than zero.");
+        }
+
+        // SHAPED thì unitWeight do user nhập
+        if (ProductType.SHAPED.equals(dto.productType())) {
+            if (dto.unitWeight() == null || dto.unitWeight().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Unit weight must be provided and positive for SHAPED.");
+            }
+            return dto.unitWeight();
+        }
+
+        // Các loại khác thì tự tính tổng trọng lượng rồi chia length ra
+        BigDecimal totalWeight = calculateSteelWeight(dto);
+        return totalWeight.divide(dto.length(), 10, RoundingMode.HALF_UP);
+    }
 }
