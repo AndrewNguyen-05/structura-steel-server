@@ -117,7 +117,7 @@ public class AnalyticServiceImpl implements AnalyticService {
         BigDecimal deliveryPayable = deliveryDebtRepository.sumRemainingAmountByStatusIn(unpaidStatuses);
         BigDecimal totalDebtPayable = purchasePayable.add(deliveryPayable);
 
-        return new SummaryDto(totalRevenue, totalCostOfGoods, grossProfit, totalDebtReceivable, totalDebtPayable);
+        return new SummaryDto(totalRevenue, totalCostOfGoods, totalDeliveryCost, grossProfit, totalDebtReceivable, totalDebtPayable);
     }
 
     @Transactional(readOnly = true)
